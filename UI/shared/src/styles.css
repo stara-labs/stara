@@ -1,0 +1,90 @@
+@import './styles/tokens.css';
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2');
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+body {
+  color: var(--stara-color-text-primary);
+  background: var(--stara-color-canvas);
+  font: var(--stara-type-body);
+}
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+  letter-spacing: 0;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: default;
+}
+svg {
+  flex: none;
+  width: var(--stara-size-icon-control);
+  height: var(--stara-size-icon-control);
+}
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+  letter-spacing: 0;
+}
+button,
+input,
+textarea,
+a,
+[tabindex] {
+  scroll-margin: var(--stara-space-2);
+}
+:focus-visible {
+  outline: var(--stara-border-focus) solid var(--stara-color-focus);
+  outline-offset: 2px;
+}
+[hidden] {
+  display: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+@media (forced-colors: active) {
+  button,
+  input,
+  textarea,
+  dialog {
+    border: 1px solid ButtonText;
+  }
+  :focus-visible {
+    outline: 2px solid Highlight;
+  }
+  [aria-selected='true'],
+  [aria-pressed='true'] {
+    outline: 1px solid Highlight;
+    outline-offset: -1px;
+  }
+}

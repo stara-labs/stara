@@ -34,8 +34,26 @@ or unilaterally weaken protected tests or acceptance criteria.
 - No authentication, persistence, agent execution, deployment, release publishing,
   or license grant is part of the initial scaffold.
 
-## Seed Boundary
+## Verification and Handoff
 
-This first commit is repository metadata only. Executable scaffolding must arrive
+Read `docs/setup.md`, `docs/verification.md`, and the relevant scenarios in
+`docs/requirements/scaffold.md`. Use the owning package commands and root gates;
+do not weaken tests, exclude uncovered source, bypass hooks, or substitute an
+unrelated running server. Every test report identifies its actual source and
+scope. Changes to protected tests require the independent test author's review.
+
+For UI, compare both external rendered references at the recorded pin. Verify
+themes, keyboard/focus, 1100/900/700 widths, long labels, 200% text zoom, reduced
+motion, and forced colors. Stop on unresolved authority conflicts. Ordinary
+public builds must not require access to the external private checkout.
+
+Use one honest handoff conclusion: `Ready for human review`,
+`More journey evidence required`, `Revision required`, or
+`Blocked by Product decision`. Name failures and missing evidence even when
+other checks pass. Engineering and Product acceptance are not agent self-review.
+
+## Delivery Boundary
+
+The first main commit is repository metadata only. Executable scaffolding must arrive
 through a separate branch, passing hosted checks, and independent review.
 Do not claim that a named command, workflow, or review exists before it does.

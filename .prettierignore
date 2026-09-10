@@ -1,0 +1,8 @@
+pnpm-lock.yaml
+node_modules
+**/dist
+**/coverage
+UI/shared/src/styles/tokens.css
+.artifacts
+playwright-report
+test-results

@@ -1,0 +1,174 @@
+.button,
+.iconButton {
+  min-height: var(--stara-control-compact-height);
+  border-radius: var(--stara-radius-control);
+  border: var(--stara-border-hairline) solid transparent;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--stara-control-gap);
+  padding: var(--stara-space-1) var(--stara-control-padding-standard-inline);
+  font: var(--stara-type-control-label);
+  transition: background var(--stara-motion-feedback) ease-out;
+}
+.quiet {
+  color: var(--stara-color-text-secondary);
+}
+.secondary {
+  border-color: var(--stara-color-border-strong);
+  background: var(--stara-color-surface-primary);
+}
+.button:hover,
+.iconButton:hover {
+  background: var(--stara-color-surface-hover);
+}
+.primary {
+  color: var(--stara-color-text-inverse);
+  background: var(--stara-color-interaction);
+}
+.primary:hover {
+  background: var(--stara-color-interaction-hover);
+}
+.button:disabled {
+  color: var(--stara-color-text-muted);
+  background: var(--stara-color-surface-secondary);
+}
+.iconButton {
+  width: var(--stara-control-compact-height);
+  height: var(--stara-control-compact-height);
+  padding: 0;
+  color: var(--stara-color-text-muted);
+}
+.tool {
+  display: inline-flex;
+  position: relative;
+  flex: none;
+}
+.tooltip {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  padding: var(--stara-space-1) var(--stara-space-2);
+  max-width: min(var(--stara-dialog-compact-width), 80vw);
+  width: max-content;
+  background: var(--stara-color-surface-raised);
+  color: var(--stara-color-text-primary);
+  border: var(--stara-border-hairline) solid var(--stara-color-border-strong);
+  border-radius: var(--stara-radius-small);
+  font: var(--stara-type-supporting);
+  pointer-events: none;
+}
+.tool:hover .tooltip,
+.tool:focus-within .tooltip {
+  display: block;
+}
+.tool:hover .tooltip {
+  animation: reveal 500ms step-end;
+}
+.tool:focus-within .tooltip {
+  animation: none;
+}
+@keyframes reveal {
+  from {
+    visibility: hidden;
+  }
+  to {
+    visibility: visible;
+  }
+}
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--stara-control-gap);
+  font: var(--stara-type-supporting);
+}
+.status[data-state='attention'] {
+  color: var(--stara-color-state-attention);
+}
+.status[data-state='running'] {
+  color: var(--stara-color-state-running);
+}
+.status[data-state='waiting'] {
+  color: var(--stara-color-state-waiting);
+}
+.status[data-state='failed'] {
+  color: var(--stara-color-state-failed);
+}
+.status[data-state='completed'] {
+  color: var(--stara-color-state-completed);
+}
+.status[data-state='unread'] {
+  color: var(--stara-color-state-unread);
+}
+.dot {
+  width: var(--stara-tab-gap);
+  height: var(--stara-tab-gap);
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.field {
+  display: grid;
+  gap: var(--stara-space-related-text);
+  font: var(--stara-type-control-label);
+}
+.field textarea {
+  min-height: var(--stara-field-textarea-minimum-height);
+  width: 100%;
+  resize: vertical;
+  padding: var(--stara-space-2) var(--stara-field-padding-inline);
+  border: var(--stara-border-hairline) solid var(--stara-color-border-strong);
+  border-radius: var(--stara-radius-control);
+  background: var(--stara-color-surface-primary);
+  font: var(--stara-type-body);
+}
+.dialog {
+  width: min(var(--stara-dialog-standard-width), calc(100vw - 2 * var(--stara-space-4)));
+  max-height: calc(100dvh - 2 * var(--stara-space-4));
+  margin: auto;
+  border: var(--stara-border-hairline) solid var(--stara-color-border-strong);
+  border-radius: var(--stara-radius-floating);
+  padding: var(--stara-dialog-content-padding);
+  color: var(--stara-color-text-primary);
+  background: var(--stara-color-surface-raised);
+}
+.dialog::backdrop {
+  background: var(--stara-color-overlay);
+}
+.dialog header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--stara-space-2);
+  margin-bottom: var(--stara-space-3);
+}
+.dialog h2 {
+  font: var(--stara-type-workspace-title);
+}
+@media (pointer: coarse) {
+  .button,
+  .iconButton {
+    min-width: var(--stara-row-attention-minimum-height);
+    min-height: var(--stara-row-attention-minimum-height);
+  }
+}
+@media (forced-colors: active) {
+  .dot {
+    background: CanvasText;
+  }
+  .button,
+  .iconButton {
+    border-color: ButtonText;
+  }
+}
