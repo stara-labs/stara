@@ -136,37 +136,20 @@ export function App() {
             <Icon name="search" />
             <span>Search</span>
           </button>
-          {(['home', 'conversation', 'work', 'intake', 'knowledge', 'agents'] as const).map(
-            (id) => (
-              <button
-                key={id}
-                className={styles.navRow}
-                title={id === 'home' ? 'Home, 1 decision needed' : contexts[id].kind}
-                aria-label={id === 'home' ? 'Home, 1 decision needed' : contexts[id].kind}
-                aria-current={contexts[id].kind === current.kind ? 'page' : undefined}
-                onClick={() => (id === 'conversation' ? setPicker('Conversation') : open(id))}
-              >
-                <Icon name={contexts[id].icon} />
-                <span>
-                  {id === 'intake'
-                    ? 'Apps'
-                    : id === 'conversation'
-                      ? 'Conversations'
-                      : contexts[id].kind}
-                </span>
-                {id === 'home' && (
-                  <Status state="attention" compact>
-                    1 decision needed
-                  </Status>
-                )}
-              </button>
-            ),
-          )}
+          <button
+            className={styles.navRow}
+            title="Home, 1 decision needed"
+            aria-label="Home, 1 decision needed"
+            aria-current={state.active === 'home' ? 'page' : undefined}
+            onClick={() => open('home')}
+          >
+            <Icon name="home" />
+            <span>Home</span>
+            <Status state="attention" compact>
+              1 decision needed
+            </Status>
+          </button>
         </nav>
-        <footer className={styles.navFooter}>
-          <span>You</span>
-          <small>Simulated workspace</small>
-        </footer>
       </aside>
       <main
         className={styles.workspace}

@@ -27,7 +27,7 @@ export const freshMemory = (): ContextMemory => ({
 });
 
 export function createWorkspace(): Workspace {
-  const open = ['home', 'work', 'conversation', 'intake', 'research'];
+  const open = ['home', 'work', 'conversation', 'intake'];
   return {
     open,
     active: 'home',

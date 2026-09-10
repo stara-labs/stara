@@ -139,17 +139,6 @@ export function ContextContent({
           />
         </>
       )}
-      {context.kind === 'Agents' && (
-        <section className={styles.messages} aria-label="Collaborators">
-          {messages.map((message) => (
-            <article key={message.name} className={styles.message}>
-              <h2>{message.name}</h2>
-              <p>{message.role}</p>
-              <p>{message.text}</p>
-            </article>
-          ))}
-        </section>
-      )}
       <section className={styles.detailSection} aria-label="Operational facts">
         <h2>Operational facts</h2>
         <p>External effect: None</p>

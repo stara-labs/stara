@@ -3,7 +3,7 @@ import type { IconName, OperationalState } from '@stara/ui';
 export interface WorkingContext {
   id: string;
   title: string;
-  kind: 'Home' | 'Work' | 'Conversation' | 'App activity' | 'Knowledge' | 'Agents';
+  kind: 'Home' | 'Work' | 'Conversation' | 'App activity' | 'Knowledge';
   icon: IconName;
   status: OperationalState;
   statusLabel: string;
@@ -82,17 +82,6 @@ export const contexts: Record<string, WorkingContext> = {
     statusLabel: 'Review pending',
     lead: 'Responsible lead',
     summary: 'Compare the agreement and account record without changing either source.',
-    verified: false,
-  },
-  agents: {
-    id: 'agents',
-    title: 'Onboarding collaborators',
-    kind: 'Agents',
-    icon: 'agents',
-    status: 'waiting',
-    statusLabel: 'Bounded assistance',
-    lead: 'Responsible lead',
-    summary: 'Contributors help prepare work. Lead and decision authority remain distinct.',
     verified: false,
   },
 };

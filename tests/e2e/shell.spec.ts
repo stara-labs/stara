@@ -113,7 +113,7 @@ test('UI-JOURNEY-05 overflow retains manual order and canonical identities', asy
   await page.getByRole('button', { name: 'Review address decision' }).click();
   await page.getByRole('button', { name: 'Working contexts', exact: true }).click();
   const picker = page.getByRole('dialog');
-  await expect(picker.getByRole('button', { name: /^Open / })).toHaveCount(7);
+  await expect(picker.getByRole('button', { name: /^Open / })).toHaveCount(6);
   await picker.getByRole('button', { name: 'Move Research evidence boundary earlier' }).click();
   await picker
     .getByRole('button', { name: 'Open Research evidence boundary', exact: true })

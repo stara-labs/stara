@@ -54,25 +54,12 @@
 .navRow > span:last-child:not(:nth-child(2)) {
   margin-left: auto;
 }
-.navFooter {
-  margin-top: auto;
-  display: grid;
-  gap: var(--stara-space-related-text);
-  border-top: var(--stara-border-hairline) solid var(--stara-color-border-subtle);
-  padding: var(--stara-space-3);
-  font: var(--stara-type-control-label);
-}
-.navFooter small {
-  font: var(--stara-type-supporting);
-  color: var(--stara-color-text-muted);
-}
 .shell[data-collapsed='true'] .brand {
   justify-content: center;
   padding-inline: 0;
 }
 .shell[data-collapsed='true'] .brand strong,
-.shell[data-collapsed='true'] .navRow > span:nth-child(2),
-.shell[data-collapsed='true'] .navFooter {
+.shell[data-collapsed='true'] .navRow > span:nth-child(2) {
   display: none;
 }
 .shell[data-collapsed='true'] .navRow {

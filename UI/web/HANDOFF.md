@@ -21,8 +21,12 @@ Ordinary integrated builds use the relative generated stylesheet import.
 
 ## Implemented Boundary
 
-Home and customer-independent Work, Conversation, App activity, Knowledge, and
-collaborator contexts are implemented. Pointer and keyboard reordering, overflow,
+The initial left rail exposes only Stara identity, collapse or expand, Search,
+and Home. Destinations without a usable first surface are intentionally absent.
+Home and customer-independent Work, Conversation, App activity, and Knowledge
+contexts are implemented. The initial working set is Home plus one Work item,
+one Conversation, and one App activity; additional durable contexts remain
+closed and discoverable through Search. Pointer and keyboard reordering, overflow,
 canonical reopen, in-session draft/selection/scroll restoration, contextual
 inspection, independent opening, local inspector views, resizing, focus return,
 themes, and responsive layouts are exercised. Closing a context is not deletion.

@@ -28,12 +28,12 @@ it('UI-TABS-01 dragging moves a canonical working tab and never moves Home', () 
     setData: (key: string, value: string) => data.set(key, value),
     getData: (key: string) => data.get(key),
   };
-  const from = screen.getByRole('tab', { name: /Research evidence/ }).parentElement!;
+  const from = screen.getByRole('tab', { name: /Resolve client/ }).parentElement!;
   const to = screen.getByRole('tab', { name: /Prepare client/ }).parentElement!;
   fireEvent.dragStart(from, { dataTransfer });
   fireEvent.dragOver(to, { dataTransfer });
   fireEvent.drop(to, { dataTransfer });
-  expect(move).toHaveBeenCalledWith('research', 1);
+  expect(move).toHaveBeenCalledWith('intake', 1);
   expect(screen.getByRole('tab', { name: 'Home' }).parentElement).toHaveAttribute(
     'draggable',
     'false',

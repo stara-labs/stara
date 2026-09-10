@@ -14,7 +14,7 @@ describe('UI-SHELL-01 durable working set', () => {
     const initial = createWorkspace();
     expect(workspaceReducer(initial, { type: 'close', id: 'home' })).toEqual(initial);
     expect(workspaceReducer(initial, { type: 'move', id: 'home', to: 3 })).toEqual(initial);
-    expect(workspaceReducer(initial, { type: 'move', id: 'research', to: 0 }).open[0]).toBe('home');
+    expect(workspaceReducer(initial, { type: 'move', id: 'intake', to: 0 }).open[0]).toBe('home');
   });
   it('Given draft and selection, when closed and reopened, then state and operational facts survive', () => {
     let state = workspaceReducer(createWorkspace(), { type: 'open', id: 'intake' });
@@ -43,8 +43,8 @@ describe('UI-SHELL-01 durable working set', () => {
     expect(contexts.intake.verified).toBe(false);
   });
   it('Given an ordered set, when reordered, then only manual order changes', () => {
-    const state = workspaceReducer(createWorkspace(), { type: 'move', id: 'research', to: 1 });
-    expect(state.open).toEqual(['home', 'research', 'work', 'conversation', 'intake']);
+    const state = workspaceReducer(createWorkspace(), { type: 'move', id: 'intake', to: 1 });
+    expect(state.open).toEqual(['home', 'intake', 'work', 'conversation']);
     expect(state.active).toBe('home');
   });
   it('Given unknown close and move targets, then the working set stays unchanged', () => {
