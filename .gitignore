@@ -1,0 +1,14 @@
+node_modules/
+.pnpm-store/
+.artifacts/
+dist/
+coverage/
+playwright-report/
+test-results/
+.cache/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
