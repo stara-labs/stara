@@ -34,7 +34,7 @@ describe('workspace CLI: unknown gate stage fails closed', () => {
   it.each(['unknown-stage', 'commti', 'pr-unknown'])(
     'rejects %s explicitly within the process bound',
     async (stage) => {
-      const root = await mkdtemp(join(tmpdir(), 'stara-control-cli-'));
+      const root = await mkdtemp(join(await realpath(tmpdir()), 'stara-control-cli-'));
       ownedTemps.push(root);
       await mkdir(join(root, 'tooling'));
       await cp(join(toolingRoot, 'scripts'), join(root, 'tooling/scripts'), { recursive: true });

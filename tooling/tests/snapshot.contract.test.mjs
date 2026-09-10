@@ -115,7 +115,7 @@ async function write(root, path, data) {
 }
 
 async function fixture() {
-  const root = await mkdtemp(join(tmpdir(), 'stara-control-snapshot-'));
+  const root = await mkdtemp(join(await realpath(tmpdir()), 'stara-control-snapshot-'));
   ownedTemps.push(root);
   const repo = join(root, 'repo');
   await mkdir(repo);

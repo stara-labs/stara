@@ -121,7 +121,7 @@ if (
   );
   process.exitCode = 2;
 } else {
-  const harness = await mkdtemp(join(tmpdir(), 'stara-control-run-'));
+  const harness = await mkdtemp(join(await realpath(tmpdir()), 'stara-control-run-'));
   try {
     await mkdir(join(harness, 'tooling'), { recursive: true });
     await cp(testRoot, join(harness, 'tooling/tests'), {

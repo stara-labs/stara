@@ -71,10 +71,13 @@ supported ref types and refusal behavior are documented in [setup](setup.md).
 ## Supported Matrix and Operations
 
 Use the exact pinned Node and pnpm on Linux and Windows. PR candidate and
-container/browser checks run on Linux. Full package verification runs on Linux
-and Windows nightly and on mainline candidates; Linux runs Chromium, Firefox,
-and WebKit functional/accessibility verification. Windows containers are not
-part of this Linux-container scaffold.
+container/browser checks run on Linux. The Windows package job runs on PRs as
+well as every other supported workflow event; its coverage and build must pass
+before the required aggregate succeeds. A skipped Windows job is missing
+evidence, including on PRs. Full package verification runs on Linux and Windows
+nightly and on mainline candidates; Linux runs Chromium, Firefox, and WebKit
+functional/accessibility verification. Windows containers are not part of this
+Linux-container scaffold.
 
 Full nightly verification is scheduled at **08:17 UTC**, daily. GitHub Actions
 retains diagnostics for 30 days. The failure and missed-run owner is
