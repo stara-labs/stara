@@ -12,8 +12,8 @@ application fixtures. The fixtures do not authorize external effects.
 - **SHELL-01:** Given a fresh session, when the shell opens, then Home is active,
   the three-region frame and center header follow the accepted design, and the
   right inspection panel is closed. The initial left rail contains only Stara
-  identity, collapse or expand, Search, and Home. Product destinations enter the
-  rail only when their first usable surface exists.
+  identity, Search and collapse or expand icon controls, and Home. Product
+  destinations enter the rail only when their first usable surface exists.
 - **SHELL-02:** Given several open contexts, when a context is reopened, then its
   existing tab is focused, not duplicated. Closing a tab never completes or stops
   its underlying fixture object; Home remains non-closable. Only durable,

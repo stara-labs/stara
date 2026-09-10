@@ -25,6 +25,11 @@
 .brand strong {
   font: var(--stara-type-workspace-title);
 }
+.brandTools {
+  display: flex;
+  align-items: center;
+  gap: var(--stara-space-1);
+}
 .navigation nav {
   padding: var(--stara-space-2) var(--stara-navigation-row-padding-inline);
   display: grid;
@@ -55,11 +60,12 @@
   margin-left: auto;
 }
 .shell[data-collapsed='true'] .brand {
-  justify-content: center;
+  justify-content: flex-end;
   padding-inline: 0;
 }
 .shell[data-collapsed='true'] .brand strong,
-.shell[data-collapsed='true'] .navRow > span:nth-child(2) {
+.shell[data-collapsed='true'] .navRow > span:nth-child(2),
+.shell[data-collapsed='true'] .brandTools > :first-child {
   display: none;
 }
 .shell[data-collapsed='true'] .navRow {

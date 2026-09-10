@@ -120,22 +120,16 @@ export function App() {
       <aside className={styles.navigation} aria-label="Global navigation" inert={layerOpen}>
         <header className={styles.brand}>
           <strong>Stara</strong>
-          <IconButton
-            icon="panelLeft"
-            label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
-            onClick={() => setNavOverride(!collapsed)}
-          />
+          <div className={styles.brandTools}>
+            <IconButton icon="search" label="Search contexts" onClick={() => setPicker('')} />
+            <IconButton
+              icon="panelLeft"
+              label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
+              onClick={() => setNavOverride(!collapsed)}
+            />
+          </div>
         </header>
         <nav aria-label="Destinations">
-          <button
-            className={styles.navRow}
-            title="Search contexts"
-            aria-label="Search contexts"
-            onClick={() => setPicker('')}
-          >
-            <Icon name="search" />
-            <span>Search</span>
-          </button>
           <button
             className={styles.navRow}
             title="Home, 1 decision needed"

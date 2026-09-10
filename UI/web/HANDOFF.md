@@ -21,8 +21,9 @@ Ordinary integrated builds use the relative generated stylesheet import.
 
 ## Implemented Boundary
 
-The initial left rail exposes only Stara identity, collapse or expand, Search,
-and Home. Destinations without a usable first surface are intentionally absent.
+The initial left rail exposes only Stara identity, Search and collapse or expand
+icon controls, and Home. Destinations without a usable first surface are
+intentionally absent.
 Home and customer-independent Work, Conversation, App activity, and Knowledge
 contexts are implemented. The initial working set is Home plus one Work item,
 one Conversation, and one App activity; additional durable contexts remain
