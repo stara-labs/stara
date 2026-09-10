@@ -1,0 +1,19 @@
+packages:
+  - UI/web
+  - UI/shared
+  - backend/api
+  - tooling
+
+autoInstallPeers: false
+strictPeerDependencies: true
+engineStrict: true
+frozenLockfile: true
+minimumReleaseAge: 1440
+allowBuilds:
+  esbuild: true
+  msw: false
+  simple-git-hooks: false
+saveExact: true
+
+overrides:
+  typed-rest-client>qs: 6.16.0

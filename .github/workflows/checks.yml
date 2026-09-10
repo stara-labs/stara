@@ -1,0 +1,163 @@
+name: Scaffold checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 8 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scaffold-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    name: Candidate verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          version: 11.19.0
+          run_install: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps
+      - name: Complete proposed-change gates
+        if: github.event_name == 'pull_request'
+        run: pnpm check:pr
+      - name: Full candidate verification
+        if: github.event_name != 'pull_request'
+        run: pnpm validate
+      - name: Targeted control mutation evaluation
+        if: github.event_name != 'pull_request'
+        run: pnpm test:mutation
+      - run: pnpm security:dependencies
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: candidate-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            .artifacts/
+            tests/e2e/.artifacts/
+          include-hidden-files: true
+          retention-days: 30
+          if-no-files-found: error
+
+  windows:
+    name: Windows package verification
+    if: github.event_name != 'pull_request'
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          version: 11.19.0
+          run_install: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm tokens:check
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm security:secrets
+      - run: pnpm test:coverage
+      - run: pnpm build
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: windows-${{ github.sha }}-${{ github.run_attempt }}
+          path: .artifacts/
+          include-hidden-files: true
+          retention-days: 30
+          if-no-files-found: error
+
+  containers:
+    name: Container journeys
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          version: 11.19.0
+          run_install: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm start
+      - name: Repeated startup preserves the environment
+        run: pnpm start
+      - run: pnpm exec playwright install --with-deps
+      - run: pnpm test:e2e
+        env:
+          STARA_EXTERNAL_SERVERS: '1'
+          STARA_E2E_BASE_URL: http://127.0.0.1:5173
+      - run: pnpm test:a11y
+        env:
+          STARA_EXTERNAL_SERVERS: '1'
+          STARA_E2E_BASE_URL: http://127.0.0.1:5173
+      - name: Retain service diagnostics
+        if: always()
+        run: |
+          mkdir -p .artifacts
+          pnpm environment:logs > .artifacts/compose.log 2>&1
+      - name: Stop only this checkout's services
+        if: always()
+        run: pnpm environment:down
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: containers-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            .artifacts/
+            tests/e2e/.artifacts/
+          include-hidden-files: true
+          retention-days: 30
+          if-no-files-found: error
+
+  required:
+    name: Required scaffold checks
+    if: always()
+    needs: [verify, windows, containers]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Reject failed, canceled, missing, or unexpectedly skipped checks
+        env:
+          EVENT: ${{ github.event_name }}
+          VERIFY: ${{ needs.verify.result }}
+          WINDOWS: ${{ needs.windows.result }}
+          CONTAINERS: ${{ needs.containers.result }}
+        run: |
+          test "$VERIFY" = success
+          test "$CONTAINERS" = success
+          if [ "$EVENT" = pull_request ]; then
+            test "$WINDOWS" = skipped
+          else
+            test "$WINDOWS" = success
+          fi

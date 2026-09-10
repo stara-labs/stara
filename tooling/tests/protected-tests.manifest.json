@@ -1,0 +1,583 @@
+{
+  "schemaVersion": 1,
+  "role": "independent-test-author; not final verifier",
+  "files": {
+    "tooling/tests/.gitignore": "fece5e911fee0763510b0e59e9e2f22c724ce923e49f05b3f45713d9eba7f408",
+    "tooling/tests/artifacts.contract.test.mjs": "17ca502cca00154faa23edafe0e6e8f707eb81cb349bd495cea5079e227730d2",
+    "tooling/tests/bootstrap.contract.test.mjs": "ee5d17c7c19a57c851e467777719ccba06603e23cdfec2a9cc63f4344fb0282b",
+    "tooling/tests/cli.contract.test.mjs": "924d3afa3c5de840507a606e50b69730572357b142314423b6e3b8a0b6301b9c",
+    "tooling/tests/environment.contract.test.mjs": "aca529c1d41b12de5f2be269485755ea0b6bf5230e8cb73f3ad37c24839c4324",
+    "tooling/tests/eslint.contract.test.mjs": "fb73f4ac793e514f0605929911a21a131611ddbb2e35d8420101bf8550dd56d6",
+    "tooling/tests/fixtures.contract.test.mjs": "70d7fa82c37d03f5d5f0c2b743df0b8dd56bf652e111745c7a9a0347f717f705",
+    "tooling/tests/fixtures.mjs": "92c70f5053f753e06a4aebe83a13db6e2beb3fd1ade932a7905ddeffa2270a3a",
+    "tooling/tests/gates.contract.test.mjs": "da9fa07d194d879fa2e1b4cbe5e1e816028e29c1bc40d4dcd1447232c66067c1",
+    "tooling/tests/integrity.contract.test.mjs": "f5658ce5bacdfe97d41f9e50072c6dce14c3d994af4c9c0b5b0932f49ee489ea",
+    "tooling/tests/negative-controls/tooling/lib/integrity.mjs": "adcf051f0ba4e9b6725e2ea10830d2bf30d80aa7c3697e195309937e3bc46ee6",
+    "tooling/tests/negative-controls/tooling/lib/policy.mjs": "7998800af908a2221e0a988f38d944521f63f536b540dd48da70f422ab0679e5",
+    "tooling/tests/negative-controls/tooling/lib/snapshot.mjs": "d4dcd58cfa25335c4c955563ff9a63c690cbb7326e5b1a162395bdac5f8eab5a",
+    "tooling/tests/negative-controls/tooling/scripts/workspace.mjs": "f422442b14df8f0e317655ed5e1978886a5671bc0cfa8b32a0d277d3724eeddc",
+    "tooling/tests/policy.contract.test.mjs": "d00d17531208b2ee29286701cd750bf859259d323d1ca37cc01083ea2af6295a",
+    "tooling/tests/process.contract.test.mjs": "db1150dee93a173aaf328163d45d47a90ff11caace29b3d0ee4ce9422f264879",
+    "tooling/tests/protect-manifest.mjs": "3bb59b86e404950f2525e502aa292ec7fe9f395ea45e57498c3c34a9cb40bbc2",
+    "tooling/tests/push.contract.test.mjs": "f9372fa967c650431e201139cedae199efbad78e0a1732b47edc977ad815dbc5",
+    "tooling/tests/run-contracts.mjs": "2e5cd1ef70baa06886f8548f351b5e4d4169be4ee13543d5184f35f921702bd1",
+    "tooling/tests/run-stryker.mjs": "e5727e8bb3427b490463b02906f4bcd386891015a177257c2c21503814ac984d",
+    "tooling/tests/snapshot.contract.test.mjs": "46a34301137ec499acae5c200b8abe4e1ec4f6143ee796c7b439884fd8a9d098",
+    "tooling/tests/stages.contract.test.mjs": "f2f277bd0dee1e1324e25e856dd7480dc4b60fa65b1fa770241d7bb04cee0f2b",
+    "tooling/tests/stryker.config.mjs": "40352ca6c26242b996eaea57af318272ef86a1a737684e576012d5ca69fec8d2",
+    "tooling/tests/tokens.contract.test.mjs": "53e38b4f2e80639ac0712b1a3523335bff808e3e9b63aee7f8c3875cd286be82",
+    "tooling/tests/vitest.contract.config.mjs": "f6684dac73ec0b494205af22f6ec5b33287d5605ecbb005d69a31673af6a5908",
+    "tooling/tests/vitest.mutation.config.mjs": "cb000e32f65595a99c69aa8b9e1c7ab1f45df1dab88a097bbc00af0bd79b23ab",
+    "tooling/tests/workflow.contract.test.mjs": "2518aa69e300483f7600daf52f9f52d4d4687275eda0d3c4a6e398f76a8a5f03",
+    "docs/evidence/control-test-design.md": "856df48b30ad78675429a3fef5c2a352179f7952e4717d524a5cba66ebdf061f"
+  },
+  "initialBehavioralRed": [
+    {
+      "label": "adversarial-negative-controls",
+      "timestamp": "2026-09-10T04:19:40.546Z",
+      "counts": {
+        "tests": 210,
+        "passed": 22,
+        "failed": 188,
+        "pending": 0,
+        "suites": 13,
+        "failedSuites": 12
+      },
+      "logSha256": "9804d5c27b90d78feb56ee5e03d3c54b77c451e40dde2319af601dbaf16c5d78",
+      "testSetSha256": "c54b91cef5e574c821f91419be4964f81a0b3af4ef3246a1b138877c1cebb00b",
+      "sourceSetSha256": "4411f9a4273a7497352a78d33058064a4bc6c98eecbf1be5a9d5261cfccc04b6"
+    },
+    {
+      "label": "review-contracts-red",
+      "timestamp": "2026-09-10T04:32:13.654Z",
+      "counts": {
+        "tests": 5,
+        "passed": 0,
+        "failed": 5,
+        "pending": 0,
+        "suites": 3,
+        "failedSuites": 3
+      },
+      "logSha256": "8f808112c31c012a55e41d18b25820dc87ffb134de778d27f1d53dc7588d8a77",
+      "testSetSha256": "96e920346e27157a4aad2394ed285371e9825a1f39c5e7d557b6a0da93f041dd",
+      "sourceSetSha256": "edfba42de7e653b973a0dbf4427e7ffa527b46e08b3b631b0c88894edb9339d4"
+    },
+    {
+      "label": "path-casing-red",
+      "timestamp": "2026-09-10T04:32:16.203Z",
+      "counts": {
+        "tests": 19,
+        "passed": 18,
+        "failed": 1,
+        "pending": 0,
+        "suites": 3,
+        "failedSuites": 2
+      },
+      "logSha256": "16ce4fcfff2fa30cee9ad70963a62ce0d6e355f81d02bd2932d61626843b6ed6",
+      "testSetSha256": "96e920346e27157a4aad2394ed285371e9825a1f39c5e7d557b6a0da93f041dd",
+      "sourceSetSha256": "124c18ea8311630e4cd0ebbf371436ba4259b38a65c801ab62aa2095d2244460"
+    },
+    {
+      "label": "pnpm-root-record-red",
+      "timestamp": "2026-09-10T04:32:18.080Z",
+      "counts": {
+        "tests": 40,
+        "passed": 39,
+        "failed": 1,
+        "pending": 0,
+        "suites": 3,
+        "failedSuites": 2
+      },
+      "logSha256": "8c8d5296e44d17d92de4634ac7537b46f2419aee1ecd8707bccfbe4d478fe836",
+      "testSetSha256": "96e920346e27157a4aad2394ed285371e9825a1f39c5e7d557b6a0da93f041dd",
+      "sourceSetSha256": "124c18ea8311630e4cd0ebbf371436ba4259b38a65c801ab62aa2095d2244460"
+    },
+    {
+      "label": "staged-cache-red",
+      "timestamp": "2026-09-10T04:33:24.492Z",
+      "counts": {
+        "tests": 15,
+        "passed": 11,
+        "failed": 4,
+        "pending": 0,
+        "suites": 2,
+        "failedSuites": 2
+      },
+      "logSha256": "b5272be202f1a0490d81e478c57a904a5a5d8b4b039be14d48f7be5f28043d46",
+      "testSetSha256": "5f4f9e6d818b7e76151e397bf87c20c634c1e58486d6b48254c3a910dddf89d7",
+      "sourceSetSha256": "124c18ea8311630e4cd0ebbf371436ba4259b38a65c801ab62aa2095d2244460"
+    },
+    {
+      "label": "primitive-projection-red",
+      "timestamp": "2026-09-10T04:35:20.343Z",
+      "counts": {
+        "tests": 22,
+        "passed": 21,
+        "failed": 1,
+        "pending": 0,
+        "suites": 2,
+        "failedSuites": 2
+      },
+      "logSha256": "3bb0abbb4f9fb99bc38f7f6b01f48bb95a0ceb2eb8bdfff74f0952c7a427ee7c",
+      "testSetSha256": "90e507d0531a5b7067e2c4af4c41b16d7d67a8c5d2478e62f796cb3f4c65ef85",
+      "sourceSetSha256": "4f6c221e66525b8a387e0eb022f81dae54e9ee8bbc8b8deae182dcbe0e4204e2"
+    },
+    {
+      "label": "staged-source-path-red",
+      "timestamp": "2026-09-10T04:36:06.800Z",
+      "counts": {
+        "tests": 14,
+        "passed": 13,
+        "failed": 1,
+        "pending": 0,
+        "suites": 3,
+        "failedSuites": 2
+      },
+      "logSha256": "5fec85ebef48a01c22778492cc570066a4e105131ef4854b48fc2352bbb39885",
+      "testSetSha256": "ab8aac7caac9b1ae88517340cbf0fc2b2e2fc57012362b780bf50abeeecc122f",
+      "sourceSetSha256": "eebbee81dc3e6d2785f8ed10657305e57ac0a60cfafd4f5c8f032522afd20e46"
+    },
+    {
+      "label": "ambiguous-windows-index-red",
+      "timestamp": "2026-09-10T04:36:52.800Z",
+      "counts": {
+        "tests": 28,
+        "passed": 18,
+        "failed": 10,
+        "pending": 0,
+        "suites": 2,
+        "failedSuites": 2
+      },
+      "logSha256": "56bb5f9214c6dd529f2bded345819f651d16a80950679e2d4a1f7c856003d9d1",
+      "testSetSha256": "c4eb7865aae8ae2bd4f3bc89892586f9765400763c6299ad6f3546c43273f738",
+      "sourceSetSha256": "d932ef5ae095f138a0a0533674d32f4e76d335bfb806dd3ba24fbeb08455d618"
+    },
+    {
+      "label": "staged-evidence-durability-red",
+      "timestamp": "2026-09-10T04:38:32.605Z",
+      "counts": {
+        "tests": 23,
+        "passed": 21,
+        "failed": 2,
+        "pending": 0,
+        "suites": 3,
+        "failedSuites": 2
+      },
+      "logSha256": "e6e68c00b5865b43fcd9c71d696806afc5af861379d650f3b32a0b849c9bdf0e",
+      "testSetSha256": "311f3e96823af9a6b6692280e5945dbcd12608ac727d7e6473e78d1194913877",
+      "sourceSetSha256": "f68818b9bd4ef94a46508a53cdf01b2625d4f51e084eccbd928d0a4b4840a900"
+    },
+    {
+      "label": "selective-mutation-gate-red",
+      "timestamp": "2026-09-10T04:47:47.304Z",
+      "counts": {
+        "tests": 51,
+        "passed": 42,
+        "failed": 9,
+        "pending": 0,
+        "suites": 3,
+        "failedSuites": 2
+      },
+      "logSha256": "b1d6ed90c11f25f27b411e9c8887bbd9756c53ebb7e32cb8d186c3421af1a194",
+      "testSetSha256": "9b966999c9b3f92fc4baccd24ba189d25f06792c61439ba10413a27f5768a91b",
+      "sourceSetSha256": "25ec791b10f0289a16cd09ee29ba8181cffaaeb3418a6d2bbe8928b74b70b8b7"
+    },
+    {
+      "label": "docker-diagnostic-red",
+      "timestamp": "2026-09-10T04:52:49.520Z",
+      "counts": {
+        "tests": 37,
+        "passed": 36,
+        "failed": 1,
+        "pending": 0,
+        "suites": 3,
+        "failedSuites": 2
+      },
+      "logSha256": "2fada4ba498b9db9b08ba50d46c13e367b0007979f2a5e619200bf9b770723c6",
+      "testSetSha256": "e73bd749ccb14c1c0177a21f8313e7994ba12aed4d2576faff294d7459d7aadc",
+      "sourceSetSha256": "861aaa2f604eec65d22367bf1c9b14dc4620943173df1897eb7ed0c690b49a80"
+    },
+    {
+      "label": "nested-eslint-artifacts-red",
+      "timestamp": "2026-09-10T05:07:39.033Z",
+      "counts": {
+        "tests": 6,
+        "passed": 5,
+        "failed": 1,
+        "pending": 0,
+        "suites": 2,
+        "failedSuites": 2
+      },
+      "logSha256": "23757e664f1f51ac8bb8e89467024912f33bcc3caf373e62d057b353845d2ba9",
+      "testSetSha256": "6607e1167fe96b34d41cbbc38bf83e4bd62f5ae7904e3dbb2cf988302cef292e",
+      "sourceSetSha256": "5e3222d9e2c96f8f748e27ab333a4317b35eac35cd5a9003ebeed18afcd3f0e4"
+    },
+    {
+      "label": "outgoing-push-behavior-red",
+      "timestamp": "2026-09-10T05:15:40.530Z",
+      "counts": {
+        "tests": 5,
+        "passed": 0,
+        "failed": 5,
+        "pending": 0,
+        "suites": 2,
+        "failedSuites": 2
+      },
+      "logSha256": "d08f4f3c8648f63006a95de9a3d8717a8248154a9152cd70ffa1c1fcf66ae78a",
+      "testSetSha256": "be5b359930d8d403170cf691111b7e315c49c916be21d6e089a63e8b26af86e0",
+      "sourceSetSha256": "f32ddd80285c2ae85cf06398098d757520ebbd42e0075a7d7e341dfa353a663a"
+    },
+    {
+      "label": "outgoing-hook-contracts-red",
+      "timestamp": "2026-09-10T05:18:02.563Z",
+      "counts": {
+        "tests": 19,
+        "passed": 6,
+        "failed": 13,
+        "pending": 0,
+        "suites": 3,
+        "failedSuites": 3
+      },
+      "logSha256": "b1805fcc408088789c1ed6f0e82433c3fe2aaaa3fbae51913cb9e797b79b4367",
+      "testSetSha256": "f1d3ba8b1580f7322fb154b7db5355b11169de58b7187a910f1449947ba615f4",
+      "sourceSetSha256": "f32ddd80285c2ae85cf06398098d757520ebbd42e0075a7d7e341dfa353a663a"
+    },
+    {
+      "label": "outgoing-nested-source-drift-red",
+      "timestamp": "2026-09-10T05:21:54.377Z",
+      "counts": {
+        "tests": 32,
+        "passed": 0,
+        "failed": 2,
+        "pending": 30,
+        "suites": 3,
+        "failedSuites": 2
+      },
+      "filter": "nested",
+      "executed": 2,
+      "unselected": 30,
+      "logSha256": "320a665e943a7821710c611a77ddeb438cfa3487741529188e6d674dd01f7af1",
+      "testSetSha256": "c0d89d2d9eab61d13ae345f672a17e6e318c91875400b172e3e5fcd7ac99b3ba",
+      "sourceSetSha256": "591f0f6cc4cca07d11a222e80d6b08f2bd49da543921fcac75da03d64662c304"
+    },
+    {
+      "label": "outgoing-utf8-input-red",
+      "timestamp": "2026-09-10T05:26:31.650Z",
+      "counts": {
+        "tests": 46,
+        "passed": 0,
+        "failed": 1,
+        "pending": 45,
+        "suites": 4,
+        "failedSuites": 2
+      },
+      "filter": "UTF-8",
+      "executed": 1,
+      "unselected": 45,
+      "logSha256": "887adf94642c8a29ea4c1b7a945c9a19f594494f9e2cff7632acf1c8a78fbe37",
+      "testSetSha256": "624486b0df8167f6b0da7feed57fd9019928401723c863531d1615572a471e03",
+      "sourceSetSha256": "909560bd9038158ef1b0e4d45a13324022167e296d497f74a544066b4d8cf6af"
+    },
+    {
+      "label": "isolated-pnpm-auto-install-red",
+      "timestamp": "2026-09-10T05:31:46.794Z",
+      "counts": {
+        "tests": 50,
+        "passed": 0,
+        "failed": 4,
+        "pending": 46,
+        "suites": 5,
+        "failedSuites": 2
+      },
+      "filter": "isolated package-manager configuration",
+      "executed": 4,
+      "unselected": 46,
+      "logSha256": "6c307e5d16725d8db56cebbb6b4f039da91b8db32cf8992d1c5f25ef39924a84",
+      "testSetSha256": "430ae2e9ff440cd9cae5fdadff2e76dc7cd11e2060f6ec7b8ee4a7d18d316b3d",
+      "sourceSetSha256": "cf01a535b017b095553b34cc984742b47884ae7a52aa36a5e113e06f69ff81b4"
+    },
+    {
+      "label": "isolated-pnpm-fixed",
+      "timestamp": "2026-09-10T05:32:09.350Z",
+      "counts": {
+        "tests": 50,
+        "passed": 4,
+        "failed": 2,
+        "pending": 44,
+        "suites": 5,
+        "failedSuites": 2
+      },
+      "filter": "isolated package-manager configuration|UTF|separate identities",
+      "executed": 6,
+      "unselected": 44,
+      "logSha256": "c029efe2c45cba14752a8131c2a6ed0809ce237789014e7b28ea7d15469f8c51",
+      "testSetSha256": "430ae2e9ff440cd9cae5fdadff2e76dc7cd11e2060f6ec7b8ee4a7d18d316b3d",
+      "sourceSetSha256": "3679fd1df93d4f772a7eeea2113e1295aff5e95d7df0dc9ab6a3b723721221b2"
+    },
+    {
+      "label": "bootstrap-preinstall-lock-red",
+      "timestamp": "2026-09-10T05:34:10.454Z",
+      "counts": {
+        "tests": 14,
+        "passed": 0,
+        "failed": 1,
+        "pending": 13,
+        "suites": 3,
+        "failedSuites": 2
+      },
+      "filter": "real pnpm start",
+      "executed": 1,
+      "unselected": 13,
+      "logSha256": "dc25dcc81f769df5161691fa2f412b99ade1081aa1eda7ff4d53c87072370aef",
+      "testSetSha256": "8a2559b60dbe96c2c898f7734fcad69c507a6572aef1ba63f2d7fb33a99f7f05",
+      "sourceSetSha256": "494f9cbf91b6e62deb49fcdc0374700f3df373d78d4570da92bcc639cf07ae1c"
+    },
+    {
+      "label": "bootstrap-preinstall-lock-fixed",
+      "timestamp": "2026-09-10T05:35:53.233Z",
+      "counts": {
+        "tests": 14,
+        "passed": 0,
+        "failed": 1,
+        "pending": 13,
+        "suites": 3,
+        "failedSuites": 2
+      },
+      "filter": "real pnpm start",
+      "executed": 1,
+      "unselected": 13,
+      "logSha256": "a283e0d0f5117824c0100167c1e26cf37b2dc754d75039f815f526881f8989f1",
+      "testSetSha256": "0bf01a148e9f092dae6d5f5229349b1aaebceb4a962afd2cbbe35f144684dd0a",
+      "sourceSetSha256": "fb08d24d2a7e930c0588740b6572579c40a9b330002f984b9e22aa75acd62af7"
+    },
+    {
+      "label": "ordinary-pnpm-key-casing-red",
+      "timestamp": "2026-09-10T05:46:49.963Z",
+      "counts": {
+        "tests": 52,
+        "passed": 2,
+        "failed": 2,
+        "pending": 48,
+        "suites": 5,
+        "failedSuites": 2
+      },
+      "filter": "real pnpm frozen install",
+      "executed": 4,
+      "unselected": 48,
+      "logSha256": "86ff6807ca3140bf1f799df7bbda7544c8cff59b34393491070f8e1c65f1ad8a",
+      "testSetSha256": "7f1386401f650cd70243152cad0d92881f1c97cdba7a55b274bcd244e3d3203c",
+      "sourceSetSha256": "a4a54c76e38a21914f3ebe8554b4b436edb228505825a200b5ce46b8210a3e6b"
+    },
+    {
+      "label": "lifecycle-discovery-contract-red",
+      "timestamp": "2026-09-10T05:48:11.965Z",
+      "counts": {
+        "tests": 26,
+        "passed": 2,
+        "failed": 4,
+        "pending": 20,
+        "suites": 3,
+        "failedSuites": 2
+      },
+      "filter": "Windows lifecycle key|case-variant explicit|Windows pnpm discovery aliases",
+      "executed": 6,
+      "unselected": 20,
+      "logSha256": "6c5d8a3f977ab1e41ee7316e163336c76f95c9a2b6c3ed11375a8afee26549f7",
+      "testSetSha256": "ad651c731df29a7b20d2ffc7385a9a21b460777f13d119719816382a6e4cdbcd",
+      "sourceSetSha256": "15980ab502d9ad94a1990dcb2d4e4d929a43bb11080eae738e51ca3d08797d7d"
+    },
+    {
+      "label": "linux-fixture-index-red",
+      "timestamp": "2026-09-10T06:16:28.464Z",
+      "counts": {
+        "tests": 540,
+        "passed": 498,
+        "failed": 35,
+        "pending": 7,
+        "suites": 45,
+        "failedSuites": 7
+      },
+      "platformOmissions": [
+        "createRuntime: exact runtime and pnpm entry point accepts identical Windows pnpm discovery aliases without mutating the caller",
+        "createRuntime: exact runtime and pnpm entry point normalizes duplicate Windows PATH casing and preserves both values plus exact Node",
+        "createRuntime: exact runtime and pnpm entry point rejects an invalid case-variant explicit pnpm override instead of falling back",
+        "createRuntime: exact runtime and pnpm entry point rejects conflicting Windows pnpm discovery aliases before any child runs",
+        "createRuntime: exact runtime and pnpm entry point resolves Windows lifecycle key NPM_EXECPATH without changing the caller environment",
+        "createRuntime: exact runtime and pnpm entry point resolves Windows lifecycle key Npm_ExecPath without changing the caller environment",
+        "createRuntime: exact runtime and pnpm entry point resolves Windows lifecycle key stara_pnpm_cli without changing the caller environment"
+      ],
+      "logSha256": "43e7ece4a4c893c0601094ba1bc86384e3435e151e029cc0afa6152cfb33d3be",
+      "testSetSha256": "7ecd5027acef9c19f142e5f1604f7b7f1f5233885543687e2d0b811975e8851c",
+      "sourceSetSha256": "21a44b4ea814180e029f1b4881d1d6b0a87a18757448f9dc83dc9870301a1984"
+    }
+  ],
+  "verification": {
+    "label": "fixture-cross-platform-windows-final",
+    "timestamp": "2026-09-10T06:17:53.728Z",
+    "node": "v24.16.0",
+    "platform": "win32",
+    "vitest": "vitest/5.0.0 win32-x64 node-v24.16.0",
+    "counts": {
+      "tests": 540,
+      "passed": 540,
+      "failed": 0,
+      "pending": 0,
+      "suites": 45,
+      "failedSuites": 0
+    },
+    "coverage": {
+      "lines": {
+        "total": 866,
+        "covered": 823,
+        "skipped": 0,
+        "pct": 95.03
+      },
+      "statements": {
+        "total": 965,
+        "covered": 897,
+        "skipped": 0,
+        "pct": 92.95
+      },
+      "functions": {
+        "total": 160,
+        "covered": 154,
+        "skipped": 0,
+        "pct": 96.25
+      },
+      "branches": {
+        "total": 772,
+        "covered": 688,
+        "skipped": 0,
+        "pct": 89.11
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "production": {
+      "tooling/lib/bootstrap.mjs": "6a40c5f0190881150b473ffb618da69c460b89e712f57c893434645df789b9b9",
+      "tooling/lib/build.mjs": "a13cea7ade8d7780911fa0f85cffd0164ec30ecc8c1dd19e423780a5b31e357f",
+      "tooling/lib/environment.mjs": "46d014da8e764d48db0638144a7862692839944bc39525cf0684c14111a10ad3",
+      "tooling/lib/evidence.mjs": "87dad19639908fd953e8c927bff17ae4f262ee43de27eb6302a824fcfaa0ecd0",
+      "tooling/lib/files.mjs": "3e6de7bace8d861142a2938979cd5f93a7093f3e8d6197ca63c241a7b2340fed",
+      "tooling/lib/gates.mjs": "58443407f7388dfa5efedb39ffb268674ed09ff422cd7fddc00e0fa80d4d7b42",
+      "tooling/lib/integrity.mjs": "d602a88965aae0ad3205cb6a5939e834ed7c0db655f518da286e029173313b0d",
+      "tooling/lib/policy.mjs": "9fae1fce66aa96397c850af6c8a3157edad5d744c7612dcc3d37c1ad4405554d",
+      "tooling/lib/process.mjs": "f9340a1b324b6341b2fb2eb1405635d5c7bcc4f34bf295d17a80bfd651ed9f7d",
+      "tooling/lib/snapshot.mjs": "a488b16db4691bf8f063fc6aaf9aeb9bc8267743680bf4df7e36f8a1fea58043",
+      "tooling/lib/tokens.mjs": "c353680a1d7b3b95530d7654ee329ff98bd2da73049817a0cf1fdb500515a592",
+      "tooling/lib/workspace.mjs": "f953d930e957bf081316c34e944ec0d917275213077ac4d37c6a09b9e5265b1c",
+      "tooling/scripts/workspace.mjs": "864fdafc9bb2779211eb58126d9edf413fc0ce389de1c0fe4cb0519d26c7782d",
+      ".github/workflows/checks.yml": "7f579b7562f8b6b759d61fcdf580ff43a21df516165dff68a26c1df60e362f03",
+      "eslint.config.mjs": "b860b08d01ec64384673f4e9a64f0960714d40e6a3cdff19f2b274e42c0ba4ee",
+      ".npmrc": "70127e3e153052a3822a9ab4a7238fe80eeccb511be9f39ea3ea07f6558b425a",
+      "pnpm-workspace.yaml": "413615f42fc643b5f5d129560a4aae77af9873552aa1475aa71aabc2b1d1bd56"
+    },
+    "logSha256": "55d41bd636dccc74cb76e06681b11e0ecc354ad68f9d5d6e3235be242ef0fef2"
+  },
+  "linuxVerification": {
+    "label": "linux-fixture-full-final",
+    "timestamp": "2026-09-10T06:17:42.887Z",
+    "node": "v24.16.0",
+    "platform": "linux",
+    "vitest": "vitest/5.0.0",
+    "pnpm": "11.19.0",
+    "counts": {
+      "tests": 540,
+      "passed": 533,
+      "failed": 0,
+      "pending": 7,
+      "suites": 45,
+      "failedSuites": 0
+    },
+    "coverage": {
+      "lines": {
+        "total": 866,
+        "covered": 815,
+        "skipped": 0,
+        "pct": 94.11
+      },
+      "statements": {
+        "total": 965,
+        "covered": 884,
+        "skipped": 0,
+        "pct": 91.6
+      },
+      "functions": {
+        "total": 160,
+        "covered": 152,
+        "skipped": 0,
+        "pct": 95
+      },
+      "branches": {
+        "total": 772,
+        "covered": 685,
+        "skipped": 0,
+        "pct": 88.73
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "platformOmissions": [
+      "createRuntime: exact runtime and pnpm entry point accepts identical Windows pnpm discovery aliases without mutating the caller",
+      "createRuntime: exact runtime and pnpm entry point normalizes duplicate Windows PATH casing and preserves both values plus exact Node",
+      "createRuntime: exact runtime and pnpm entry point rejects an invalid case-variant explicit pnpm override instead of falling back",
+      "createRuntime: exact runtime and pnpm entry point rejects conflicting Windows pnpm discovery aliases before any child runs",
+      "createRuntime: exact runtime and pnpm entry point resolves Windows lifecycle key NPM_EXECPATH without changing the caller environment",
+      "createRuntime: exact runtime and pnpm entry point resolves Windows lifecycle key Npm_ExecPath without changing the caller environment",
+      "createRuntime: exact runtime and pnpm entry point resolves Windows lifecycle key stara_pnpm_cli without changing the caller environment"
+    ],
+    "omissionsPassedOnWindows": true,
+    "production": {
+      "tooling/lib/bootstrap.mjs": "6a40c5f0190881150b473ffb618da69c460b89e712f57c893434645df789b9b9",
+      "tooling/lib/build.mjs": "a13cea7ade8d7780911fa0f85cffd0164ec30ecc8c1dd19e423780a5b31e357f",
+      "tooling/lib/environment.mjs": "46d014da8e764d48db0638144a7862692839944bc39525cf0684c14111a10ad3",
+      "tooling/lib/evidence.mjs": "87dad19639908fd953e8c927bff17ae4f262ee43de27eb6302a824fcfaa0ecd0",
+      "tooling/lib/files.mjs": "3e6de7bace8d861142a2938979cd5f93a7093f3e8d6197ca63c241a7b2340fed",
+      "tooling/lib/gates.mjs": "58443407f7388dfa5efedb39ffb268674ed09ff422cd7fddc00e0fa80d4d7b42",
+      "tooling/lib/integrity.mjs": "d602a88965aae0ad3205cb6a5939e834ed7c0db655f518da286e029173313b0d",
+      "tooling/lib/policy.mjs": "9fae1fce66aa96397c850af6c8a3157edad5d744c7612dcc3d37c1ad4405554d",
+      "tooling/lib/process.mjs": "f9340a1b324b6341b2fb2eb1405635d5c7bcc4f34bf295d17a80bfd651ed9f7d",
+      "tooling/lib/snapshot.mjs": "a488b16db4691bf8f063fc6aaf9aeb9bc8267743680bf4df7e36f8a1fea58043",
+      "tooling/lib/tokens.mjs": "c353680a1d7b3b95530d7654ee329ff98bd2da73049817a0cf1fdb500515a592",
+      "tooling/lib/workspace.mjs": "f953d930e957bf081316c34e944ec0d917275213077ac4d37c6a09b9e5265b1c",
+      "tooling/scripts/workspace.mjs": "864fdafc9bb2779211eb58126d9edf413fc0ce389de1c0fe4cb0519d26c7782d",
+      ".github/workflows/checks.yml": "7f579b7562f8b6b759d61fcdf580ff43a21df516165dff68a26c1df60e362f03",
+      "eslint.config.mjs": "b860b08d01ec64384673f4e9a64f0960714d40e6a3cdff19f2b274e42c0ba4ee",
+      ".npmrc": "70127e3e153052a3822a9ab4a7238fe80eeccb511be9f39ea3ea07f6558b425a",
+      "pnpm-workspace.yaml": "413615f42fc643b5f5d129560a4aae77af9873552aa1475aa71aabc2b1d1bd56"
+    },
+    "logSha256": "ab71e59a6eaa72e0225381f63b500015a3ffe588ac96acb20f567e29091f847b"
+  },
+  "mutation": {
+    "label": "stryker-policy-final",
+    "tool": "StrykerJS",
+    "version": "10.0.0",
+    "runner": "official command runner invoking Vitest CLI",
+    "scope": ["classifyChanges", "assertCoverage", "assertRequiredResults"],
+    "counts": {
+      "Killed": 143,
+      "Survived": 7
+    },
+    "sourceHashes": {
+      "tooling/lib/policy.mjs": "9fae1fce66aa96397c850af6c8a3157edad5d744c7612dcc3d37c1ad4405554d"
+    },
+    "testHashes": {
+      "policy.contract.test.mjs": "d00d17531208b2ee29286701cd750bf859259d323d1ca37cc01083ea2af6295a",
+      "stryker.config.mjs": "40352ca6c26242b996eaea57af318272ef86a1a737684e576012d5ca69fec8d2",
+      "vitest.mutation.config.mjs": "cb000e32f65595a99c69aa8b9e1c7ab1f45df1dab88a097bbc00af0bd79b23ab"
+    },
+    "logSha256": "a8a7c154fafc70cade7492b5d0fae390eaa6cfb4013b470603340996a477a5e1",
+    "reportSha256": "943ac73b81ade56a5cabcdacb31b3430a57ea69fcb7f00d2870efc7e3de3f628",
+    "inputsMatchVerifiedCandidate": true,
+    "survivorReview": "See docs/evidence/control-test-design.md; no arbitrary score threshold"
+  },
+  "exclusions": ["tooling/tests/evidence/**"]
+}

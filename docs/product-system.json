@@ -1,0 +1,8 @@
+{
+  "productSystem": "stara-product-system",
+  "version": "0.1.0",
+  "revision": "60f949e21d0fbe82dbdda5801715dbe1172e7b1b",
+  "tokenSource": "tokens/tokens.json",
+  "reference": "reference/index.html",
+  "validated": false
+}

@@ -1,0 +1,51 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: backend/api/Dockerfile
+      target: development
+    environment:
+      HOST: 0.0.0.0
+      PORT: '3000'
+    ports:
+      - '127.0.0.1:${STARA_API_PORT:-3000}:3000'
+    init: true
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/api/health').then(async r=>{if(r.status!==200||(await r.json()).status!=='ok')process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+      start_period: 10s
+    stop_grace_period: 10s
+  web:
+    build:
+      context: .
+      dockerfile: UI/web/Dockerfile
+      target: development
+    environment:
+      API_PROXY_TARGET: http://api:3000
+    ports:
+      - '127.0.0.1:${STARA_WEB_PORT:-5173}:5173'
+    depends_on:
+      api:
+        condition: service_healthy
+    init: true
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:5173/api/health').then(async r=>{if(r.status!==200||(await r.json()).status!=='ok')process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+      start_period: 10s
+    stop_grace_period: 10s
