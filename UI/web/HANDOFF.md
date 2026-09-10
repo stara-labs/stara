@@ -133,18 +133,17 @@ Not every UI component was introduced test-first.
 
 ## Product Decisions and Limits
 
-Conclusion: **Blocked by Product decision** for visual acceptance, not for copying
-the implemented candidate into integration.
+Conclusion: **Blocked by Product review** for visual acceptance, not for copying
+the implemented candidate into integration. The consumer record remains
+`validated: false` until that review is recorded.
 
-- Open numeric conflict: shell fixture Home action height 34px versus current
-  element specs/generated token 30px. The implementation preserves generated
-  30px pending the Product Owner's explicit decision. No resolution or visual
-  acceptance is claimed.
-- The candidate currently uses generated frame/header and tab dimensions
-  (38px/36px) pending Product resolution of the older rationale conflict
-  (42px/38px).
+- Product direction on 2026-09-10 selects the current generated Controlled
+  Defaults for this foundation: 30px Home action row, 38px frame header, and 36px
+  working tabs. This resolves the older 34px and 42px/38px reference conflicts
+  for this candidate; it does not constitute final visual acceptance.
 - Home uses the generic generated minimum tab width (104px), not the reference's
-  special 84px Home width. This is a reported visual deviation for review.
+  special 84px Home width. The candidate deliberately defers a special Home width
+  until Product review demonstrates that it improves the simplified working set.
 - Supporting text on selected source rows and selected/hovered Home rows uses
   existing text-secondary instead of text-muted to fix measured light contrast.
   This existing-token substitution is a reported controlled-default deviation.

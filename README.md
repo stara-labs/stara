@@ -47,6 +47,11 @@ The scaffold, execution evidence, and Product acceptance are not complete.
 Public visibility does not imply an open-source license; licensing is pending a
 separate decision. No package publication or deployment is configured.
 
+This repository is currently source-visible, not yet open source. External pull
+requests are not accepted until Stara publishes a license, security policy, code
+of conduct, and public contribution policy. Issues and feedback may still be
+reviewed, but visibility grants no right to use, modify, or redistribute the code.
+
 ## Contracts
 
 - [Requirements and scenarios](docs/requirements/scaffold.md)

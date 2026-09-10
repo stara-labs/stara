@@ -1,5 +1,13 @@
 # Contributing to Stara
 
+## Current Contribution Status
+
+External pull requests are not currently accepted. This repository has no
+open-source license, and its public contribution, security, and governance
+policies are not yet complete. The workflow below governs authorized Stara
+contributors while that work is pending. Public visibility is not permission to
+use, modify, or redistribute the source.
+
 Start with [requirements](docs/requirements/scaffold.md),
 [architecture](docs/architecture.md), and [verification](docs/verification.md).
 This application consumes shared Stara standards; it is not a second standards
