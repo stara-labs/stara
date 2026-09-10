@@ -31,8 +31,11 @@ or unilaterally weaken protected tests or acceptance criteria.
 - Use synthetic, customer-independent fixtures and label simulated behavior.
 - Never commit secrets, private source snapshots, generated reports, or caches.
 - Record exact revisions, selected scope, results, and verification limitations.
-- No authentication, persistence, agent execution, deployment, release publishing,
-  or license grant is part of the initial scaffold.
+- No authentication, persistence, agent execution, deployment, or release
+  publishing is part of the initial scaffold.
+- The application is licensed under Apache-2.0; preserve `LICENSE.md` and
+  third-party licenses and notices. This does not relicense the external private
+  Product System or authorize package publication.
 
 ## Verification and Handoff
 

@@ -44,13 +44,24 @@ build configuration, and Dockerfiles belong inside their owning projects.
 ## Status
 
 The scaffold, execution evidence, and Product acceptance are not complete.
-Public visibility does not imply an open-source license; licensing is pending a
-separate decision. No package publication or deployment is configured.
+No package publication or deployment is configured.
 
-This repository is currently source-visible, not yet open source. External pull
-requests are not accepted until Stara publishes a license, security policy, code
-of conduct, and public contribution policy. Issues and feedback may still be
-reviewed, but visibility grants no right to use, modify, or redistribute the code.
+External pull requests are not currently accepted while the security policy,
+code of conduct, and public contribution policy are being completed. Issues and
+feedback may still be reviewed. This contribution-intake policy does not limit
+the rights granted by the license.
+
+## License
+
+Stara's original source code and documentation in this repository are licensed
+under the [Apache License, Version 2.0](LICENSE.md), unless otherwise noted.
+Workspace packages remain marked `private` to prevent package publication;
+that setting does not restrict the Apache-2.0 license grant.
+
+Third-party components retain their own licenses and attribution notices,
+including the Inter font under SIL Open Font License 1.1. The application license
+does not relicense the external private Product System or grant rights to Stara
+trademarks beyond those provided by the license.
 
 ## Contracts
 

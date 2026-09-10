@@ -5,8 +5,8 @@ Requirement and scenario IDs; issue reference (use `Refs #1` for scaffold milest
 ## Change and Risk
 
 Scope, compatibility, protected controls, dependency/token changes, and recovery.
-Declare expected release impact or no-release rationale. Scaffold delivery does
-not publish or license the application.
+Declare expected release impact or no-release rationale. The application is
+licensed under Apache-2.0; scaffold delivery does not publish a package or release.
 
 ## Evidence
 

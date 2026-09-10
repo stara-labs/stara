@@ -2,7 +2,7 @@
   "name": "stara",
   "version": "0.0.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "type": "module",
   "packageManager": "pnpm@11.19.0",
   "engines": {

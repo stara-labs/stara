@@ -4,6 +4,10 @@ Date: 2026-09-10 UTC
 Conclusion: More journey evidence required
 Scope: Initial issue #1 milestone, not application conformance or deployment
 
+Historical record: licensing was pending during the observations below. The
+subsequent [Apache-2.0 decision](../architecture.md#license-decision) supersedes
+that licensing status without changing the recorded execution evidence.
+
 ## Identity and Roles
 
 The candidate is on `feat/monorepo-scaffold`, based on the independently reviewed

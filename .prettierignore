@@ -1,4 +1,6 @@
 pnpm-lock.yaml
+# Preserve the canonical legal text without Markdown reformatting.
+LICENSE.md
 node_modules
 **/dist
 **/coverage

@@ -60,7 +60,8 @@ application fixtures. The fixtures do not authorize external effects.
 
 ## Boundaries
 
-No accounts, persistent agents, database, business API, deployment, license grant
-or release publishing is included. Engineering and Product acceptance remain
+No accounts, persistent agents, database, business API, deployment, or release
+publishing is included. The application license is [Apache-2.0](../../LICENSE.md).
+Engineering and Product acceptance remain
 separate from implementation and test success. The implementing agent cannot
 self-approve protected tests, selection controls, or Product behavior.

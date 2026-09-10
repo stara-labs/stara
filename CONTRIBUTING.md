@@ -2,11 +2,15 @@
 
 ## Current Contribution Status
 
-External pull requests are not currently accepted. This repository has no
-open-source license, and its public contribution, security, and governance
-policies are not yet complete. The workflow below governs authorized Stara
-contributors while that work is pending. Public visibility is not permission to
-use, modify, or redistribute the source.
+Stara is licensed under [Apache-2.0](LICENSE.md). External pull requests are not
+currently accepted while the public contribution, security, and governance
+policies are being completed. The workflow below governs authorized Stara
+contributors while that work is pending; this intake policy does not restrict
+any rights granted by the license.
+
+Contributions intentionally submitted for inclusion are governed by Section 5
+of the Apache License, Version 2.0, including its provisions for separately agreed
+terms. Preserve applicable third-party licenses and attribution notices.
 
 Start with [requirements](docs/requirements/scaffold.md),
 [architecture](docs/architecture.md), and [verification](docs/verification.md).
@@ -48,8 +52,8 @@ questions to the responsible human.
 
 Keep credentials out of tests and untrusted CI. Dependency/action/token changes
 need review of provenance, install scripts, compatibility, security, and migration
-consequences. Public visibility is not a license grant. Do not introduce a release
-publisher, deployment secret, or external effect in the scaffold.
+consequences. Do not introduce a release publisher, deployment secret, or external
+effect in the scaffold.
 
 ## Acceptance
 

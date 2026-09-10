@@ -47,9 +47,17 @@ chain. Retain the override until the upstream client adopts the patched range,
 then remove it through a reviewed lockfile update and renewed mutation evidence.
 
 Semantic-release is the proposed eventual version/release tool, not installed
-publication machinery. Deployment, release authorization, artifact promotion,
-and license approval are separate future work. All packages are private; no
-licensed open-source status is claimed for this public evaluation repository.
+publication machinery. Deployment, release authorization, and artifact promotion
+are separate future work. Packages remain private to prevent publication.
+
+## License Decision
+
+On 2026-09-10, the responsible Engineering owner selected the
+[Apache License, Version 2.0](../LICENSE.md) for the Stara application repository.
+The root and all workspace package manifests declare `Apache-2.0`. Third-party
+licenses and notices remain applicable; this decision does not relicense the
+external private Product System. Licensing does not authorize a release or
+deployment, establish Product System conformance, or open external PR intake.
 
 ## Product System Boundary
 
