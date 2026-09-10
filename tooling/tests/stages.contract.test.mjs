@@ -123,7 +123,7 @@ describe('gate stages: independent workload contracts', () => {
     await write(
       root,
       '.gitignore',
-      'node_modules/\nsource-only-node_modules/\n.artifacts/\n**/dist/\n',
+      'node_modules\nsource-only-node_modules/\n.artifacts/\n**/dist/\n',
     );
     const program = `import {spawnSync} from 'node:child_process';\nimport {mkdir,writeFile} from 'node:fs/promises';\nimport {join} from 'node:path';\nexport async function runMaterializedGate(input,options={}) { const child = spawnSync(${JSON.stringify(name)}, ['--version'], {encoding:'utf8',timeout:2000}); if (!child.error) throw new Error('DIRTY_SOURCE_BINARY_RESOLVED'); if (child.error.code !== 'ENOENT') throw child.error; const directory=join(process.cwd(),'.artifacts/gates',options.runId ?? input.runId); await mkdir(directory,{recursive:true}); await writeFile(join(directory,'selection.json'),JSON.stringify({stage:'commit',mode:'all',targets:['@stara/tooling'],reason:'source PATH isolation'})); await writeFile(join(directory,'results.json'),JSON.stringify({status:'pass',results:[{name:'source-path-isolation',required:true,status:'pass',durationMs:1}]})); return true; }\n`;
     await write(root, 'tooling/lib/workspace.mjs', program);

@@ -186,6 +186,36 @@ resolved conversations, enforced administrators, no force push or deletion.
 Workflow YAML is independently exercised by contract tests, but hosted CI and
 human review are separate evidence and remain required on the actual PR.
 
+## Hosted Follow-Up
+
+[Draft PR #2](https://github.com/stara-labs/stara/pull/2) initially delivered
+`2a7533d8620a0c4809938a98b6d8d95fd772846f`. Actual installed commit and push hooks
+passed. The independent verifier checked the outgoing record, all 146 source
+hashes, 13 retained build files, and 15 required passing push results. Push run
+`ec441f33-936f-4840-94e5-13f16d287cba` retained build manifest SHA-256
+`cc0e83acfc48f2a648f6aa6d5b95e11755147e060811de53fd20940df3ab3948`.
+This was evidence inspection, not a GitHub approval or human acceptance.
+
+[Hosted run 34443817585](https://github.com/stara-labs/stara/actions/runs/34443817585)
+passed the complete Linux container journey in 3m43s, including repeated startup,
+21 functional checks, 18 accessibility checks, diagnostics, and scoped shutdown.
+Candidate verification failed with 34 failed, 498 passed, and seven Windows-only
+tests not applicable on Linux. The required aggregate correctly failed. No hosted
+coverage or complete-candidate pass is claimed for that run.
+
+Native Linux reproduction confirmed that the test fixture's directory-only
+`node_modules/` ignore rule did not ignore its dependency symlink. Git committed
+that link as mode `120000`; the production snapshot guard correctly rejected it
+before the intended test behavior. The independent test author corrected both
+fixture ignore rules and added a committed-tree/repeated-staging regression.
+Production controls, assertions, floors, and applicability rules were not relaxed.
+The original native regression failed before this correction. A subsequent full
+native Linux run passed 533 tests, with the same seven Windows-only cases not
+applicable, closing the 34 original failures plus the new fixture regression.
+The corrected ordinary Windows tooling command passed all 540 tests in 132.13
+seconds, with unchanged 823/866 lines (95.03%) and 688/772 branches (89.11%).
+Hosted verification must be renewed on the corrected commit.
+
 Do not merge based on this local ledger. Obtain independent final verification,
 responsible Engineering acceptance, and Stara Product Owner acceptance. Record
 accepted defaults centrally only afterward. Keep issue #1 open until the complete

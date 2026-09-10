@@ -8,7 +8,8 @@
     "tooling/tests/cli.contract.test.mjs": "924d3afa3c5de840507a606e50b69730572357b142314423b6e3b8a0b6301b9c",
     "tooling/tests/environment.contract.test.mjs": "aca529c1d41b12de5f2be269485755ea0b6bf5230e8cb73f3ad37c24839c4324",
     "tooling/tests/eslint.contract.test.mjs": "fb73f4ac793e514f0605929911a21a131611ddbb2e35d8420101bf8550dd56d6",
-    "tooling/tests/fixtures.mjs": "0c56c72c525216f925831662e792288b8807f0c3a79d5de87fa573f16019962e",
+    "tooling/tests/fixtures.contract.test.mjs": "70d7fa82c37d03f5d5f0c2b743df0b8dd56bf652e111745c7a9a0347f717f705",
+    "tooling/tests/fixtures.mjs": "92c70f5053f753e06a4aebe83a13db6e2beb3fd1ade932a7905ddeffa2270a3a",
     "tooling/tests/gates.contract.test.mjs": "da9fa07d194d879fa2e1b4cbe5e1e816028e29c1bc40d4dcd1447232c66067c1",
     "tooling/tests/integrity.contract.test.mjs": "f5658ce5bacdfe97d41f9e50072c6dce14c3d994af4c9c0b5b0932f49ee489ea",
     "tooling/tests/negative-controls/tooling/lib/integrity.mjs": "adcf051f0ba4e9b6725e2ea10830d2bf30d80aa7c3697e195309937e3bc46ee6",
@@ -17,18 +18,18 @@
     "tooling/tests/negative-controls/tooling/scripts/workspace.mjs": "f422442b14df8f0e317655ed5e1978886a5671bc0cfa8b32a0d277d3724eeddc",
     "tooling/tests/policy.contract.test.mjs": "d00d17531208b2ee29286701cd750bf859259d323d1ca37cc01083ea2af6295a",
     "tooling/tests/process.contract.test.mjs": "db1150dee93a173aaf328163d45d47a90ff11caace29b3d0ee4ce9422f264879",
-    "tooling/tests/protect-manifest.mjs": "81ddebbe95cbbc995ba34e9f4049767ccb980283df565a55e95839e3a2930320",
+    "tooling/tests/protect-manifest.mjs": "3bb59b86e404950f2525e502aa292ec7fe9f395ea45e57498c3c34a9cb40bbc2",
     "tooling/tests/push.contract.test.mjs": "f9372fa967c650431e201139cedae199efbad78e0a1732b47edc977ad815dbc5",
     "tooling/tests/run-contracts.mjs": "2e5cd1ef70baa06886f8548f351b5e4d4169be4ee13543d5184f35f921702bd1",
     "tooling/tests/run-stryker.mjs": "e5727e8bb3427b490463b02906f4bcd386891015a177257c2c21503814ac984d",
     "tooling/tests/snapshot.contract.test.mjs": "46a34301137ec499acae5c200b8abe4e1ec4f6143ee796c7b439884fd8a9d098",
-    "tooling/tests/stages.contract.test.mjs": "9eba2dc08bb4823ee07ad4aabb8aaf0d1c9a27f6d1d4c0a45d07baa448c7b669",
+    "tooling/tests/stages.contract.test.mjs": "f2f277bd0dee1e1324e25e856dd7480dc4b60fa65b1fa770241d7bb04cee0f2b",
     "tooling/tests/stryker.config.mjs": "40352ca6c26242b996eaea57af318272ef86a1a737684e576012d5ca69fec8d2",
     "tooling/tests/tokens.contract.test.mjs": "53e38b4f2e80639ac0712b1a3523335bff808e3e9b63aee7f8c3875cd286be82",
     "tooling/tests/vitest.contract.config.mjs": "f6684dac73ec0b494205af22f6ec5b33287d5605ecbb005d69a31673af6a5908",
     "tooling/tests/vitest.mutation.config.mjs": "cb000e32f65595a99c69aa8b9e1c7ab1f45df1dab88a097bbc00af0bd79b23ab",
     "tooling/tests/workflow.contract.test.mjs": "2518aa69e300483f7600daf52f9f52d4d4687275eda0d3c4a6e398f76a8a5f03",
-    "docs/evidence/control-test-design.md": "6f01daa5ffd459c20698de9ae27a029412622e2887aa54fc5f0451c4cdc02354"
+    "docs/evidence/control-test-design.md": "856df48b30ad78675429a3fef5c2a352179f7952e4717d524a5cba66ebdf061f"
   },
   "initialBehavioralRed": [
     {
@@ -384,20 +385,44 @@
       "logSha256": "6c5d8a3f977ab1e41ee7316e163336c76f95c9a2b6c3ed11375a8afee26549f7",
       "testSetSha256": "ad651c731df29a7b20d2ffc7385a9a21b460777f13d119719816382a6e4cdbcd",
       "sourceSetSha256": "15980ab502d9ad94a1990dcb2d4e4d929a43bb11080eae738e51ca3d08797d7d"
+    },
+    {
+      "label": "linux-fixture-index-red",
+      "timestamp": "2026-09-10T06:16:28.464Z",
+      "counts": {
+        "tests": 540,
+        "passed": 498,
+        "failed": 35,
+        "pending": 7,
+        "suites": 45,
+        "failedSuites": 7
+      },
+      "platformOmissions": [
+        "createRuntime: exact runtime and pnpm entry point accepts identical Windows pnpm discovery aliases without mutating the caller",
+        "createRuntime: exact runtime and pnpm entry point normalizes duplicate Windows PATH casing and preserves both values plus exact Node",
+        "createRuntime: exact runtime and pnpm entry point rejects an invalid case-variant explicit pnpm override instead of falling back",
+        "createRuntime: exact runtime and pnpm entry point rejects conflicting Windows pnpm discovery aliases before any child runs",
+        "createRuntime: exact runtime and pnpm entry point resolves Windows lifecycle key NPM_EXECPATH without changing the caller environment",
+        "createRuntime: exact runtime and pnpm entry point resolves Windows lifecycle key Npm_ExecPath without changing the caller environment",
+        "createRuntime: exact runtime and pnpm entry point resolves Windows lifecycle key stara_pnpm_cli without changing the caller environment"
+      ],
+      "logSha256": "43e7ece4a4c893c0601094ba1bc86384e3435e151e029cc0afa6152cfb33d3be",
+      "testSetSha256": "7ecd5027acef9c19f142e5f1604f7b7f1f5233885543687e2d0b811975e8851c",
+      "sourceSetSha256": "21a44b4ea814180e029f1b4881d1d6b0a87a18757448f9dc83dc9870301a1984"
     }
   ],
   "verification": {
-    "label": "lifecycle-discovery-full-final",
-    "timestamp": "2026-09-10T05:50:16.532Z",
+    "label": "fixture-cross-platform-windows-final",
+    "timestamp": "2026-09-10T06:17:53.728Z",
     "node": "v24.16.0",
     "platform": "win32",
     "vitest": "vitest/5.0.0 win32-x64 node-v24.16.0",
     "counts": {
-      "tests": 539,
-      "passed": 539,
+      "tests": 540,
+      "passed": 540,
       "failed": 0,
       "pending": 0,
-      "suites": 44,
+      "suites": 45,
       "failedSuites": 0
     },
     "coverage": {
@@ -451,7 +476,85 @@
       ".npmrc": "70127e3e153052a3822a9ab4a7238fe80eeccb511be9f39ea3ea07f6558b425a",
       "pnpm-workspace.yaml": "413615f42fc643b5f5d129560a4aae77af9873552aa1475aa71aabc2b1d1bd56"
     },
-    "logSha256": "22ffec239f0f74c7d32d24822b428451a66c5112fa3141409c2c9006ba783a8f"
+    "logSha256": "55d41bd636dccc74cb76e06681b11e0ecc354ad68f9d5d6e3235be242ef0fef2"
+  },
+  "linuxVerification": {
+    "label": "linux-fixture-full-final",
+    "timestamp": "2026-09-10T06:17:42.887Z",
+    "node": "v24.16.0",
+    "platform": "linux",
+    "vitest": "vitest/5.0.0",
+    "pnpm": "11.19.0",
+    "counts": {
+      "tests": 540,
+      "passed": 533,
+      "failed": 0,
+      "pending": 7,
+      "suites": 45,
+      "failedSuites": 0
+    },
+    "coverage": {
+      "lines": {
+        "total": 866,
+        "covered": 815,
+        "skipped": 0,
+        "pct": 94.11
+      },
+      "statements": {
+        "total": 965,
+        "covered": 884,
+        "skipped": 0,
+        "pct": 91.6
+      },
+      "functions": {
+        "total": 160,
+        "covered": 152,
+        "skipped": 0,
+        "pct": 95
+      },
+      "branches": {
+        "total": 772,
+        "covered": 685,
+        "skipped": 0,
+        "pct": 88.73
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "platformOmissions": [
+      "createRuntime: exact runtime and pnpm entry point accepts identical Windows pnpm discovery aliases without mutating the caller",
+      "createRuntime: exact runtime and pnpm entry point normalizes duplicate Windows PATH casing and preserves both values plus exact Node",
+      "createRuntime: exact runtime and pnpm entry point rejects an invalid case-variant explicit pnpm override instead of falling back",
+      "createRuntime: exact runtime and pnpm entry point rejects conflicting Windows pnpm discovery aliases before any child runs",
+      "createRuntime: exact runtime and pnpm entry point resolves Windows lifecycle key NPM_EXECPATH without changing the caller environment",
+      "createRuntime: exact runtime and pnpm entry point resolves Windows lifecycle key Npm_ExecPath without changing the caller environment",
+      "createRuntime: exact runtime and pnpm entry point resolves Windows lifecycle key stara_pnpm_cli without changing the caller environment"
+    ],
+    "omissionsPassedOnWindows": true,
+    "production": {
+      "tooling/lib/bootstrap.mjs": "6a40c5f0190881150b473ffb618da69c460b89e712f57c893434645df789b9b9",
+      "tooling/lib/build.mjs": "a13cea7ade8d7780911fa0f85cffd0164ec30ecc8c1dd19e423780a5b31e357f",
+      "tooling/lib/environment.mjs": "46d014da8e764d48db0638144a7862692839944bc39525cf0684c14111a10ad3",
+      "tooling/lib/evidence.mjs": "87dad19639908fd953e8c927bff17ae4f262ee43de27eb6302a824fcfaa0ecd0",
+      "tooling/lib/files.mjs": "3e6de7bace8d861142a2938979cd5f93a7093f3e8d6197ca63c241a7b2340fed",
+      "tooling/lib/gates.mjs": "58443407f7388dfa5efedb39ffb268674ed09ff422cd7fddc00e0fa80d4d7b42",
+      "tooling/lib/integrity.mjs": "d602a88965aae0ad3205cb6a5939e834ed7c0db655f518da286e029173313b0d",
+      "tooling/lib/policy.mjs": "9fae1fce66aa96397c850af6c8a3157edad5d744c7612dcc3d37c1ad4405554d",
+      "tooling/lib/process.mjs": "f9340a1b324b6341b2fb2eb1405635d5c7bcc4f34bf295d17a80bfd651ed9f7d",
+      "tooling/lib/snapshot.mjs": "a488b16db4691bf8f063fc6aaf9aeb9bc8267743680bf4df7e36f8a1fea58043",
+      "tooling/lib/tokens.mjs": "c353680a1d7b3b95530d7654ee329ff98bd2da73049817a0cf1fdb500515a592",
+      "tooling/lib/workspace.mjs": "f953d930e957bf081316c34e944ec0d917275213077ac4d37c6a09b9e5265b1c",
+      "tooling/scripts/workspace.mjs": "864fdafc9bb2779211eb58126d9edf413fc0ce389de1c0fe4cb0519d26c7782d",
+      ".github/workflows/checks.yml": "7f579b7562f8b6b759d61fcdf580ff43a21df516165dff68a26c1df60e362f03",
+      "eslint.config.mjs": "b860b08d01ec64384673f4e9a64f0960714d40e6a3cdff19f2b274e42c0ba4ee",
+      ".npmrc": "70127e3e153052a3822a9ab4a7238fe80eeccb511be9f39ea3ea07f6558b425a",
+      "pnpm-workspace.yaml": "413615f42fc643b5f5d129560a4aae77af9873552aa1475aa71aabc2b1d1bd56"
+    },
+    "logSha256": "ab71e59a6eaa72e0225381f63b500015a3ffe588ac96acb20f567e29091f847b"
   },
   "mutation": {
     "label": "stryker-policy-final",

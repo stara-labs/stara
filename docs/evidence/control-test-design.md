@@ -161,6 +161,30 @@ and ordinary-invocation regressions retain this red independently of the earlier
 standalone success; neither explicit-path injection nor suffix relaxation is an
 acceptable substitute for correcting discovery.
 
+## Hosted Fixture Correction
+
+Hosted candidate run `34443817585` at commit `2a7533d` failed 34 tooling tests.
+The author inspected the retained candidate logs and reproduced the mechanism
+with real Linux Git: the fixture's directory-only `node_modules/` ignore did not
+exclude its dependency symlink, so `git add --all` staged and committed mode
+`120000`. Production correctly rejected that unsafe snapshot before the intended
+tests could execute. Windows junction behavior had concealed the fixture defect.
+
+Only the fixture ignore and the stage test's matching override changed to
+`node_modules` without a trailing slash. A new Git-index contract checks both the
+baseline commit and repeated staging. The pre-fix native Vitest run reproduced
+the 34 hosted failures plus this new regression. Snapshot link/submodule rejection
+and all production sources remain unchanged; no assertions or skips were weakened.
+
+Native Linux execution used the coordinator-provided API image with Git added in
+an owned diagnostic image. Tests ran with Docker networking disabled and wrote
+only disposable container state and ignored author evidence; live services and
+daemon settings were untouched. This local Linux execution is not a hosted CI
+rerun or final acceptance. The sealed manifest records its separate coverage and
+the exact seven pre-existing Windows-only omissions, and requires those same
+cases to pass in the Windows run. It rejects any other Linux omissions and any
+test/production input mismatch between the two platform runs.
+
 Missing Vitest was a harness blocker, not red evidence. Missing production modules
 produced setup-only failures, not executed behavioral proof. Neither is counted in
 the behavioral red ledger. Raw logs and machine-specific paths are not public.
@@ -207,17 +231,22 @@ does not claim a new mutation run over the added orchestration code.
 
 ## Verification Status
 
-The replacement author run passed all 539 tests with zero failures or skips,
-using lifecycle CLI discovery without a test CLI override. Full-library/script
-V8 coverage is 95.03% lines (823/866) and 89.11% branches (688/772). The coordinator
-also reported the actual ordinary root validation's tooling run green at 539/539,
-zero skips, with identical coverage and no test CLI override. That reported
-integrated run took 140.63 seconds; it is distinct from author execution evidence.
-The protected manifest identifies the current author inputs and retained logs.
-Author execution is Windows with Node 24.16.0, Vitest 5, and pnpm 11.19.0; actual
-package-manager regressions use no external dependencies. Formatting and ESLint
-checks passed for the authored set.
-Linux execution and final acceptance remain the separate verifier's responsibility.
+The prior 539-test Windows checkpoint was green before hosted Linux exposed the
+fixture defect. The replacement native Linux suite passes 533 of 540 cases, with
+zero failures and the seven pre-existing Windows-only omissions. Linux V8 coverage
+is 94.11% lines (815/866) and 88.73% branches (685/772). The fresh author Windows
+run passes all 540 tests with zero skips; its V8 coverage is 95.03% lines (823/866)
+and 89.11% branches (688/772). Both platforms independently exceed the existing
+90-line/85-branch tooling floors. The coordinator also reported the ordinary
+Windows pnpm coverage command green at 540/540, zero skips, identical coverage,
+and 132.13 seconds; this is distinct from author execution evidence.
+
+The seal verifies matching test and production inputs across both platform runs
+and confirms the Linux-omitted cases passed on Windows. Both author platforms use
+Node 24.16.0, Vitest 5, and pnpm 11.19.0. Actual package-manager regressions use no
+external dependencies. Formatting and ESLint passed for the protected sources.
+No updated hosted success is claimed. The corrected candidate still requires its
+own normal hooks, hosted rerun, and separate final acceptance.
 The authoritative V8 configuration includes every production library and script,
 has no file exclusions, and enforces tooling's 90-line/85-branch floors.
 

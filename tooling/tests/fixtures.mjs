@@ -79,7 +79,7 @@ export async function workspace({ gitRepository = false } = {}) {
   await write(root, 'pnpm-workspace.yaml', 'packages:\n  - UI/*\n  - backend/*\n  - tooling\n');
   await write(root, 'pnpm-lock.yaml', 'lockfileVersion: "9.0"\n');
   await write(root, '.gitattributes', '* -text\n');
-  await write(root, '.gitignore', 'node_modules/\n.artifacts/\n**/dist/\n');
+  await write(root, '.gitignore', 'node_modules\n.artifacts/\n**/dist/\n');
   await symlink(
     fileURLToPath(new URL('../../node_modules', import.meta.url)),
     join(root, 'node_modules'),
