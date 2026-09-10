@@ -112,20 +112,73 @@ test('UI-JOURNEY-05 overflow retains manual order and canonical identities', asy
   await page.goto('/');
   await page.getByRole('button', { name: 'Review address decision' }).click();
   await page.getByRole('button', { name: 'Working contexts', exact: true }).click();
-  const picker = page.getByRole('dialog');
+  const picker = page.getByRole('dialog', { name: 'Working contexts', exact: true });
+  const openResearch = picker.getByRole('button', {
+    name: 'Open Research evidence boundary',
+    exact: true,
+  });
+  const researchTab = page.getByRole('tab', {
+    name: 'Research evidence boundary, Unread material',
+    exact: true,
+  });
   await expect(picker.getByRole('button', { name: /^Open / })).toHaveCount(6);
+  await expect(openResearch).toContainText('Conversation | Closed | Unread material');
+  await expect(
+    picker.getByRole('button', { name: /^Move Research evidence boundary (earlier|later)$/ }),
+  ).toHaveCount(0);
+  await picker.getByRole('searchbox', { name: 'Find a context', exact: true }).fill('Research');
+  await expect(picker.getByRole('button', { name: /^Open / })).toHaveCount(1);
+  await openResearch.click();
+  await expect(researchTab).toHaveAttribute('aria-selected', 'true');
+  await page.getByRole('button', { name: 'Show details', exact: true }).click();
+  const inspector = page.getByRole('complementary', { name: 'Context panel' });
+  await expect(inspector).toBeVisible();
+  await expect(inspector).toHaveAttribute('data-overlay', 'false');
+  await expect(page.locator('[data-context-id]')).toHaveCount(4);
+  await expect(page.getByRole('tab', { name: /Resolve client intake/ })).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Working contexts', exact: true }).click();
+  const contextTitles = picker.getByRole('button', { name: /^Open / }).locator('strong');
+  await expect(contextTitles).toHaveText([
+    'Home',
+    'Prepare client onboarding plan',
+    'Design-partner preparation',
+    'Resolve client intake',
+    'Research evidence boundary',
+    'Onboarding source review',
+  ]);
+  await expect(openResearch).toContainText('Conversation | Open | Unread material');
+  await expect(
+    picker.getByRole('button', { name: 'Open Resolve client intake', exact: true }),
+  ).toContainText('App activity | Open | Needs attention');
   await picker.getByRole('button', { name: 'Move Research evidence boundary earlier' }).click();
-  await picker
-    .getByRole('button', { name: 'Open Research evidence boundary', exact: true })
-    .click();
-  await expect(page.getByRole('tab', { name: /Research evidence boundary/ })).toHaveAttribute(
+  const reorderedTitles = [
+    'Home',
+    'Prepare client onboarding plan',
+    'Design-partner preparation',
+    'Research evidence boundary',
+    'Resolve client intake',
+    'Onboarding source review',
+  ];
+  await expect(contextTitles).toHaveText(reorderedTitles);
+  await page.keyboard.press('Escape');
+
+  await page.getByRole('tab', { name: 'Home', exact: true }).click();
+  await expect(inspector).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Home', exact: true })).toHaveAttribute(
     'aria-selected',
     'true',
   );
   await page.getByRole('button', { name: 'Working contexts', exact: true }).click();
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Open Research evidence boundary', exact: true })
-    .click();
-  await expect(page.getByRole('tab', { name: /Research evidence boundary/ })).toHaveCount(1);
+  await openResearch.click();
+  await expect(researchTab).toHaveCount(1);
+  await expect(researchTab).toHaveAttribute('id', 'tab-research');
+  await expect(researchTab).toHaveAttribute('aria-controls', 'panel-research');
+  await expect(researchTab).toHaveAttribute('aria-selected', 'true');
+  await expect(inspector).toBeVisible();
+  await page.getByRole('button', { name: 'Working contexts', exact: true }).click();
+  await expect(picker.getByRole('button', { name: /^Open / })).toHaveCount(6);
+  await expect(contextTitles).toHaveText(reorderedTitles);
+  await expect(openResearch).toContainText('Conversation | Open | Unread material');
+  await page.keyboard.press('Escape');
 });
