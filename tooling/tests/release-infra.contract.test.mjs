@@ -702,6 +702,58 @@ describe('Terraform source contracts: privacy, trust and production absence (not
     }
   });
 
+  it('never grants project-wide IAP runtime authority or widens target project roles', async () => {
+    const code = await terraform('target');
+    const grants = blocks(code, 'resource').filter((block) =>
+      /^google_project_iam_(?:member|binding|policy)$/.test(block.labels[0]),
+    );
+    expect(grants.map((grant) => grant.labels.join('.')).sort()).toEqual([
+      'google_project_iam_member.executor_operation_read',
+      'google_project_iam_member.run_agent',
+    ]);
+    for (const grant of grants) {
+      expect(grant.body).not.toMatch(
+        /google_project_service_identity\.iap\b|gcp-sa-iap|roles\/(?:iap\.|run\.invoker|iam\.serviceAccountTokenCreator)/,
+      );
+    }
+    expect(uncomment(code)).not.toMatch(
+      /roles\/iap\.serviceAgent|roles\/iam\.serviceAccountTokenCreator|\ballUsers\b|\ballAuthenticatedUsers\b/,
+    );
+  });
+
+  it('binds only the generated IAP agent to matching services without an invalid project-role dependency', async () => {
+    const code = await terraform('target');
+    const identity = resources(code, 'google_project_service_identity').filter(
+      (block) => block.labels[1] === 'iap',
+    );
+    expect(identity).toHaveLength(1);
+    expect(field(identity[0], 'provider')).toBe('google-beta');
+    expect(field(identity[0], 'project')).toBe('var.project_id');
+    expect(literal(identity[0], 'service')).toBe('iap.googleapis.com');
+    expect(field(identity[0], 'depends_on')).toMatch(/^\[\s*google_project_service\.api\s*\]$/);
+    const invokers = resources(code, 'google_cloud_run_v2_service_iam_member');
+    expect(invokers).toHaveLength(1);
+    const grant = invokers[0];
+    expect(grant.labels[1]).toBe('iap_invoker');
+    expect(field(grant, 'for_each')).toBe('local.components');
+    expect(field(grant, 'project')).toBe('var.project_id');
+    expect(field(grant, 'location')).toBe('var.region');
+    expect(field(grant, 'name')).toBe('google_cloud_run_v2_service.app[each.key].name');
+    expect(literal(grant, 'role')).toBe('roles/run.invoker');
+    // The value reference supplies the identity dependency without a project IAM role.
+    expect(field(grant, 'member')).toBe('google_project_service_identity.iap.member');
+    expect(uncomment(code)).not.toMatch(/google_project_iam_member\.iap_agent\b/);
+    const explicitDependencies = grant.body.match(/depends_on\s*=\s*\[([^\]]*)\]/)?.[1];
+    if (explicitDependencies !== undefined) {
+      expect(
+        explicitDependencies
+          .split(',')
+          .map((value) => value.trim())
+          .filter(Boolean),
+      ).toEqual(['google_project_service_identity.iap']);
+    }
+  });
+
   it('protects both HTTPS backends with IAP and explicit grants, and routes API separately', async () => {
     const code = await terraform('target');
     const backends = resources(code, 'google_compute_backend_service');
