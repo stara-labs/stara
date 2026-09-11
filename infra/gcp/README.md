@@ -12,6 +12,15 @@ Terraform is exactly **1.16.2**. Both Google providers are exactly **8.2.0**.
 provider's tagged implementation does not expose that resource. All other
 resources use `google`.
 
+Cloud Build's generated service identity can be the legacy build-execution
+account, not its service agent. Delivery looks up its own project's number and
+binds `roles/cloudbuild.serviceAgent` only to
+`service-PROJECT_NUMBER@gcp-sa-cloudbuild.iam.gserviceaccount.com`, with an explicit
+dependency on service-identity initialization. Never grant that role to the
+legacy build account or the user-managed executor. See Google's
+[service-agent guidance](https://docs.cloud.google.com/build/docs/securing-builds/configure-access-for-cloud-build-service-account#grant_a_role_to_the_cloud_build_service_agent)
+and the [independent regression](../../docs/evidence/release-cloudbuild-identity-test-design.md).
+
 ## Ownership and State
 
 | Root        | Creates                                                                                                                                                                                                        | State                                                                                                                                    |

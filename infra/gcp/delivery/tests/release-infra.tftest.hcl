@@ -1,8 +1,19 @@
 # Independent plan-only tests. Mock only server-computed identities, never IAM inputs.
 mock_provider "google" {
   override_during = plan
+  mock_data "google_project" {
+    defaults = { number = "900000000001" }
+  }
   mock_resource "google_monitoring_notification_channel" {
     defaults = { name = "projects/stara-test-delivery/notificationChannels/900000000001" }
+  }
+}
+
+mock_provider "google" {
+  alias           = "alternate_project_number"
+  override_during = plan
+  mock_data "google_project" {
+    defaults = { number = "900000000099" }
   }
 }
 
@@ -10,8 +21,8 @@ mock_provider "google-beta" {
   override_during = plan
   mock_resource "google_project_service_identity" {
     defaults = {
-      email  = "service-900000000001@gcp-sa-cloudbuild.iam.gserviceaccount.com"
-      member = "serviceAccount:service-900000000001@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+      email  = "900000000001@cloudbuild.gserviceaccount.com"
+      member = "serviceAccount:900000000001@cloudbuild.gserviceaccount.com"
     }
   }
 }
@@ -77,6 +88,44 @@ override_resource {
   target          = google_pubsub_topic.staging
   override_during = plan
   values          = { id = "projects/stara-test-delivery/topics/stara-staging-candidates" }
+}
+
+run "cloud_build_service_agent_is_not_the_generated_legacy_build_account" {
+  command = plan
+  assert {
+    condition = (
+      google_project_iam_member.cloud_build_agent.project == var.project_id &&
+      google_project_iam_member.cloud_build_agent.role == "roles/cloudbuild.serviceAgent" &&
+      google_project_iam_member.cloud_build_agent.member == "serviceAccount:service-900000000001@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+    )
+    error_message = "The privileged Cloud Build service-agent role belongs only to the actual delivery service agent derived from project metadata."
+  }
+  assert {
+    condition = (
+      google_project_service_identity.cloud_build.email == "900000000001@cloudbuild.gserviceaccount.com" &&
+      google_project_service_identity.cloud_build.member == "serviceAccount:900000000001@cloudbuild.gserviceaccount.com" &&
+      google_project_iam_member.cloud_build_agent.member != google_project_service_identity.cloud_build.member &&
+      !endswith(google_project_iam_member.cloud_build_agent.member, "@cloudbuild.gserviceaccount.com")
+    )
+    error_message = "The generated legacy build identity must never receive roles/cloudbuild.serviceAgent."
+  }
+}
+
+run "service_agent_number_comes_from_project_metadata_not_identity_output" {
+  command = plan
+  providers = {
+    google      = google.alternate_project_number
+    google-beta = google-beta
+  }
+  assert {
+    condition = (
+      google_project_iam_member.cloud_build_agent.project == var.project_id &&
+      google_project_iam_member.cloud_build_agent.role == "roles/cloudbuild.serviceAgent" &&
+      google_project_iam_member.cloud_build_agent.member == "serviceAccount:service-900000000099@gcp-sa-cloudbuild.iam.gserviceaccount.com" &&
+      google_project_iam_member.cloud_build_agent.member != google_project_service_identity.cloud_build.member
+    )
+    error_message = "Changing mocked project metadata must change the exact service-agent principal independently of the generated identity output."
+  }
 }
 
 run "publishers_have_distinct_narrow_resource_grants" {

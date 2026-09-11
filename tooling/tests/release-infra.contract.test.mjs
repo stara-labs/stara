@@ -460,6 +460,37 @@ describe('Terraform source contracts: privacy, trust and production absence (not
     expect(blocks(budget.body, 'budget_filter')[0].body).toMatch(/projects\s*=/);
   });
 
+  it('derives Cloud Build agent authority from owned project metadata while retaining identity activation ordering', async () => {
+    const code = await terraform('delivery');
+    const metadata = blocks(code, 'data').filter((block) => block.labels[0] === 'google_project');
+    expect(metadata).toHaveLength(1);
+    expect(field(metadata[0], 'project_id')).toBe('var.project_id');
+    const identity = resources(code, 'google_project_service_identity').filter(
+      (block) => block.labels[1] === 'cloud_build',
+    );
+    expect(identity).toHaveLength(1);
+    expect(field(identity[0], 'provider')).toBe('google-beta');
+    expect(field(identity[0], 'project')).toBe('var.project_id');
+    expect(literal(identity[0], 'service')).toBe('cloudbuild.googleapis.com');
+    expect(identity[0].body).toMatch(/depends_on\s*=\s*\[\s*google_project_service\.api\s*\]/);
+    const bindings = resources(code, 'google_project_iam_member').filter(
+      (block) => literal(block, 'role') === 'roles/cloudbuild.serviceAgent',
+    );
+    expect(bindings).toHaveLength(1);
+    expect(field(bindings[0], 'project')).toBe('var.project_id');
+    expect(field(bindings[0], 'member')).not.toContain('google_project_service_identity');
+    expect(bindings[0].body).toMatch(
+      /depends_on\s*=\s*\[\s*google_project_service_identity\.cloud_build\s*\]/,
+    );
+    const trigger = resources(code, 'google_cloudbuild_trigger');
+    expect(trigger).toHaveLength(1);
+    const dependencies = trigger[0].body
+      .match(/depends_on\s*=\s*\[([^\]]*)\]/)?.[1]
+      .split(',')
+      .map((dependency) => dependency.trim());
+    expect(dependencies).toContain('google_project_iam_member.cloud_build_agent');
+  });
+
   it('uses private Artifact Registry, separate GCS config/artifacts/state and private 30-day Cloud Logging', async () => {
     const code = await terraform('delivery');
     for (const repository of resources(code, 'google_artifact_registry_repository')) {

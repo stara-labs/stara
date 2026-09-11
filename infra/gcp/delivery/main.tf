@@ -5,6 +5,10 @@ locals {
   }
 }
 
+data "google_project" "delivery" {
+  project_id = var.project_id
+}
+
 resource "google_project_service" "api" {
   for_each = toset([
     "artifactregistry.googleapis.com", "cloudbuild.googleapis.com",
@@ -27,7 +31,9 @@ resource "google_project_service_identity" "cloud_build" {
 resource "google_project_iam_member" "cloud_build_agent" {
   project = var.project_id
   role    = "roles/cloudbuild.serviceAgent"
-  member  = google_project_service_identity.cloud_build.member
+  # Identity generation can return the legacy build account, not the service agent.
+  member     = "serviceAccount:service-${data.google_project.delivery.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+  depends_on = [google_project_service_identity.cloud_build]
 }
 
 resource "google_artifact_registry_repository" "app" {
