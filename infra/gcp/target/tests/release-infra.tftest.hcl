@@ -213,7 +213,8 @@ run "executor_grants_are_target_scoped_and_runtime_accounts_have_no_project_auth
   }
   assert {
     condition = alltrue([
-      for grant in [google_project_iam_member.run_agent, google_project_iam_member.iap_agent, google_project_iam_member.executor_operation_read] :
+      # The static inventory regression excludes unsupported IAP project grants.
+      for grant in [google_project_iam_member.run_agent, google_project_iam_member.executor_operation_read] :
       !contains(["serviceAccount:${google_service_account.runtime["web"].email}", "serviceAccount:${google_service_account.runtime["api"].email}"], grant.member) &&
       !contains(["roles/owner", "roles/editor", "roles/iam.serviceAccountTokenCreator"], grant.role)
     ])
@@ -224,16 +225,22 @@ run "executor_grants_are_target_scoped_and_runtime_accounts_have_no_project_auth
 run "https_iap_protects_web_and_api_without_direct_url_or_anonymous_invoker" {
   command = plan
   assert {
-    condition = length(google_cloud_run_v2_service_iam_member.iap_invoker) == 2 && alltrue([
-      for key, grant in google_cloud_run_v2_service_iam_member.iap_invoker :
-      grant.member == google_project_service_identity.iap.member && grant.role == "roles/run.invoker" &&
-      grant.name == google_cloud_run_v2_service.app[key].name && grant.project == var.project_id
-      ]) && length(google_compute_backend_service.app) == 2 && alltrue([
-      for key, backend in google_compute_backend_service.app :
-      backend.iap[0].enabled && !backend.enable_cdn &&
-      one(backend.backend).group == google_compute_region_network_endpoint_group.app[key].id &&
-      google_compute_region_network_endpoint_group.app[key].cloud_run[0].service == google_cloud_run_v2_service.app[key].name
-    ])
+    condition = (
+      google_project_service_identity.iap.project == var.project_id &&
+      google_project_service_identity.iap.service == "iap.googleapis.com" &&
+      toset(keys(google_cloud_run_v2_service_iam_member.iap_invoker)) == toset(["web", "api"]) && alltrue([
+        for key, grant in google_cloud_run_v2_service_iam_member.iap_invoker :
+        grant.member == google_project_service_identity.iap.member && grant.role == "roles/run.invoker" &&
+        grant.member == "serviceAccount:service-900000000002@gcp-sa-iap.iam.gserviceaccount.com" &&
+        grant.name == google_cloud_run_v2_service.app[key].name && grant.project == var.project_id &&
+        grant.location == google_cloud_run_v2_service.app[key].location && grant.location == "us-central1"
+        ]) && length(google_compute_backend_service.app) == 2 && alltrue([
+        for key, backend in google_compute_backend_service.app :
+        backend.iap[0].enabled && !backend.enable_cdn &&
+        one(backend.backend).group == google_compute_region_network_endpoint_group.app[key].id &&
+        google_compute_region_network_endpoint_group.app[key].cloud_run[0].service == google_cloud_run_v2_service.app[key].name
+      ])
+    )
     error_message = "IAP must protect both service backends and be the only declared service-invoker principal."
   }
   assert {
@@ -262,6 +269,29 @@ run "https_iap_protects_web_and_api_without_direct_url_or_anonymous_invoker" {
       length(output.dns_records) == 2
     )
     error_message = "HTTPS routing/certificate must cover only staging, with API paths directed to API and no production origin."
+  }
+}
+
+run "iap_invoker_follows_generated_identity_without_a_hardcoded_agent" {
+  command = plan
+  override_resource {
+    target          = google_project_service_identity.iap
+    override_during = plan
+    values = {
+      email  = "service-900000000099@gcp-sa-iap.iam.gserviceaccount.com"
+      member = "serviceAccount:service-900000000099@gcp-sa-iap.iam.gserviceaccount.com"
+    }
+  }
+  assert {
+    condition = toset(keys(google_cloud_run_v2_service_iam_member.iap_invoker)) == toset(["web", "api"]) && alltrue([
+      for key, grant in google_cloud_run_v2_service_iam_member.iap_invoker :
+      grant.project == var.project_id && grant.location == "us-central1" &&
+      grant.name == google_cloud_run_v2_service.app[key].name && grant.role == "roles/run.invoker" &&
+      grant.member == google_project_service_identity.iap.member &&
+      grant.member == "serviceAccount:service-900000000099@gcp-sa-iap.iam.gserviceaccount.com" &&
+      grant.member != "serviceAccount:service-900000000002@gcp-sa-iap.iam.gserviceaccount.com"
+    ])
+    error_message = "Both service-scoped invoker grants must follow the generated IAP identity, not a hardcoded project number or another service agent."
   }
 }
 
@@ -316,7 +346,25 @@ run "isolation_owns_its_executor_and_state_without_lb_or_staging_grants" {
   override_resource {
     target          = google_project_service_identity.iap
     override_during = plan
-    values          = { member = "serviceAccount:service-900000000003@gcp-sa-iap.iam.gserviceaccount.com" }
+    values = {
+      email  = "service-900000000003@gcp-sa-iap.iam.gserviceaccount.com"
+      member = "serviceAccount:service-900000000003@gcp-sa-iap.iam.gserviceaccount.com"
+    }
+  }
+  assert {
+    condition = (
+      google_project_service_identity.iap.project == "stara-test-isolation" &&
+      google_project_service_identity.iap.service == "iap.googleapis.com" &&
+      toset(keys(google_cloud_run_v2_service_iam_member.iap_invoker)) == toset(["web", "api"]) && alltrue([
+        for key, grant in google_cloud_run_v2_service_iam_member.iap_invoker :
+        grant.project == "stara-test-isolation" && grant.location == "us-central1" &&
+        grant.name == google_cloud_run_v2_service.app[key].name && grant.role == "roles/run.invoker" &&
+        grant.member == google_project_service_identity.iap.member &&
+        grant.member == "serviceAccount:service-900000000003@gcp-sa-iap.iam.gserviceaccount.com" &&
+        grant.member != "serviceAccount:service-900000000002@gcp-sa-iap.iam.gserviceaccount.com"
+      ])
+    )
+    error_message = "Isolation must retain only its own generated IAP agent as invoker on its matching web/API services, without staging-agent reuse."
   }
   assert {
     condition = (

@@ -163,7 +163,16 @@ IAM, IAP, DNS, image content or incident-delivery acceptance.
 
 Both Cloud Run v2 services require invoker IAM, use internal/load-balancer
 ingress, and disable their default URI. Only the project's generated IAP service
-agent has the service invoker role. Web and API have separate runtime accounts
+agent receives `roles/run.invoker`, separately on each service. There is no
+project-level IAP runtime grant: `roles/iap.serviceAgent` is not a supported
+predefined role. The generated member reference supplies the identity dependency.
+This follows Google's [IAP setup](https://docs.cloud.google.com/iap/docs/enabling-cloud-run)
+and is protected by the [independent regression](../../docs/evidence/release-iap-invoker-test-design.md).
+Mocked providers do not validate Google's role catalog. Before a live apply,
+verify predefined role identifiers and supported resource scopes against current
+IAM documentation and the catalog using authorized read-only access.
+
+Web and API have separate runtime accounts
 with no granted secret or project access. Each service uses one CPU, 512 MiB
 (the second-generation minimum),
 request-based CPU allocation, min zero/max two instances, and port 8080. Service

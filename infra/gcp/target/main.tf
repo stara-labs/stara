@@ -81,12 +81,6 @@ resource "google_project_iam_member" "run_agent" {
   member  = google_project_service_identity.run.member
 }
 
-resource "google_project_iam_member" "iap_agent" {
-  project = var.project_id
-  role    = "roles/iap.serviceAgent"
-  member  = google_project_service_identity.iap.member
-}
-
 resource "google_service_account" "runtime" {
   for_each     = local.components
   project      = var.project_id
@@ -254,13 +248,12 @@ resource "google_cloud_run_v2_service" "app" {
 }
 
 resource "google_cloud_run_v2_service_iam_member" "iap_invoker" {
-  for_each   = local.components
-  project    = var.project_id
-  location   = var.region
-  name       = google_cloud_run_v2_service.app[each.key].name
-  role       = "roles/run.invoker"
-  member     = google_project_service_identity.iap.member
-  depends_on = [google_project_iam_member.iap_agent]
+  for_each = local.components
+  project  = var.project_id
+  location = var.region
+  name     = google_cloud_run_v2_service.app[each.key].name
+  role     = "roles/run.invoker"
+  member   = google_project_service_identity.iap.member
 }
 
 resource "google_project_iam_custom_role" "executor_service_update" {
