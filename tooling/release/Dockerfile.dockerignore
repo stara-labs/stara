@@ -1,0 +1,16 @@
+**
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!.npmrc
+!LICENSE.md
+!tooling/package.json
+!tooling/lib/**
+!tooling/release/*.mjs
+**/.env*
+**/credentials*
+**/node_modules
+**/.artifacts
+**/*.tfstate*
+**/*.tfplan
+**/*.tfvars*

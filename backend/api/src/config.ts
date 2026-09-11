@@ -5,6 +5,19 @@ export interface ServerConfig {
   port: number;
 }
 
+export interface PublicRuntimeConfig {
+  schemaVersion: 1;
+  environment: 'development' | 'staging';
+}
+
+export function readRuntimeConfig(env: NodeJS.ProcessEnv): PublicRuntimeConfig {
+  const environment = env.STARA_ENVIRONMENT === undefined ? 'development' : env.STARA_ENVIRONMENT;
+  if (environment !== 'development' && environment !== 'staging') {
+    throw new Error('STARA_ENVIRONMENT must be development or staging');
+  }
+  return { schemaVersion: 1, environment };
+}
+
 export function readConfig(env: NodeJS.ProcessEnv): ServerConfig {
   const host = env.HOST ?? '127.0.0.1';
   const port = env.PORT ?? '3000';

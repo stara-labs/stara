@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { readConfig } from './config.js';
+import { readConfig, readRuntimeConfig } from './config.js';
 import { createServer } from './server.js';
 
 export interface ProcessRuntime {
@@ -31,7 +31,7 @@ export async function startMain(
     runtime?: ProcessRuntime;
   } = {},
 ): Promise<{ shutdown(): Promise<void> } | undefined> {
-  const server = options.server ?? createServer();
+  let server = options.server;
   const runtime = options.runtime ?? processRuntime;
   let shutdownPromise: Promise<void> | undefined;
   const onSignal = () => {
@@ -39,6 +39,7 @@ export async function startMain(
   };
 
   function shutdown(): Promise<void> {
+    const activeServer = server!;
     shutdownPromise ??= new Promise<void>((resolve) => {
       let settled = false;
       // Keep the deadline referenced: a hung close hook must not silently exit zero.
@@ -51,15 +52,15 @@ export async function startMain(
         runtime.off('SIGINT', onSignal);
         runtime.off('SIGTERM', onSignal);
         if (event === 'shutdown_complete') {
-          server.log.info({ event }, 'API stopped');
+          activeServer.log.info({ event }, 'API stopped');
         } else {
-          server.log.error({ event }, 'API shutdown failed');
-          server.server.closeAllConnections();
+          activeServer.log.error({ event }, 'API shutdown failed');
+          activeServer.server.closeAllConnections();
           runtime.exit(1);
         }
         resolve();
       }
-      void server.close().then(
+      void activeServer.close().then(
         () => finish('shutdown_complete'),
         () => finish('shutdown_failed'),
       );
@@ -68,12 +69,16 @@ export async function startMain(
   }
 
   try {
-    const config = readConfig(options.env ?? process.env);
+    const env = options.env ?? process.env;
+    const config = readConfig(env);
+    const runtimeConfig = readRuntimeConfig(env);
+    server ??= createServer({ runtimeConfig });
     await server.listen(config);
     runtime.on('SIGINT', onSignal);
     runtime.on('SIGTERM', onSignal);
     return { shutdown };
   } catch {
+    server ??= createServer();
     server.log.error({ event: 'startup_failed' }, 'API startup failed');
     runtime.setExitCode(1);
     await shutdown();

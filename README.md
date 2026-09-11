@@ -5,8 +5,9 @@ Stara is being built as a place for humans and persistent agents to work togethe
 This repository is the application monorepo. The initial implementation is tracked
 in [the web reference-consumer milestone](https://github.com/stara-labs/stara/issues/1).
 This first scaffold contains a synthetic-data application shell and a minimal
-HTTP API. Authentication, databases, persistent agents, business workflows,
-deployment, and release publication are not implemented.
+HTTP API. The separate release milestone adds restricted synthetic-only staging
+delivery controls. Customer authentication, databases, persistent agents, business
+workflows, production delivery, and customer activation remain deferred.
 
 ## Start
 
@@ -34,6 +35,7 @@ external token maintenance.
 - `UI/shared`: shared UI primitives and generated application styles.
 - `backend/api`: backend service.
 - `tooling`: shared development and verification tools.
+- `infra/gcp`: reviewed infrastructure, with private operational inputs kept outside Git.
 - `tests/e2e`: cross-project verification.
 - `docs`: application documentation and evidence.
 - `.github`: repository-wide workflow and ownership configuration.
@@ -44,7 +46,9 @@ build configuration, and Dockerfiles belong inside their owning projects.
 ## Status
 
 The scaffold, execution evidence, and Product acceptance are not complete.
-No package publication or deployment is configured.
+Release source is being verified; source configuration is not evidence of live
+activation. Production remains disabled and workspace packages remain private.
+See [release operations](docs/release-operations.md) for the activation boundary.
 
 External pull requests are not currently accepted while the security policy,
 code of conduct, and public contribution policy are being completed. Issues and
@@ -72,6 +76,10 @@ trademarks beyond those provided by the license.
 - [Contribution workflow](CONTRIBUTING.md)
 - [Agent instructions](AGENTS.md)
 - [Product System consumer record](docs/product-system.json)
+- [Restricted release requirements](docs/requirements/releases.md)
+- [Release architecture](docs/release-architecture.md)
+- [Release evaluation and blockers](docs/evidence/release-evaluation.md)
+- [Security reporting](SECURITY.md)
 
 The public build consumes generated styles only. The private Product System
 checkout is not an install, build, or ordinary CI dependency. `validated: false`

@@ -27,6 +27,22 @@ disabled. The API and web must both be built first. For a running Compose
 candidate, set `STARA_EXTERNAL_SERVERS=1` and
 `STARA_E2E_BASE_URL=http://127.0.0.1:5173`.
 
+The browser entry waits for `GET /api/runtime-config` before mounting the
+workspace. Run the API alongside the web development server; an unavailable API
+shows a generic failure instead of a workspace with an unknown environment.
+The response must contain exactly `schemaVersion: 1` and an `environment` of
+`development` or `staging`. Missing, malformed, or additional fields are rejected.
+Configuration is fetched with `cache: 'no-store'`; no build-time environment
+values or browser storage select the application environment.
+
+Set `STARA_ENVIRONMENT=staging` on the API to display the persistent,
+non-dismissible staging notice. The API defaults to `development` when that
+variable is absent, so local development has no staging notice. `RuntimeApp`
+owns loading and failure states; direct `App` composition defaults to development.
+Exactly one notice is mounted: above the frame during ordinary use and inspection,
+or inside an active native dialog so its text remains accessible while the
+background is inert. It has no live-region announcements or dismiss control.
+
 Each Playwright invocation reserves a new UUID-based directory under
 `tests/e2e/.artifacts/<runId>/`, containing `results/`, `report/`, and `run.json`.
 Metadata records arguments (including filters), server mode, base URL, timestamps,

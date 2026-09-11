@@ -1,8 +1,22 @@
 import Fastify from 'fastify';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Writable } from 'node:stream';
+import type { PublicRuntimeConfig } from './config.js';
 
-export function createServer(options: { logStream?: Writable } = {}) {
+export function createServer(
+  options: { logStream?: Writable; runtimeConfig?: PublicRuntimeConfig } = {},
+) {
+  const configured = options.runtimeConfig ?? { schemaVersion: 1, environment: 'development' };
+  if (
+    configured.schemaVersion !== 1 ||
+    (configured.environment !== 'development' && configured.environment !== 'staging')
+  ) {
+    throw new Error('Invalid public runtime configuration');
+  }
+  const runtimeConfig: PublicRuntimeConfig = {
+    schemaVersion: 1,
+    environment: configured.environment,
+  };
   const server = Fastify({
     exposeHeadRoutes: false,
     requestIdHeader: false,
@@ -87,6 +101,25 @@ export function createServer(options: { logStream?: Writable } = {}) {
       },
     },
     async () => ({ status: 'ok' }),
+  );
+  server.get(
+    '/api/runtime-config',
+    {
+      schema: {
+        response: {
+          200: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['schemaVersion', 'environment'],
+            properties: {
+              schemaVersion: { type: 'integer', const: 1 },
+              environment: { type: 'string', enum: ['development', 'staging'] },
+            },
+          },
+        },
+      },
+    },
+    async (_request, reply) => reply.header('Cache-Control', 'no-store').send(runtimeConfig),
   );
   return server;
 }

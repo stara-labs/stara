@@ -124,6 +124,17 @@ export function validateLayout(files) {
   return files
     .filter((file) => {
       if (!safeRelativePath(file)) return true;
+      const approvedExample = file === 'infra/gcp/terraform.tfvars.example';
+      if (
+        /(?:^|\/)\.terraform(?:\/|$)/.test(file) ||
+        /(?:\.tfstate|\.tfplan)(?:\.|$)/i.test(file) ||
+        (!approvedExample && /\.tfvars(?:\.|$)/i.test(file)) ||
+        /(?:^|\/)(?:credentials[^/]*|application_default_credentials|service-account|gha-creds-[^/]*)\.json$/i.test(
+          file,
+        ) ||
+        /\.(?:pem|p12|pfx|key)$/i.test(file)
+      )
+        return true;
       if (/(?:^|\/)\.env(?:\.|$)/.test(file) && !file.endsWith('/.env.example')) return true;
       if (
         /(?:^|\/)(?:stara-product-system|ProductSystem|private)(?:\/|$)/i.test(file) ||
@@ -133,7 +144,7 @@ export function validateLayout(files) {
       return !(
         rootFiles.has(file) ||
         /^[^/]+\.md$/.test(file) ||
-        /^(?:\.github|docs|tooling|tests|UI\/(?:web|shared)|backend\/api)\//.test(file)
+        /^(?:\.github|docs|tooling|tests|UI\/(?:web|shared)|backend\/api|infra\/gcp)\//.test(file)
       );
     })
     .map((file) => `Forbidden tracked file: ${file}`);

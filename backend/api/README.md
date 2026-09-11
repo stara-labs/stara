@@ -1,9 +1,10 @@
 # Stara API
 
-Private, health-only Fastify service. `GET /api/health` returns HTTP 200 and exactly
+Private Fastify service. `GET /api/health` returns HTTP 200 and exactly
 `{"status":"ok"}`. This reports that the handler can answer a request. It does not
 assert dependency health, readiness, authentication, data integrity, or any wider
-application state. Other routes and methods return 404.
+application state. `GET /api/runtime-config` returns the allowlisted public
+configuration described below. Other routes and methods return 404.
 
 ## Commands
 
@@ -37,6 +38,22 @@ must set `HOST=0.0.0.0`. `PORT` defaults to `3000` and accepts decimal integers
 invalid. Variables are read from the process environment; no dotenv file is loaded.
 Invalid configuration or a failed bind logs `startup_failed` and exits nonzero.
 Configuration values and raw exception details are omitted from failure logs.
+
+`STARA_ENVIRONMENT` defaults to `development` only when absent and accepts exactly
+`development` or `staging`. Empty, padded, production, and unknown values fail
+startup before listening. `GET /api/runtime-config` returns HTTP 200 with
+`Cache-Control: no-store` and exactly
+`{"schemaVersion":1,"environment":"development"}` or
+`{"schemaVersion":1,"environment":"staging"}`. Its typed configuration and
+response schema expose no other process-environment or operational fields.
+The web entry requires this endpoint before displaying its workspace.
+
+`readRuntimeConfig` validates the public environment independently of the existing
+host/port `readConfig` contract. `createServer` accepts an optional validated
+`runtimeConfig`, snapshots its two public fields, and defaults to development.
+`startMain` validates environment values within its sanitized failure handling
+and supplies the public config when constructing its server. An injected server
+retains its explicitly supplied configuration and lifecycle hooks.
 
 `config.ts` validates configuration, `server.ts` constructs an unbound server,
 `main.ts` owns listening and shutdown, and `index.ts` is the executable entrypoint.

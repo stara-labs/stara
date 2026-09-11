@@ -36,6 +36,28 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps
+      - name: Install checksum-pinned Terraform
+        shell: bash
+        run: |
+          set -euo pipefail
+          directory="$(mktemp -d "$RUNNER_TEMP/stara-terraform.XXXXXX")"
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 \
+            https://releases.hashicorp.com/terraform/1.16.2/terraform_1.16.2_linux_amd64.zip \
+            --output "$directory/terraform.zip"
+          printf '%s  %s\n' 0d17011f0c4664539b164b044903d04e296c86c13cb9f28040076c65cfb3985a "$directory/terraform.zip" | sha256sum --check --strict
+          unzip -q "$directory/terraform.zip" -d "$directory"
+          sudo install -m 0755 "$directory/terraform" /usr/local/bin/terraform
+          sudo install -D -m 0644 "$directory/LICENSE.txt" /usr/local/share/licenses/terraform/LICENSE.txt
+      - name: Verify backend-free Terraform plans
+        shell: bash
+        run: |
+          set -euo pipefail
+          for module in bootstrap delivery target; do
+            terraform -chdir=infra/gcp/$module fmt -check -recursive
+            terraform -chdir=infra/gcp/$module init -backend=false -input=false -lockfile=readonly
+            terraform -chdir=infra/gcp/$module validate
+            terraform -chdir=infra/gcp/$module test
+          done
       - name: Complete proposed-change gates
         if: github.event_name == 'pull_request'
         run: pnpm check:pr
@@ -46,13 +68,28 @@ jobs:
         if: github.event_name != 'pull_request'
         run: pnpm test:mutation
       - run: pnpm security:dependencies
+      - name: Export complete mainline target coverage
+        if: github.event_name == 'push'
+        run: pnpm release:coverage
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: github.event_name == 'push'
+        with:
+          name: release-coverage-${{ github.sha }}-${{ github.run_attempt }}
+          path: .artifacts/public-release/coverage.json
+          include-hidden-files: true
+          retention-days: 30
+          if-no-files-found: error
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
         with:
           name: candidate-${{ github.sha }}-${{ github.run_attempt }}
           path: |
-            .artifacts/
-            tests/e2e/.artifacts/
+            .artifacts/coverage/**/coverage-summary.json
+            .artifacts/gates/**/selection.json
+            .artifacts/gates/**/results.json
+            .artifacts/build/manifest.json
+            tests/e2e/.artifacts/run-*/run.json
+            tests/e2e/.artifacts/run-*/results/
           include-hidden-files: true
           retention-days: 30
           if-no-files-found: error
@@ -86,7 +123,9 @@ jobs:
         if: always()
         with:
           name: windows-${{ github.sha }}-${{ github.run_attempt }}
-          path: .artifacts/
+          path: |
+            .artifacts/coverage/**/coverage-summary.json
+            .artifacts/build/manifest.json
           include-hidden-files: true
           retention-days: 30
           if-no-files-found: error
@@ -133,8 +172,40 @@ jobs:
         with:
           name: containers-${{ github.sha }}-${{ github.run_attempt }}
           path: |
-            .artifacts/
-            tests/e2e/.artifacts/
+            tests/e2e/.artifacts/run-*/run.json
+            tests/e2e/.artifacts/run-*/results/
+          include-hidden-files: true
+          retention-days: 30
+          if-no-files-found: error
+
+  release-images:
+    name: Release image verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      STARA_RELEASE_RUN_ID: checks-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          version: 11.19.0
+          run_install: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps
+      - run: pnpm release:images
+      - run: pnpm release:safety
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: release-images-${{ github.sha }}-${{ github.run_attempt }}
+          path: .artifacts/public-release/results.json
           include-hidden-files: true
           retention-days: 30
           if-no-files-found: error
@@ -142,7 +213,7 @@ jobs:
   required:
     name: Required scaffold checks
     if: always()
-    needs: [verify, windows, containers]
+    needs: [verify, windows, containers, release-images]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
@@ -152,7 +223,9 @@ jobs:
           VERIFY: ${{ needs.verify.result }}
           WINDOWS: ${{ needs.windows.result }}
           CONTAINERS: ${{ needs.containers.result }}
+          RELEASE_IMAGES: ${{ needs.release-images.result }}
         run: |
           test "$VERIFY" = success
           test "$CONTAINERS" = success
           test "$WINDOWS" = success
+          test "$RELEASE_IMAGES" = success

@@ -9,7 +9,18 @@
     "test:integration": "vitest run tests/snapshot.contract.test.mjs tests/cli.contract.test.mjs",
     "test:coverage": "vitest run --coverage"
   },
+  "dependencies": {
+    "@actions/attest": "3.2.0",
+    "@octokit/request": "10.0.16",
+    "google-auth-library": "11.0.2",
+    "parse5": "8.0.1",
+    "yaml": "2.9.0"
+  },
   "devDependencies": {
+    "@semantic-release/commit-analyzer": "13.0.1",
+    "@semantic-release/github": "12.0.9",
+    "@semantic-release/release-notes-generator": "14.1.1",
+    "semantic-release": "25.0.9",
     "vitest": "5.0.0",
     "@vitest/coverage-v8": "5.0.0",
     "style-dictionary": "5.5.3",

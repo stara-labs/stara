@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { Dialog, Icon, IconButton, Status } from '@stara/ui';
 import type { WorkingContext } from './fixtures';
+import { StagingNotice } from './StagingNotice';
+import type { PublicRuntimeConfig } from './runtime-config';
 import styles from './shell.module.css';
 
 export function ContextPicker({
   contexts,
   open,
   filter = '',
+  environment = 'development',
   onOpen,
   onDismiss,
   onMove,
@@ -14,6 +17,7 @@ export function ContextPicker({
   contexts: Record<string, WorkingContext>;
   open: string[];
   filter?: string;
+  environment?: PublicRuntimeConfig['environment'];
   onOpen: (id: string) => void;
   onDismiss: () => void;
   onMove: (id: string, to: number) => void;
@@ -25,6 +29,7 @@ export function ContextPicker({
   );
   return (
     <Dialog title="Working contexts" onDismiss={onDismiss}>
+      {environment === 'staging' && <StagingNotice />}
       <label className={styles.searchLabel}>
         Find a context
         <input

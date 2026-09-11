@@ -50,6 +50,7 @@ export async function listFiles(
   prefix = '',
   excluded = [
     '.git',
+    '.terraform',
     'node_modules',
     '.artifacts',
     'dist',
