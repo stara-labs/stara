@@ -64,7 +64,7 @@ function evidence() {
       ...run,
       workflowRef: policy.workflows[kind].workflowRef,
       headSha: sha,
-      event: 'push',
+      event: kind === 'codeql' ? 'dynamic' : 'push',
       status: 'completed',
       conclusion: 'success',
       jobs: policy.workflows[kind].jobs.map((name) => ({
@@ -365,6 +365,42 @@ describe('REL-02/03 strict immutable dispatch and manifest', () => {
 });
 
 describe('REL-02/03 independently fetched evidence and provenance', () => {
+  it.each([
+    ['codeql', 'push'],
+    ['codeql', 'pull_request'],
+    ['scaffold', 'dynamic'],
+    ['scaffold', 'pull_request'],
+    ['images', 'dynamic'],
+    ['images', 'pull_request'],
+  ])('denies %s event %s without broadening the other workflow kinds', (kind, event) => {
+    const candidate = manifest();
+    const input = evidence();
+    input.runs.find((run) => run.id === candidate.runs[kind].id).event = event;
+    denied(() => contract.validateEvidence(candidate, input, policy));
+  });
+
+  it('does not treat dynamic CodeQL as image-signing provenance', () => {
+    const candidate = manifest();
+    const proof = {
+      ...provenance(),
+      workflowRef: policy.workflows.codeql.workflowRef,
+      runId: candidate.runs.codeql.id,
+      runAttempt: candidate.runs.codeql.attempt,
+    };
+    denied(() => contract.validateProvenance(candidate, 'web', proof, policy));
+  });
+
+  it('pins dynamic CodeQL to its literal workflow ref even when policy and evidence are both changed', () => {
+    const candidate = manifest();
+    const input = evidence();
+    const changedPolicy = structuredClone(policy);
+    changedPolicy.workflows.codeql.workflowRef = 'dynamic/synthetic-foreign/codeql';
+    const run = input.runs.find((entry) => entry.id === candidate.runs.codeql.id);
+    run.workflowRef = changedPolicy.workflows.codeql.workflowRef;
+    expect(run.event).toBe('dynamic');
+    denied(() => contract.validateEvidence(candidate, input, changedPolicy));
+  });
+
   it('denies provenance without certified image-run identity', () => {
     const proof = provenance();
     delete proof.runId;

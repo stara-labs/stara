@@ -69,7 +69,7 @@ function evidence(candidate) {
       ...run,
       workflowRef: policy.workflows[kind].workflowRef,
       headSha: candidate.sourceSha,
-      event: 'push',
+      event: kind === 'codeql' ? 'dynamic' : 'push',
       status: 'completed',
       conclusion: 'success',
       jobs: policy.workflows[kind].jobs.map((name) => ({

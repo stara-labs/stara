@@ -1,5 +1,10 @@
 # Independent Release Pipeline Test Design
 
+Current-event correction: the `push` assumptions for default CodeQL below are
+superseded by the [CodeQL event regression](release-codeql-event-test-design.md).
+They remain here as historical design and evidence; scaffold/image events and
+all other eligibility requirements are unchanged.
+
 Author: independent release test author. Implementer: Locke. The parent owns
 workflow, CLI, Compose, Playwright release configuration, and provider wiring;
 Mencius owns cloud-adapter tests. A distinct verifier and responsible human

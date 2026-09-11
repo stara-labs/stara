@@ -1,5 +1,10 @@
 # Independent Release Adapter Test Design
 
+Current-event correction: the `push` assumptions for default CodeQL below are
+superseded by the [CodeQL event regression](release-codeql-event-test-design.md).
+They remain here as historical design and evidence; scaffold/image events and
+all other eligibility requirements are unchanged.
+
 Role: independent test author, distinct from implementation and final verification.
 Base: `319c9bf8fb7c4bbc852497e5742f801f9015aec1`, branch `feat/secure-releases`.
 Authority: approved release requirements, release architecture and the independently

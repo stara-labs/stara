@@ -18,6 +18,7 @@ const workflows = {
   scaffold: {
     id: '354641209',
     path: '.github/workflows/checks.yml',
+    event: 'push',
     jobs: [
       'Candidate verification',
       'Windows package verification',
@@ -29,10 +30,12 @@ const workflows = {
   codeql: {
     id: '355366692',
     path: 'dynamic/github-code-scanning/codeql',
+    event: 'dynamic',
     jobs: ['Analyze (javascript-typescript)', 'Analyze (actions)'],
   },
   images: {
     path: '.github/workflows/release.yml',
+    event: 'push',
     jobs: ['Verify release images', 'Publish verified images'],
   },
 };
@@ -186,7 +189,9 @@ function nativeRunIdentity(run, workflow, sourceSha, repositoryId, identity) {
   const id = decimal(run.id);
   requireValue(Number.isSafeInteger(run.run_attempt) && run.run_attempt > 0);
   requireValue(decimal(run.workflow_id) === workflow.id && run.path === workflow.path);
-  requireValue(run.head_sha === sourceSha && run.head_branch === 'main' && run.event === 'push');
+  requireValue(
+    run.head_sha === sourceSha && run.head_branch === 'main' && run.event === workflow.event,
+  );
   repository(run.repository, repositoryId);
   repository(run.head_repository, repositoryId);
   if (identity) requireValue(id === identity.id && run.run_attempt === identity.attempt);
@@ -291,7 +296,8 @@ export async function awaitMainChecks(options) {
             workflow_id: workflow.id,
             head_sha: sourceSha,
             branch: 'main',
-            event: 'push',
+            // Include every CodeQL event so a newer unsupported run cannot be hidden.
+            ...(kind === 'codeql' ? {} : { event: workflow.event }),
             per_page: 100,
             page: 1,
           },

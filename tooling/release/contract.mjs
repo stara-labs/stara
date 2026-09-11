@@ -187,7 +187,12 @@ export function validateEvidence(manifest, evidence, policy) {
     const run = evidence.runs.find((entry) => entry.id === expected.id);
     requireValue(run && run.attempt === expected.attempt);
     requireValue(run.workflowRef === policy.workflows[kind].workflowRef);
-    requireValue(run.headSha === manifest.sourceSha && run.event === 'push');
+    requireValue(run.headSha === manifest.sourceSha);
+    requireValue(
+      kind === 'codeql'
+        ? run.workflowRef === 'dynamic/github-code-scanning/codeql' && run.event === 'dynamic'
+        : run.event === 'push',
+    );
     requireValue(run.status === 'completed' && run.conclusion === 'success');
     for (const name of policy.workflows[kind].jobs) {
       const job = run.jobs.find((entry) => entry.name === name);

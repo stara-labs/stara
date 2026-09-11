@@ -1800,7 +1800,7 @@ function evidenceBackend(change = () => {}) {
           run_attempt: run.attempt,
           run_number: kind === 'codeql' ? 1000 : Number(run.id),
           head_sha: sourceSha,
-          event: 'push',
+          event: kind === 'codeql' ? 'dynamic' : 'push',
           status: 'completed',
           conclusion: 'success',
           path:
@@ -1885,7 +1885,90 @@ const otherCodeqlRun = (model, extra = {}) => ({
 });
 
 describe('latest CodeQL workflow inventory: distinct-run eligibility, synthetic HTTP', () => {
-  it('reads one complete exact-source main push inventory without filtering failures or pending runs', async () => {
+  it('collects dynamic CodeQL without narrowing inventory by event', async () => {
+    const fixture = evidenceBackend();
+    const h = await adapters((call) =>
+      call.url.pathname === codeqlInventoryPath &&
+      call.url.searchParams.has('event') &&
+      call.url.searchParams.get('event') !== 'dynamic'
+        ? reply({ total_count: 0, workflow_runs: [] })
+        : fixture.handler(call),
+    );
+    const candidate = manifest();
+    const actual = await h.value.collectEvidence(argumentsFor({ manifest: candidate, sourceSha }));
+    expect(() => validateEvidence(candidate, actual, policy)).not.toThrow();
+    expect(inventoryReads(h.request)[0].url.searchParams.has('event')).toBe(false);
+    expect(actual.runs.map((run) => [run.id, run.event])).toEqual([
+      ['101', 'push'],
+      ['103', 'dynamic'],
+      ['102', 'push'],
+    ]);
+  });
+
+  it.each(['inventory', 'current', 'attempt', 'all'])(
+    'rejects push-labelled CodeQL at the %s boundary even when every other field matches',
+    async (phase) => {
+      const fixture = evidenceBackend((model) => {
+        if (['inventory', 'all'].includes(phase))
+          model.codeqlInventory.workflow_runs[0].event = 'push';
+        if (['current', 'all'].includes(phase)) model.currentRuns['103'].event = 'push';
+        if (['attempt', 'all'].includes(phase)) model.runs['103'].event = 'push';
+      });
+      const h = await adapters(fixture.handler);
+      await denied(() =>
+        h.value.collectEvidence(argumentsFor({ manifest: manifest(), sourceSha })),
+      );
+      const selected = h.request.calls.filter((call) =>
+        call.url.pathname.includes('/actions/runs/103'),
+      );
+      if (phase === 'inventory' || phase === 'all') expect(selected).toEqual([]);
+      else
+        expect(
+          selected.some((call) =>
+            call.url.pathname.endsWith(
+              phase === 'current' ? '/actions/runs/103' : '/actions/runs/103/attempts/2',
+            ),
+          ),
+        ).toBe(true);
+    },
+  );
+
+  it.each([
+    ['scaffold', 'currentRuns'],
+    ['scaffold', 'runs'],
+    ['images', 'currentRuns'],
+    ['images', 'runs'],
+  ])('still rejects dynamic %s %s evidence', async (kind, field) => {
+    const candidate = manifest();
+    const id = candidate.runs[kind].id;
+    const fixture = evidenceBackend((model) => {
+      model[field][id].event = 'dynamic';
+    });
+    const h = await adapters(fixture.handler);
+    await denied(() => h.value.collectEvidence(argumentsFor({ manifest: candidate, sourceSha })));
+    const suffix = `/actions/runs/${id}${field === 'runs' ? `/attempts/${candidate.runs[kind].attempt}` : ''}`;
+    expect(h.request.calls.some((call) => call.url.pathname.endsWith(suffix))).toBe(true);
+  });
+
+  it('denies a newer unsupported push CodeQL run instead of hiding it with an event filter', async () => {
+    const fixture = evidenceBackend((model) =>
+      setCodeqlInventory(model, [model.runs['103'], otherCodeqlRun(model, { event: 'push' })]),
+    );
+    const h = await adapters((call) => {
+      if (call.url.pathname !== codeqlInventoryPath) return fixture.handler(call);
+      const entries = fixture.model.codeqlInventory.workflow_runs.filter(
+        (run) =>
+          !call.url.searchParams.has('event') || run.event === call.url.searchParams.get('event'),
+      );
+      return reply({ total_count: entries.length, workflow_runs: clone(entries) });
+    });
+    await denied(() => h.value.collectEvidence(argumentsFor({ manifest: manifest(), sourceSha })));
+    expect(inventoryReads(h.request)).toHaveLength(1);
+    expect(inventoryReads(h.request)[0].url.searchParams.has('event')).toBe(false);
+    expect(h.request.calls.at(-1).url.pathname).toBe(codeqlInventoryPath);
+  });
+
+  it('reads complete exact-source main inventory without filtering event, failures or pending runs', async () => {
     const fixture = evidenceBackend();
     const h = await adapters(fixture.handler);
     const candidate = manifest();
@@ -1896,11 +1979,10 @@ describe('latest CodeQL workflow inventory: distinct-run eligibility, synthetic 
     expect(Object.fromEntries(call.url.searchParams)).toEqual({
       head_sha: sourceSha,
       branch: 'main',
-      event: 'push',
       per_page: '100',
       page: '1',
     });
-    expect([...call.url.searchParams]).toHaveLength(5);
+    expect([...call.url.searchParams]).toHaveLength(4);
     expect(call.options).toMatchObject({ method: 'GET', responseType: 'json' });
     expect(call.url.hostname).toBe('api.github.com');
     for (const suffix of [
@@ -2301,7 +2383,7 @@ describe('independent GitHub and coverage evidence: real core validation, synthe
       attempt: 2,
       workflowRef: 'dynamic/github-code-scanning/codeql',
       headSha: sourceSha,
-      event: 'push',
+      event: 'dynamic',
       status: 'completed',
       conclusion: 'success',
       jobs: policy.workflows.codeql.jobs.map((name) => ({
