@@ -438,7 +438,85 @@ two old-runtime-pin failures, no skips/drift. Test SHA-256:
 `32d28cba8b975ea8c2b2197f8c1dd5f9d7b032f34d5dd82b2df9fe8c25569b88`.
 This is a pin contract, not a vulnerability-scan pass or severity waiver.
 
-Live IAM, image builds and hosted workflows: Not executed by this author.
+## Hosted Linux Lockfile Remediation
+
+The first hosted PR #4 Terraform failure was independently inspected through the
+GitHub job-log API: run `34552891330`, job `103119290684`, candidate
+`abe57bfa056596b5d88e4b6dac1f709548f4df47`. The existing required CI command
+`init -backend=false -input=false -lockfile=readonly` installed Google 8.2.0,
+reported it signed by HashiCorp, and returned initialization success with a
+`Provider lock file not updated` warning. The following `validate` rejected the
+cached provider package because none of its checksums matched the lockfile.
+This is actual hosted Linux red, not a mocked Terraform or download-signature
+failure. Filtered evidence is retained in ignored
+`.artifacts/release-infra-test-author/hosted-linux-lock-red-34552891330.json`.
+The parent separately reported the same actual Linux reproduction in an isolated
+Alpine container with fresh provider data and no credentials.
+
+The original locks contained their Windows package `h1` values and the signed
+release `zh` checksums, but not Linux's package `h1`. Native multi-platform lock
+generation is the reviewed remedy; read-only CI must not repair its own inputs.
+With the pinned Terraform 1.16.2 executable, regenerate through the origin
+registry without an upgrade, mirror override or unverified plugin cache:
+
+```powershell
+$terraform = '.artifacts/tools/terraform/1.16.2/terraform.exe'
+foreach ($root in @('bootstrap', 'delivery', 'target')) {
+  & $terraform "-chdir=infra/gcp/$root" providers lock -platform=linux_amd64 -platform=windows_amd64
+  if ($LASTEXITCODE -ne 0) { throw "Provider locking failed for $root" }
+}
+```
+
+Review native signing output and the resulting diff before accepting it.
+HashiCorp documents explicit platform locking for this cross-platform case in
+the [providers lock reference](https://developer.hashicorp.com/terraform/cli/commands/providers/lock).
+The parent owns generation; the author made no lockfile or production edits.
+Independent diff review found only these additions, with no removals, version,
+constraint, source, resource, IAM or workflow changes:
+
+- Google 8.2.0 in all three roots:
+  `h1:Y6nbie6TYtIO7IBucSdIh01BVIloBNgsfUulhaRj2Q4=`.
+- Google Beta 8.2.0 in delivery and target:
+  `h1:6tEo5OEQMAjS/zib5MY85Egckwhzx0/EW7AyUjXyESU=`.
+
+All original Windows `h1` and signed-release `zh` entries remain unchanged. Reviewed
+lockfile SHA-256 values are bootstrap
+`f21de9af5aa3b96ff87b833e0e938c56829fd8ce51c6533ded4b6f9298e1e88e`,
+and delivery/target
+`4d323781f644bcaeca7624a216758452f99be5af5c7aa86035e177a947606ab3`.
+These hashes identify the reviewed files; counting `h1` entries would not prove
+which platforms they cover, so no superficial count assertion was added.
+
+The regression remains the existing real CLI sequence for each root on fresh
+Linux and Windows provider data: pinned `fmt -check -recursive`,
+`init -backend=false -input=false -lockfile=readonly`, `validate`, then all mocked
+`test` plans. Require no lock-update warning, no checksum failure, and byte-identical
+locks before/after; retain the 45-run total and the existing no-live-IAM limitation.
+Parent owns those post-generation runs and the next hosted rerun. Their completion
+must be recorded separately rather than inferred from this diff review.
+
+At patch handoff, the parent reported native generation complete for all three
+roots with HashiCorp-signed packages, followed by fresh Linux read-only init and
+validate plus all 45 mock plans passing (bootstrap 10, delivery 12, target 23;
+session `41078`, exit 0). The author rechecked the five-addition diff and file
+hashes; Kant independently reported no new finding. These Linux results are
+parent-executed, not an additional author run. The first hosted run finished with
+Windows checks, Release image verification and Container journeys passing, while
+Candidate/Required failed on the reproduced lockfile issue. Hosted Windows checks
+are not substituted for a separate fresh Windows Terraform run. The author has
+no objection to committing/pushing this checksum-only remediation; the next
+hosted run and retained cross-platform evidence determine final runtime closure.
+
+The author's extra local Linux attempt stopped before Terraform execution because
+the selected existing container lacked `unzip`; its verified CLI archive download
+does not make that attempt a Terraform red. The incomplete attempt is retained
+at `linux-lock-red-2026-09-11T02-04-37-613Z`. It was not retried after the parent
+confirmed sufficient hosted and local Linux evidence. No cloud credentials,
+remote backend, plan/apply operation, test weakening or artifact-upload workaround
+was introduced.
+
+Live IAM and image builds: Not executed by this author. Hosted failure logs were
+inspected as described above; hosted jobs were not dispatched by this author.
 
 References checked while reconciling the source assertions:
 [Google Cloud build log storage](https://docs.cloud.google.com/build/docs/securing-builds/build-log-storage),

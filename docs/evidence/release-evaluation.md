@@ -91,6 +91,30 @@ layout and doubled text/forced colors with dialogs. Automated text scaling is
 not a claim of manual native-zoom or screen-reader acceptance. Product approval
 of the staging notice and shell remains outstanding.
 
+## Initial Hosted Run
+
+PR #4 head `abe57bfa056596b5d88e4b6dac1f709548f4df47` was tested as merge
+candidate `2d39bfffdefa129c37a632dbf6e7cdeccbb51d7f`. Scaffold run
+[34552891330](https://github.com/stara-labs/stara/actions/runs/34552891330)
+passed Windows package verification, release image verification and container
+journeys. Candidate verification failed at Terraform validation because the
+provider locks lacked Linux package hashes; the required aggregate correctly
+failed. CodeQL run
+[34552889860](https://github.com/stara-labs/stara/actions/runs/34552889860)
+passed both analysis jobs. These are partial results, not a passing PR.
+
+The coordinator reproduced the checksum failure in fresh Linux provider data.
+Native Terraform `providers lock -platform=linux_amd64 -platform=windows_amd64`
+then added only five HashiCorp-signed Linux package hashes across the three
+roots. Provider versions, original Windows hashes and archive hashes were
+preserved. Independent review is recorded in the
+[infrastructure ledger](release-infra-test-design.md#hosted-linux-lockfile-remediation).
+Fresh Linux and Windows read-only initialization, validation and all 45 mocked
+plans on each platform passed after generation. The Linux source mount was
+read-only; Windows used separate fresh provider data directories. Reviewed lock
+hashes remained unchanged. This local repair still requires a new hosted run; no workflow,
+test, checksum enforcement or artifact-upload requirement was weakened.
+
 ## Security Blocker
 
 Kant's independent source review and synthetic probes closed the reported

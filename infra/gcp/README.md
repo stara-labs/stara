@@ -121,15 +121,27 @@ For provider/schema validation without accessing a state backend:
 ```powershell
 foreach ($module in @('bootstrap', 'delivery', 'target')) {
   & $tf "-chdir=infra/gcp/$module" fmt -check
-  & $tf "-chdir=infra/gcp/$module" init -backend=false
+  & $tf "-chdir=infra/gcp/$module" init -backend=false -input=false -lockfile=readonly
   & $tf "-chdir=infra/gcp/$module" validate
 }
 ```
 
-Initialization may download pinned providers and generates a dependency lock
-file in each root; it does not deploy resources. Have the owning maintainer
-review generated lock files before adding them to source control. Use
-`-lockfile=readonly` only after such a lock file exists.
+Initialization may download pinned providers but must preserve the committed
+lock files; it does not deploy resources. When intentionally updating providers,
+the owning maintainer generates signed package checksums for both supported
+platforms through the origin registry and reviews the diff:
+
+```powershell
+foreach ($module in @('bootstrap', 'delivery', 'target')) {
+  & $tf "-chdir=infra/gcp/$module" providers lock -platform=linux_amd64 -platform=windows_amd64
+  if ($LASTEXITCODE -ne 0) { throw "Provider locking failed for $module" }
+}
+```
+
+Verify fresh read-only initialization and validation on Linux and Windows before
+accepting the generated locks. Do not let CI rewrite checksums or remove package
+verification to repair a platform mismatch. See HashiCorp's
+[platform locking guidance](https://developer.hashicorp.com/terraform/cli/commands/providers/lock).
 Independent test-author mocked plans must evaluate both target variants,
 optional bootstrap isolation, combined budget membership, invalid inputs, and
 resolved IAM references. Mocked plans and source tests do not establish live
