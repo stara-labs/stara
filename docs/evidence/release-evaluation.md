@@ -102,6 +102,22 @@ and pipeline SHA-256
 `2dd5980a910a2558575eabf0367d9001ada904f3e679fae65c93563b894d1bd2`.
 Those finding closures are not blanket security acceptance or live verification.
 
+After initial commit `6eefd705e25b2f02cfbbaa7ed32243e734e73d0a`, a final
+completeness review found that the separate coverage report inventory guard
+still recognized only `lib` and `scripts`. Actual V8 reports already included
+release files, so the measured coverage above remains valid. Independent
+[coverage regressions](../../tooling/tests/release-coverage.contract.test.mjs)
+captured three failures and four preservation passes before the one-line
+`release` eligibility correction; all seven then passed. Kant independently
+closed that P2 with nine read-only probes on `gates.mjs` SHA-256
+`06e824b8c67a194fb17b80081ee968cd31947ee3b8d20f0ea1456cdc7c8bff90`.
+No source exclusion, metric floor or existing protected assertion was weakened.
+The renewed complete tooling coverage run passed 2,029 tests with 2,577/2,666
+lines (96.66%) and 1,702/1,821 branches (93.46%). Other package sources are
+unchanged from the full validation above. Locke independently reran the new
+regression plus existing gate/policy suites: 245/245 passed, with source/test
+hashes unchanged. This follow-up is not a new full-root or hosted execution.
+
 The reviewed executor image remains blocked. Its scan contains two HIGH findings
 in the official GH 2.100.0 binary: CVE-2026-56864 and CVE-2026-56865,
 `golang.org/x/mod` v0.39.0, fixed upstream in v0.40.0. The official latest GH

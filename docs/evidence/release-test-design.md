@@ -343,3 +343,42 @@ were not edited. No commits, pushes, merges or live cloud operations are authori
 as part of this test-author task.
 
 Handoff conclusion: More journey evidence required.
+
+### Late Coverage Completeness Regression
+
+The parent authorized an essential post-freeze regression in the additive
+`tooling/tests/release-coverage.contract.test.mjs`. It calls the actual exported
+`coverageReport` with owned temporary source/report files, without invoking the
+full coverage suite or modifying any existing test. The old eligibility matcher
+accepted reports omitting direct or nested `release/*.mjs` source and rejected a
+complete release-only inventory. The focused behavioral red executes seven cases:
+four pass and those three fail, with no source/test drift. Existing lib/scripts
+omission detection, unchanged report totals and stale-report rejection are retained.
+
+The parent owns the minimal production eligibility correction. This completeness
+guard defect does not imply that the earlier measured coverage excluded release
+source: both existing Vitest coverage configurations already include it. No floor,
+coverage include, acceptance criterion or prior assertion is relaxed. Raw red logs
+and exact identities are under
+`.artifacts/release-test-author/release-coverage-completeness-red`; independent
+implementation verification and any commit follow-up remain separately recorded.
+
+After that red, the parent made only the eligibility addition `lib|scripts|release`
+and reported all seven unchanged cases passing. The author read the one-line diff
+against commit `6eefd70` and confirmed source SHA-256
+`06e824b8c67a194fb17b80081ee968cd31947ee3b8d20f0ea1456cdc7c8bff90` and unchanged
+test SHA-256 `536f68e9f7a3ae8f690d1d252f3f4cb5668c283d7ac36b16662a92ae8229a8b9`.
+Kant independently closed the narrow completeness finding on those stable source
+bytes after nine focused cases using the actual exported function with in-memory
+filesystem dependencies, including preserved web eligibility. The parent's 7/7
+suite result and Kant's nine-case probe are distinct observations, not an additional
+author rerun. Locke's separately assigned review remains independent of authoring
+and the parent's implementation.
+
+Commit `6eefd70` landed through the ordinary gate before this correction; the
+regex, new regression and ledger are intended for a separate follow-up commit.
+The earlier full-root result of 2,183 package tests remains evidence for that prior
+candidate. Fresh tooling coverage was still running when this entry was appended;
+neither its anticipated test count nor a follow-up commit is claimed as completed
+here. Control-image HIGH findings and the separate moderate review continue to
+block activation; this narrow code-review closure does not grant release acceptance.
