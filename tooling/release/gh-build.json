@@ -1,0 +1,16 @@
+{
+  "version": "2.100.0-stara.1",
+  "upstreamVersion": "2.100.0",
+  "source": {
+    "repository": "https://github.com/cli/cli",
+    "commit": "45437bc7eeeb3359bbfddd1742f79de7652fd3e2",
+    "archive": "https://codeload.github.com/cli/cli/tar.gz/45437bc7eeeb3359bbfddd1742f79de7652fd3e2",
+    "sha256": "e16749bc0d99dc0633a3d5ebadf48ffff1c24beb1ce83e8f6a71bb64ce477e9a"
+  },
+  "toolchainImage": "golang:1.26.8-bookworm@sha256:9fdc884aacc3bec89b20ffc69f4bb369c78210e3e4f600387b5128b12c199f81",
+  "xMod": {
+    "version": "v0.40.0",
+    "sum": "h1:hUv+3cXcdRHz08UmSiOob7sadHig73uo5bkXxQ/tvUs=",
+    "goModSum": "h1:0/weTWkPWGBikyTWAX3dkjVztMmBA5hM0DH6BElSupE="
+  }
+}

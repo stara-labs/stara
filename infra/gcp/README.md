@@ -56,7 +56,10 @@ must be distinct and non-production. Initial images must be full SHA-256
 references to the matching delivery `app/web` and `app/api` paths. The control
 image must be `us-central1-docker.pkg.dev/<delivery-project>/control/executor@sha256:<digest>`.
 Its bytes must independently contain the reviewed executor, Node entry point,
-and `gh` 2.100.0; an application publisher cannot write the control repository.
+and `gh` 2.100.0-stara.1; an application publisher cannot write the control repository.
+This is the reviewed source build described in
+[release operations](../../docs/release-operations.md#provenance-verifier), not
+the unpatched upstream release binary.
 
 The owner needs permission to create projects under the selected organization,
 attach the selected billing account, enable APIs, and manage the declared

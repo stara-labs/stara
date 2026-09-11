@@ -801,7 +801,7 @@ async function gh(extra = {}) {
       ? {
           code: 0,
           stdout:
-            'gh version 2.100.0 (2026-09-03)\nhttps://github.com/cli/cli/releases/tag/v2.100.0\n',
+            'gh version 2.100.0-stara.1 (2026-09-03)\nhttps://github.com/cli/cli/releases/tag/v2.100.0\n',
           stderr: '',
         }
       : { code: 0, stdout: JSON.stringify(verification(input)), stderr: '' },
@@ -931,16 +931,22 @@ describe('verifyBundle: pinned real-tool boundary and private registry credentia
     vi.unstubAllEnvs();
   });
 
-  it.each(['2.99.0', '2.100.1', '2.100.0-rc.1', '2.100.0evil', ''])(
-    'rejects unpinned gh version %s before verification',
-    async (version) => {
-      const h = await gh();
-      h.run.mockResolvedValue({ code: 0, stdout: `gh version ${version}\n${canary}`, stderr: '' });
-      await denied(h.invoke);
-      expect(h.run).toHaveBeenCalledTimes(1);
-      if (h.files.mkdtemp.mock.calls.length) await cleanedTemporaryFiles(h);
-    },
-  );
+  it.each([
+    '2.99.0',
+    '2.100.0',
+    '2.100.1',
+    '2.100.0-rc.1',
+    '2.100.0evil',
+    '2.100.0-stara.2',
+    '2.100.0-stara.1evil',
+    '',
+  ])('rejects unpinned gh version %s before verification', async (version) => {
+    const h = await gh();
+    h.run.mockResolvedValue({ code: 0, stdout: `gh version ${version}\n${canary}`, stderr: '' });
+    await denied(h.invoke);
+    expect(h.run).toHaveBeenCalledTimes(1);
+    if (h.files.mkdtemp.mock.calls.length) await cleanedTemporaryFiles(h);
+  });
 
   it.each([
     ['subjectName', 'us-central1-docker.pkg.dev/private-project/app/web'],
@@ -993,7 +999,7 @@ describe('verifyBundle: pinned real-tool boundary and private registry credentia
       if (stage === 'verify')
         h.run.mockImplementation(async (_file, args) => {
           if (args[0] === '--version')
-            return { code: 0, stdout: 'gh version 2.100.0\n', stderr: '' };
+            return { code: 0, stdout: 'gh version 2.100.0-stara.1\n', stderr: '' };
           throw new Error(`${canary} ${googleToken}`);
         });
       if (stage === 'write') h.files.writeFile.mockRejectedValue(new Error(canary));
@@ -1046,7 +1052,7 @@ describe('verifyBundle: pinned real-tool boundary and private registry credentia
     const h = await gh({ clock: { now: Date.now }, input: { deadline: start + 1000 } });
     h.run.mockImplementation(async (_file, args) =>
       args[0] === '--version'
-        ? { code: 0, stdout: 'gh version 2.100.0\n', stderr: '' }
+        ? { code: 0, stdout: 'gh version 2.100.0-stara.1\n', stderr: '' }
         : new Promise(() => {}),
     );
     const rejection = denied(h.invoke);
@@ -1069,7 +1075,7 @@ describe('verified GH output: certificate facts, never predicate identity assert
       h.run.mockImplementation(async (_file, args) => {
         if (args[0] === '--version') {
           h.input[field] = value;
-          return { code: 0, stdout: 'gh version 2.100.0\n', stderr: '' };
+          return { code: 0, stdout: 'gh version 2.100.0-stara.1\n', stderr: '' };
         }
         return { code: 0, stdout: JSON.stringify(verification(h.input)), stderr: '' };
       });
@@ -1125,7 +1131,7 @@ describe('verified GH output: certificate facts, never predicate identity assert
       verified.signature.certificate.runInvocationURI = invocation;
       h.run.mockImplementation(async (_file, args) => ({
         code: 0,
-        stdout: args[0] === '--version' ? 'gh version 2.100.0\n' : JSON.stringify(result),
+        stdout: args[0] === '--version' ? 'gh version 2.100.0-stara.1\n' : JSON.stringify(result),
         stderr: '',
       }));
       await denied(h.invoke);
@@ -1141,7 +1147,7 @@ describe('verified GH output: certificate facts, never predicate identity assert
     delete cert.runInvocationURI;
     h.run.mockImplementation(async (_file, args) => ({
       code: 0,
-      stdout: args[0] === '--version' ? 'gh version 2.100.0\n' : JSON.stringify(result),
+      stdout: args[0] === '--version' ? 'gh version 2.100.0-stara.1\n' : JSON.stringify(result),
       stderr: '',
     }));
     await denied(h.invoke);
@@ -1153,7 +1159,7 @@ describe('verified GH output: certificate facts, never predicate identity assert
     const results = [...verification(), ...verification({ ...h.input, runAttempt: 2 })];
     h.run.mockImplementation(async (_file, args) => ({
       code: 0,
-      stdout: args[0] === '--version' ? 'gh version 2.100.0\n' : JSON.stringify(results),
+      stdout: args[0] === '--version' ? 'gh version 2.100.0-stara.1\n' : JSON.stringify(results),
       stderr: '',
     }));
     await denied(h.invoke);
@@ -1168,7 +1174,7 @@ describe('verified GH output: certificate facts, never predicate identity assert
       result[0].verificationResult.verifiedTimestamps[0].type = type;
       h.run.mockImplementation(async (_file, args) => ({
         code: 0,
-        stdout: args[0] === '--version' ? 'gh version 2.100.0\n' : JSON.stringify(result),
+        stdout: args[0] === '--version' ? 'gh version 2.100.0-stara.1\n' : JSON.stringify(result),
         stderr: '',
       }));
       expect((await h.invoke()).verified).toBe(true);
@@ -1192,7 +1198,7 @@ describe('verified GH output: certificate facts, never predicate identity assert
     Object.assign(result[0].verificationResult.verifiedTimestamps[0], change);
     h.run.mockImplementation(async (_file, args) => ({
       code: 0,
-      stdout: args[0] === '--version' ? 'gh version 2.100.0\n' : JSON.stringify(result),
+      stdout: args[0] === '--version' ? 'gh version 2.100.0-stara.1\n' : JSON.stringify(result),
       stderr: '',
     }));
     await denied(h.invoke);
@@ -1227,7 +1233,7 @@ describe('verified GH output: certificate facts, never predicate identity assert
     verified.signature.certificate[field] = value;
     h.run.mockImplementation(async (_file, args) => ({
       code: 0,
-      stdout: args[0] === '--version' ? 'gh version 2.100.0\n' : JSON.stringify(result),
+      stdout: args[0] === '--version' ? 'gh version 2.100.0-stara.1\n' : JSON.stringify(result),
       stderr: '',
     }));
     await denied(h.invoke);
@@ -1242,7 +1248,7 @@ describe('verified GH output: certificate facts, never predicate identity assert
       delete result[0].verificationResult.signature.certificate[field];
       h.run.mockImplementation(async (_file, args) => ({
         code: 0,
-        stdout: args[0] === '--version' ? 'gh version 2.100.0\n' : JSON.stringify(result),
+        stdout: args[0] === '--version' ? 'gh version 2.100.0-stara.1\n' : JSON.stringify(result),
         stderr: '',
       }));
       await denied(h.invoke);
@@ -1290,7 +1296,7 @@ describe('verified GH output: certificate facts, never predicate identity assert
     change(result);
     h.run.mockImplementation(async (_file, args) => ({
       code: 0,
-      stdout: args[0] === '--version' ? 'gh version 2.100.0\n' : JSON.stringify(result),
+      stdout: args[0] === '--version' ? 'gh version 2.100.0-stara.1\n' : JSON.stringify(result),
       stderr: '',
     }));
     await denied(h.invoke);
@@ -1319,7 +1325,9 @@ describe('verified GH output: certificate facts, never predicate identity assert
     async (result) => {
       const h = await gh();
       h.run.mockImplementation(async (_file, args) =>
-        args[0] === '--version' ? { code: 0, stdout: 'gh version 2.100.0\n', stderr: '' } : result,
+        args[0] === '--version'
+          ? { code: 0, stdout: 'gh version 2.100.0-stara.1\n', stderr: '' }
+          : result,
       );
       await denied(h.invoke);
       await cleanedTemporaryFiles(h);

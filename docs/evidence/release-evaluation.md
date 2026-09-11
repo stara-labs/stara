@@ -115,7 +115,14 @@ read-only; Windows used separate fresh provider data directories. Reviewed lock
 hashes remained unchanged. This local repair still requires a new hosted run; no workflow,
 test, checksum enforcement or artifact-upload requirement was weakened.
 
-## Security Blocker
+## Prior Security Blockers
+
+This section retains the earlier candidate's failures. The subsequent
+[dependency remediation](release-dependency-remediation.md) records the scoped
+Sigstore repair, source-built patched GH verifier, passing exact-artifact scans,
+independent verification and owner-approved CodeQL false-positive dispositions.
+Do not reuse the diagnostic image below; follow the newer evidence and its
+remaining validation/acceptance limits.
 
 Kant's independent source review and synthetic probes closed the reported
 concurrent-duplicate interruption, exact provenance run/attempt binding,
@@ -165,8 +172,9 @@ bootstrap. Neither a passing application scan nor source mocks clear this blocke
 
 ## Required Before Merge
 
-- Resolve executor security findings and audit applicability, then rebuild,
-  verify and scan the exact control artifact without weakening the gate.
+- Confirm the exact independently verified replacement control artifact and
+  [remediation evidence](release-dependency-remediation.md); never deploy the
+  historical failed artifact above.
 - Obtain independent final consistency/security review and current-candidate
   Linux, Windows, container and browser hosted evidence. Prior mainline checks
   do not establish this PR's result.

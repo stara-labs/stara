@@ -201,6 +201,35 @@ jobs:
       - run: pnpm exec playwright install --with-deps
       - run: pnpm release:images
       - run: pnpm release:safety
+      - name: Build the exact private executor image
+        shell: bash
+        run: |
+          set -euo pipefail
+          directory="$RUNNER_TEMP/stara-control"
+          mkdir "$directory"
+          docker buildx build --platform linux/amd64 --load --file tooling/release/Dockerfile \
+            --iidfile "$directory/control.iid" --tag stara-release-control:checks .
+          image="$(cat "$directory/control.iid")"
+          docker run --rm --network none --entrypoint gh "$image" --version
+          docker image save --output "$directory/control.tar" "$image"
+      - name: Scan executor vulnerabilities
+        shell: bash
+        run: |
+          set -euo pipefail
+          directory="$RUNNER_TEMP/stara-control"
+          docker run --rm --mount "type=bind,source=$directory,target=/evidence" \
+            aquasec/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969 \
+            image --input /evidence/control.tar --scanners vuln --severity HIGH,CRITICAL \
+            --exit-code 1 --format json --output /evidence/vulnerabilities.json
+      - name: Scan executor secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          directory="$RUNNER_TEMP/stara-control"
+          docker run --rm --mount "type=bind,source=$directory,target=/evidence" \
+            aquasec/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969 \
+            image --input /evidence/control.tar --scanners secret \
+            --exit-code 1 --format json --output /evidence/secret-findings.json
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
         with:

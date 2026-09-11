@@ -406,7 +406,7 @@ export async function verifyBundle(
         const version = new TextDecoder('utf-8', { fatal: true }).decode(
           processOutput(await run('gh', ['--version'], settings())),
         );
-        requireValue(/^gh version 2\.100\.0(?: \([^\r\n]*\))?(?:\r?\n|$)/.test(version));
+        requireValue(/^gh version 2\.100\.0-stara\.1(?: \([^\r\n]*\))?(?:\r?\n|$)/.test(version));
         scope.remaining();
         auth ??= defaultAuth();
         const token = accessToken(await auth.getAccessToken());

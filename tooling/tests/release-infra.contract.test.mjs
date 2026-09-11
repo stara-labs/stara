@@ -193,16 +193,38 @@ function expandedRootCommands(job) {
 }
 
 describe('required CI tools: pinned installers and backend-free synthetic plans', () => {
-  it('installs the reviewed GH archive before publisher provenance verification', async () => {
+  it('builds and checksum-checks the reviewed GH artifact before publisher authentication', async () => {
     const { value } = await workflow('.github/workflows/release.yml');
     const publisher = value.jobs.publish;
     expect(publisher, 'Missing image publisher').toBeDefined();
-    const installed = pinnedInstaller(publisher, {
-      executable: 'gh',
-      url: 'https://github.com/cli/cli/releases/download/v2.100.0/gh_2.100.0_linux_amd64.tar.gz',
-      hash: 'e4d4bb4498e8d007abe545b6568926793ace1b6447da598294a610018cb164be',
-      extraction: /\btar\s+[^\n]*(?:-x|--extract)/,
-    });
+    const candidates = publisher.steps.filter((step) =>
+      /--target\s+gh-artifact\b/.test(step.run ?? ''),
+    );
+    expect(candidates).toHaveLength(1);
+    const step = candidates[0];
+    expect(expression(step.if ?? 'success()')).toBe('success()');
+    expect(step['continue-on-error'] ?? false).toBe(false);
+    const code = step.run.replace(/^\s*#.*$/gm, '').replace(/\\\r?\n/g, ' ');
+    expect(code).toContain('set -euo pipefail');
+    expect(code).toMatch(/directory="\$\(mktemp -d "\$RUNNER_TEMP\/stara-gh\.[X]+"\)"/);
+    expect(code).toMatch(
+      /docker buildx build[^\n]*--platform linux\/amd64[^\n]*--target gh-artifact[^\n]*--file tooling\/release\/Dockerfile[^\n]*--output "?type=local,dest=\$directory"?\s+\./,
+    );
+    const checked = code.indexOf('sha256sum --check --strict SHA256SUMS');
+    expect(code).toMatch(/\(cd "\$directory"\s*&&\s*sha256sum --check --strict SHA256SUMS\)/);
+    expect(checked).toBeGreaterThan(code.indexOf('docker buildx build'));
+    expect(
+      code.search(/sudo install[^\n]*"\$directory\/bin\/gh"[^\n]*\/usr\/local\/bin\/gh/),
+    ).toBeGreaterThan(checked);
+    expect(code).toMatch(/sudo install[^\n]*"\$directory\/LICENSE"[^\n]*\/usr\/local\/share\//);
+    expect(code).toMatch(
+      /(?:sudo (?:cp|install)[^\n]*\$directory\/provenance|for [^\n]*\$directory\/provenance\/\*)/,
+    );
+    expect(code).not.toMatch(/\|\||\b(?:curl|wget)\b|gh_2\.100\.0_linux_amd64|--insecure/);
+    const installed = publisher.steps.indexOf(step);
+    expect(
+      publisher.steps.findIndex((item) => item.uses?.startsWith('google-github-actions/auth@')),
+    ).toBeGreaterThan(installed);
     const published = publisher.steps.findIndex(
       (step) => step.run?.trim() === 'pnpm release:publish',
     );

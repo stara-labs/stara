@@ -4,6 +4,8 @@ import { parseDocument } from 'yaml';
 
 const bookworm =
   'node:24.16.0-bookworm-slim@sha256:2c87ef9bd3c6a3bd4b472b4bec2ce9d16354b0c574f736c476489d09f560a203';
+const goBuilder =
+  'golang:1.26.8-bookworm@sha256:9fdc884aacc3bec89b20ffc69f4bb369c78210e3e4f600387b5128b12c199f81';
 const alpineNode =
   'node:24.16.0-alpine@sha256:21f403ab171f2dc89bad4dd69d7721bfd15f084ccb46cdd225f31f2bc59b5c9a';
 const alpineNginx =
@@ -44,7 +46,11 @@ describe('lean release runtime images: static contract, not vulnerability cleara
     async (file, base, user) => {
       const parsed = stages(await source(file));
       expect(parsed.at(-1).base).toBe(base);
-      for (const builder of parsed.slice(0, -1)) expect(builder.base).toBe(bookworm);
+      for (const builder of parsed.slice(0, -1)) {
+        const exceptions =
+          file === 'tooling/release/Dockerfile' ? { gh: goBuilder, 'gh-artifact': 'scratch' } : {};
+        expect(builder.base).toBe(exceptions[builder.name] ?? bookworm);
+      }
       expect(
         parsed
           .at(-1)
@@ -127,12 +133,12 @@ describe('lean release runtime images: static contract, not vulnerability cleara
     }
   });
 
-  it('keeps the checksum-verified official GH binary and license in the lean control runtime', async () => {
+  it('keeps checksum-verified source-built GH, license and provenance in the lean runtime', async () => {
     const parsed = stages(await source('tooling/release/Dockerfile'));
     const gh = parsed.find((stage) => stage.name === 'gh');
     expect(gh).toBeDefined();
     expect(gh.lines).toContain(
-      'ADD --checksum=sha256:e4d4bb4498e8d007abe545b6568926793ace1b6447da598294a610018cb164be https://github.com/cli/cli/releases/download/v2.100.0/gh_2.100.0_linux_amd64.tar.gz /tmp/gh.tar.gz',
+      'ADD --checksum=sha256:e16749bc0d99dc0633a3d5ebadf48ffff1c24beb1ce83e8f6a71bb64ce477e9a https://codeload.github.com/cli/cli/tar.gz/45437bc7eeeb3359bbfddd1742f79de7652fd3e2 /tmp/gh.tar.gz',
     );
     expect(parsed.at(-1).lines).toEqual(
       expect.arrayContaining([
@@ -142,5 +148,14 @@ describe('lean release runtime images: static contract, not vulnerability cleara
         'CMD ["execute"]',
       ]),
     );
+    const ghCopies = parsed.at(-1).lines.filter((line) => /^COPY --from=gh\s/.test(line));
+    expect(ghCopies).toHaveLength(3);
+    expect(
+      ghCopies.some((line) =>
+        /^COPY --from=gh \/opt\/gh\/provenance\/? \/usr\/share\/(?:[\w-]+\/)*provenance\/?$/.test(
+          line,
+        ),
+      ),
+    ).toBe(true);
   });
 });

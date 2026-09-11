@@ -4,9 +4,10 @@ Status: Implementation candidate; live activation evidence is still required.
 Authority: [REL scenarios](requirements/releases.md),
 [architecture](release-architecture.md), and [infrastructure](../infra/gcp/README.md).
 
-The [candidate evaluation](evidence/release-evaluation.md) records unresolved
-executor security findings. Do not bootstrap or activate this candidate while
-those findings remain unresolved, even if application image checks pass.
+The [candidate evaluation](evidence/release-evaluation.md) retains earlier executor
+security failures; the [remediation record](evidence/release-dependency-remediation.md)
+identifies the independently verified replacement artifact and remaining gates.
+Do not bootstrap or activate before those gates and owner acceptance are complete.
 
 ## Local Verification
 
@@ -29,7 +30,62 @@ synthetic summaries, complete coverage metrics and immutable candidate identitie
 may be uploaded. Retain failed results; rerunning creates new evidence and never
 erases the first failure. No command cleans unrelated containers or volumes.
 
+## Attestation Dependencies
+
+The workspace narrowly overrides `@actions/attest@3.2.0`'s signer to
+`@sigstore/sign@4.1.1`, with that signer's core pinned to `@sigstore/core@3.2.1`.
+The SDK's original signer/core graph is affected by
+[CVE-2026-48758](https://github.com/advisories/GHSA-jfc7-64v2-mr8c).
+This intentionally crosses the SDK's declared signer-major range, not the
+signer's declared core-major range. The
+[independent regression contract](evidence/release-attestation-dependencies-test-design.md)
+exercises the actual resolved SDK, statement/bundle serialization and real
+cryptographic type binding with synthetic remote-service boundaries.
+
+Keep the lockfile and scoped overrides together. Remove the overrides only when
+the maintained SDK natively resolves a patched graph and the unchanged regression,
+publisher, dependency and actual-image checks pass. Offline SDK compatibility
+does not prove live Fulcio/Rekor, GitHub or cloud authorization. Never dismiss a
+dependency advisory merely because the configured high-severity audit passes.
+
 ## Hosted Publishing Inputs
+
+### Provenance Verifier
+
+The executor and publisher use the same `gh-artifact` source-build recipe in
+`tooling/release/Dockerfile`. It pins upstream GitHub CLI 2.100.0 by immutable
+source revision and archive checksum, Go 1.26.8 by image digest, and the sole
+module override `golang.org/x/mod@v0.40.0` by version and Go checksum records.
+The module upgrade addresses the two
+[upstream checksum-verification advisories](https://groups.google.com/g/golang-announce/c/n98zX3vaIXs/m/T6fYYbScBAAJ).
+The binary identifies itself as **2.100.0-stara.1**; it is not an official GitHub
+release binary. The transport rejects the old official version and other version
+strings; that guard does not authenticate the executable's bytes.
+
+The builder verifies modules and executes the upstream CLI and sumdb test suites
+before compiling with fixed version/date, stripped paths and disabled VCS stamping.
+The output retains the upstream license, source-input identity, effective module
+files and actual binary module metadata. The exported artifact also contains
+SHA-256 checksums; the publisher verifies them before installation and before
+cloud authentication. Checksums provide output integrity, not independent proof
+that upstream source is trustworthy. Code review, pinned source identity,
+tests and artifact scanning remain required.
+
+The required release-image job now also builds and scans the exact executor
+archive for HIGH/CRITICAL vulnerabilities and secrets. Raw scan reports stay in
+the job-owned temporary directory and are not publicly uploaded. CI retains
+the failing step status; operators reproduce detailed diagnostics locally using
+the recorded candidate and recipe. Bootstrap still independently verifies the
+exact control digest it will provision. A passing application scan or a printed
+CLI version cannot substitute for that verification.
+
+Maintain the source/archive/compiler pins, module sums, `gh-build.json`, version
+guard and independent contracts together. Replace this build with a supported
+patched upstream release when available only after equivalent tests, scans and
+independent review. Never remove the override or broaden the allowed CLI version
+to silence an advisory.
+
+### Private Configuration
 
 Configure delivery identifiers as masked GitHub repository secrets, not public
 variables: `STARA_DELIVERY_PROJECT`, `STARA_IMAGE_WIF_PROVIDER`,
