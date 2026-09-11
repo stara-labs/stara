@@ -3,6 +3,53 @@
   overflow: hidden;
   display: grid;
   grid-template-columns: var(--stara-frame-nav-expanded) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+.shell[data-notice-in-frame='true'] {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+.environmentHeader {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.stagingNotice {
+  padding: var(--stara-space-2) var(--stara-space-3);
+  color: var(--stara-color-text-primary);
+  background: var(--stara-color-surface-secondary);
+  border-bottom: var(--stara-border-hairline) solid var(--stara-color-border-strong);
+  font: var(--stara-type-body);
+  overflow-wrap: anywhere;
+}
+.shell[data-environment='staging'] dialog[open] {
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+.shell[data-environment='staging'] dialog > * {
+  flex-shrink: 0;
+}
+.shell[data-environment='staging'] dialog > .stagingNotice {
+  margin-bottom: var(--stara-space-3);
+}
+.shell[data-environment='staging'] dialog > .contextList {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+.shell[data-environment='staging'] dialog > button {
+  align-self: start;
+}
+.shell[data-environment='staging'] dialog header [role='tooltip'] {
+  top: auto;
+  bottom: 100%;
+}
+.runtimeState {
+  padding: var(--stara-space-5);
+  display: grid;
+  gap: var(--stara-space-3);
+}
+.runtimeState h1 {
+  font: var(--stara-type-workspace-title);
 }
 .shell[data-collapsed='true'] {
   grid-template-columns: var(--stara-frame-nav-collapsed) minmax(0, 1fr);
@@ -174,7 +221,7 @@
   border-right: var(--stara-border-hairline) solid var(--stara-color-border-subtle);
 }
 .frameControls {
-  position: fixed;
+  position: absolute;
   z-index: 30;
   top: var(--stara-space-1);
   right: var(--stara-space-1);
@@ -403,7 +450,7 @@
   grid-column: 2;
   grid-row: 1 / 3;
   display: grid;
-  grid-template-rows: var(--stara-panel-local-tab-height) minmax(0, 1fr) auto;
+  grid-template-rows: minmax(var(--stara-panel-local-tab-height), auto) minmax(0, 1fr) auto;
   min-width: 0;
   min-height: 0;
   position: relative;
@@ -412,11 +459,14 @@
 }
 .localViews {
   display: flex;
+  min-width: 0;
   padding-right: calc(2 * var(--stara-control-compact-height) + 3 * var(--stara-space-1));
   border-bottom: var(--stara-border-hairline) solid var(--stara-color-border-subtle);
   background: var(--stara-color-panel);
 }
 .localViews button {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font: var(--stara-type-control-label);
   padding: 0 var(--stara-tab-padding-inline);
   border: 0;
@@ -558,13 +608,13 @@
   background: var(--stara-color-surface-raised);
 }
 .scrim {
-  position: fixed;
+  position: absolute;
   inset: var(--stara-frame-tab-height) 0 0;
   z-index: 10;
   background: var(--stara-color-overlay);
 }
 .inspector[data-overlay='true'] {
-  position: fixed;
+  position: absolute;
   z-index: 20;
   inset: 0 0 0 auto;
   width: min(var(--stara-dialog-compact-width), 100vw);
@@ -604,6 +654,11 @@
   }
 }
 @media (forced-colors: active) {
+  .stagingNotice {
+    color: CanvasText;
+    background: Canvas;
+    border-color: CanvasText;
+  }
   .homeRow,
   .message,
   .inspector,

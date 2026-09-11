@@ -1,0 +1,43 @@
+services:
+  api:
+    image: ${STARA_RELEASE_API_IMAGE:?A verified local API image is required}
+    environment:
+      HOST: 0.0.0.0
+      PORT: '8080'
+      STARA_ENVIRONMENT: staging
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "fetch('http://127.0.0.1:8080/api/health').then(async r=>{if(r.status!==200||JSON.stringify(await r.json())!==JSON.stringify({status:'ok'}))process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  web:
+    image: ${STARA_RELEASE_WEB_IMAGE:?A verified local web image is required}
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  gateway:
+    image: nginxinc/nginx-unprivileged:1.30.4-alpine@sha256:442753882674b49ae2c1de83ed67896131c0777f56df5005e356e62bc3f7e7ce
+    user: '101'
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    ports:
+      - '127.0.0.1:${STARA_RELEASE_PORT:-8173}:8080'
+    volumes:
+      - ./release-nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_started

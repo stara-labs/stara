@@ -1,0 +1,63 @@
+name: Dispatch staging candidate
+
+on:
+  workflow_run:
+    workflows: [Release images]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-dispatch
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    name: Dispatch verified staging candidate
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.id == 1363262992 &&
+      github.repository_owner_id == '293455507'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          version: 11.19.0
+          run_install: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: release-candidate-${{ github.event.workflow_run.head_sha }}-${{ github.event.workflow_run.run_attempt }}
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          path: .artifacts/release-inputs/candidate
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          project_id: ${{ secrets.STARA_DELIVERY_PROJECT }}
+          workload_identity_provider: ${{ secrets.STARA_DISPATCH_WIF_PROVIDER }}
+          service_account: ${{ secrets.STARA_DISPATCH_PUBLISHER }}
+          create_credentials_file: true
+          export_environment_variables: true
+      - name: Send the independently checked candidate identity
+        run: pnpm release:dispatch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STARA_STAGING_TOPIC: ${{ secrets.STARA_STAGING_TOPIC }}
+          STARA_CONFIGURATION_SHA256: ${{ secrets.STARA_CONFIGURATION_SHA256 }}

@@ -10,9 +10,13 @@ import { ContextContent } from './ContextContent';
 import { ContextPicker } from './ContextPicker';
 import { Inspector } from './Inspector';
 import { useMedia } from './useMedia';
+import { StagingNotice } from './StagingNotice';
+import type { PublicRuntimeConfig } from './runtime-config';
 import styles from './shell.module.css';
 
-export function App() {
+export function App({
+  environment = 'development',
+}: { environment?: PublicRuntimeConfig['environment'] } = {}) {
   const [state, dispatch] = useReducer(workspaceReducer, undefined, createWorkspace);
   const [contexts, setContexts] = useState(seededContexts);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
@@ -32,6 +36,8 @@ export function App() {
   const collapsed =
     (panelVisible && !overlay && collapsedDefault) || (navOverride ?? collapsedDefault);
   const layerOpen = overlay && panelVisible;
+  const staging = environment === 'staging';
+  const noticeInFrame = staging && picker === null && !creating;
 
   function remember(patch: Partial<ContextMemory>, id = state.active) {
     dispatch({ type: 'remember', id, patch });
@@ -89,6 +95,8 @@ export function App() {
       className={styles.shell}
       data-collapsed={collapsed}
       data-mobile={mobile}
+      data-environment={environment}
+      data-notice-in-frame={noticeInFrame}
       onKeyDown={(event) => {
         if (picker !== null || creating) return;
         if (event.key === 'Escape' && panelVisible) {
@@ -117,6 +125,11 @@ export function App() {
       <a className={styles.skip} href={`#panel-${state.active}`}>
         Skip to workspace
       </a>
+      {noticeInFrame && (
+        <header className={styles.environmentHeader}>
+          <StagingNotice />
+        </header>
+      )}
       <aside className={styles.navigation} aria-label="Global navigation" inert={layerOpen}>
         <header className={styles.brand}>
           <strong>Stara</strong>
@@ -256,6 +269,7 @@ export function App() {
       </div>
       {picker !== null && (
         <ContextPicker
+          environment={environment}
           contexts={contexts}
           open={state.open}
           filter={picker}
@@ -266,6 +280,7 @@ export function App() {
       )}
       {creating && (
         <Dialog title="New conversation" onDismiss={() => setCreating(false)}>
+          {staging && <StagingNotice />}
           <p className={styles.dialogCopy}>Local draft. No participants will be contacted.</p>
           <Button
             variant="primary"

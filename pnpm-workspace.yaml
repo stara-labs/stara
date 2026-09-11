@@ -17,3 +17,5 @@ saveExact: true
 
 overrides:
   typed-rest-client>qs: 6.16.0
+  '@actions/attest@3.2.0>@sigstore/sign': 4.1.1
+  '@sigstore/sign@4.1.1>@sigstore/core': 3.2.1

@@ -12,3 +12,12 @@ test-results/
 *.tsbuildinfo
 .DS_Store
 Thumbs.db
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+crash.log
+credentials*.json
+gha-creds-*.json

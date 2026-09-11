@@ -133,7 +133,7 @@ export async function coverageReport(runtime, pkg, previous) {
   const files = (await listFiles(pkg.path)).filter(
     (file) =>
       (pkg.name === '@stara/tooling'
-        ? /^(?:lib|scripts)\/.*\.mjs$/
+        ? /^(?:lib|scripts|release)\/.*\.mjs$/
         : /^src\/.*\.[cm]?[jt]sx?$/
       ).test(file) && !/\.d\.[cm]?ts$/.test(file),
   );

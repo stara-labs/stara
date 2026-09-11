@@ -8,3 +8,5 @@ UI/shared/src/styles/tokens.css
 .artifacts
 playwright-report
 test-results
+**/.terraform
+/tooling/tests/evidence/

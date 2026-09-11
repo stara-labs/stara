@@ -72,6 +72,29 @@ async function exists(path) {
   }
 }
 
+async function copySourceTree(source, destination, accept) {
+  if (!(await exists(source))) return;
+  if (!(await lstat(source)).isDirectory())
+    throw new Error('Contract source directories must not be symbolic links');
+  for (const entry of await readdir(source, { withFileTypes: true })) {
+    if (['node_modules', '.git', '.artifacts', '.terraform', 'evidence'].includes(entry.name))
+      continue;
+    if (entry.isSymbolicLink()) throw new Error('Contract source must not contain symbolic links');
+    if (entry.isDirectory()) {
+      await copySourceTree(join(source, entry.name), join(destination, entry.name), accept);
+    } else if (entry.isFile() && accept(entry.name)) {
+      await mkdir(destination, { recursive: true });
+      await cp(join(source, entry.name), join(destination, entry.name));
+    }
+  }
+}
+
+async function assertSourceContained(root, source) {
+  const child = relative(await realpath(root), await realpath(source));
+  if (!child || isAbsolute(child) || child === '..' || child.startsWith(`..${sep}`))
+    throw new Error('Contract input must stay inside its configured source root');
+}
+
 async function cleanupHarness(harness) {
   const actualTemp = await realpath(tmpdir());
   const actualHarness = await realpath(harness);
@@ -123,6 +146,16 @@ if (
 } else {
   const harness = await mkdtemp(join(await realpath(tmpdir()), 'stara-control-run-'));
   try {
+    async function copyRecordedFile(root, path) {
+      const source = join(root, path);
+      if (!(await exists(source))) return;
+      await assertSourceContained(root, source);
+      if (!(await lstat(source)).isFile())
+        throw new Error('Contract source files must not be symbolic links');
+      await mkdir(dirname(join(harness, path)), { recursive: true });
+      await cp(source, join(harness, path));
+      record.production[path] = await digest(join(harness, path));
+    }
     await mkdir(join(harness, 'tooling'), { recursive: true });
     await cp(testRoot, join(harness, 'tooling/tests'), {
       recursive: true,
@@ -140,30 +173,68 @@ if (
           record.production[`tooling/${folder}/${name}`] = hash;
       }
     }
+    for (const [folder, accept] of [
+      [
+        'tooling/release',
+        (name) => name.endsWith('.mjs') || ['Dockerfile', 'Dockerfile.dockerignore'].includes(name),
+      ],
+      [
+        'infra/gcp',
+        (name) =>
+          /(?:\.tf|\.tftest\.hcl)$/.test(name) ||
+          ['.terraform.lock.hcl', 'README.md', 'terraform.tfvars.example'].includes(name),
+      ],
+    ]) {
+      const destination = join(harness, folder);
+      if (await exists(join(sourceRoot, folder)))
+        await assertSourceContained(sourceRoot, join(sourceRoot, folder));
+      await copySourceTree(join(sourceRoot, folder), destination, accept);
+      if (await exists(destination)) {
+        for (const [name, hash] of Object.entries(await sourceHashes(destination)))
+          record.production[`${folder}/${name}`] = hash;
+      }
+    }
     await symlink(
       modules,
       join(harness, 'node_modules'),
       process.platform === 'win32' ? 'junction' : 'dir',
     );
-    const workflowSource = join(
-      resolve(values['workflow-source'] ?? sourceRoot),
-      '.github/workflows/checks.yml',
-    );
-    if (await exists(workflowSource)) {
-      await mkdir(join(harness, '.github/workflows'), { recursive: true });
-      await cp(workflowSource, join(harness, '.github/workflows/checks.yml'));
-      record.production['.github/workflows/checks.yml'] = await digest(
-        join(harness, '.github/workflows/checks.yml'),
+    const toolingModules = resolve(values.dependencies, 'tooling/node_modules');
+    if (await exists(toolingModules))
+      await symlink(
+        toolingModules,
+        join(harness, 'tooling/node_modules'),
+        process.platform === 'win32' ? 'junction' : 'dir',
       );
+    for (const name of ['checks', 'release', 'dispatch']) {
+      const path = `.github/workflows/${name}.yml`;
+      await copyRecordedFile(resolve(values['workflow-source'] ?? sourceRoot), path);
     }
-    for (const name of ['eslint.config.mjs', '.npmrc', 'pnpm-workspace.yaml']) {
-      const source = join(resolve(values['config-source'] ?? sourceRoot), name);
-      if (await exists(source)) {
-        await cp(source, join(harness, name));
-        record.production[name] = await digest(join(harness, name));
-      }
+    for (const name of [
+      'eslint.config.mjs',
+      '.npmrc',
+      'pnpm-workspace.yaml',
+      'package.json',
+      'tooling/vitest.config.mjs',
+    ]) {
+      await copyRecordedFile(resolve(values['config-source'] ?? sourceRoot), name);
     }
-    await writeFile(join(harness, 'package.json'), '{"private":true,"type":"module"}\n');
+    for (const path of [
+      'compose.yaml',
+      'tests/e2e/release.compose.yaml',
+      'tests/e2e/release.config.ts',
+      'tests/e2e/artifact-run.ts',
+      'tests/e2e/release-nginx.conf',
+      ...['UI/web', 'backend/api'].flatMap((owner) =>
+        ['Dockerfile', 'release.Dockerfile', 'release.Dockerfile.dockerignore'].map(
+          (name) => `${owner}/${name}`,
+        ),
+      ),
+    ]) {
+      await copyRecordedFile(sourceRoot, path);
+    }
+    if (!(await exists(join(harness, 'package.json'))))
+      await writeFile(join(harness, 'package.json'), '{"private":true,"type":"module"}\n');
     record.status = 'running';
     record.command = [
       process.execPath,

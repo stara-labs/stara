@@ -49,7 +49,7 @@ well as the separate container-development journey.
 | Push    | Each isolated outgoing commit: complete proposal, affected targets and native pnpm dependents, unit/contract tests and build                                                  |
 | PR      | Current merge candidate: static/security checks, complete affected-target coverage, relevant integration, functional E2E, accessibility, mandatory control and startup checks |
 | Nightly | All unit/contract, integration, coverage, functional E2E, accessibility, builds, and container startup across the declared matrix                                             |
-| Release | Not implemented in this scaffold; requires complete applicable evidence for an explicitly authorized mainline candidate                                                       |
+| Release | Exact merged SHA, complete applicable checks and coverage, actual image journeys/scans/provenance, independent private eligibility checks before staging traffic              |
 
 Root/toolchain changes, missing history, deleted targets, unknown paths, or
 incomplete impact mappings broaden scope. Modified tests are selected. Shared
@@ -96,7 +96,11 @@ zero so failures remain immediately visible.
 Measure command and job duration, queue delay, fallback rate, and flaky failures.
 The normal PR target is ten minutes. Cold image/browser installation and full
 container jobs have a proposed 25-minute ceiling; package jobs have 20-minute
-hard timeouts. These are budgets to measure, not achieved performance claims.
+hard timeouts. Release image verification has a 25-minute execution budget plus
+five minutes of outer setup allowance. Mainline publication has a 40-minute job
+budget, including that verification and 15 minutes for authentication/evidence/
+publication. Mainline prerequisite polling is bounded to 20 minutes. These are
+budgets to measure, not achieved performance claims.
 Optimize caches/selection without reducing required evidence.
 
 ## Additional Risk Testing
@@ -119,8 +123,11 @@ tenancy, persistence, or agent execution requires new risk-based requirements.
 ## Review and Recovery
 
 Protect `main` with the `Required scaffold checks` aggregate, current-candidate
-status checks, resolved conversations, an independent approving review, stale
-approval dismissal, and no force pushes. Verify installed remote settings; YAML
+status checks, resolved conversations, and no force pushes. The approved
+two-developer configuration requires zero GitHub approval reviews; it does not
+waive independent Engineering verification or human acceptance. Do not silently
+restore mandatory approval counts. Future production authorization is separate
+and still requires a different requester and approver. Verify installed remote settings; YAML
 and CODEOWNERS alone do not prove enforcement. Fork validation has read-only
 permissions, no secrets, and no privileged publication path.
 
@@ -132,7 +139,10 @@ red/green evidence. Escalate ambiguous Product behavior to the Product Owner.
 
 Repair failures through a new reviewed change and fresh candidate evidence.
 Use `pnpm environment:down` to stop only this checkout's development services;
-it must not prune Docker or remove volumes. No production rollback or release
-publisher is provided. Before merge, the responsible human accepts Engineering
+it must not prune Docker or remove volumes. Staging recovery follows the
+[release contract](requirements/releases.md): unknown mutations halt for private
+reconciliation, and recovery uses a reviewed repair PR and a fresh verified
+main candidate. No automatic rollback or production publisher is provided.
+Before merge, the responsible human accepts Engineering
 and the Stara Product Owner accepts Product/visual outcomes. Agent review does
 not supply either human acceptance.

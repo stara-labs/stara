@@ -7,7 +7,7 @@ export default defineConfig({
     testTimeout: 30000,
     coverage: {
       provider: 'v8',
-      include: ['lib/**/*.mjs', 'scripts/**/*.mjs'],
+      include: ['lib/**/*.mjs', 'scripts/**/*.mjs', 'release/**/*.mjs'],
       reporter: ['text', 'json', 'json-summary', 'html'],
       reportsDirectory: '../.artifacts/coverage/tooling',
       thresholds: { lines: 90, branches: 85 },

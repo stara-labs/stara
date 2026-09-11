@@ -15,6 +15,42 @@ afterEach(cleanupFixtures);
 
 const allSteps = () => Object.values(workflow.jobs).flatMap((job) => job.steps ?? []);
 const runs = (job) => (workflow.jobs[job].steps ?? []).map((step) => step.run ?? '').join('\n');
+const coverageArtifact = 'release-coverage-${{ github.sha }}-${{ github.run_attempt }}';
+const condition = (step) => step.if?.replaceAll('${{', '').replaceAll('}}', '').trim();
+
+function assertUploadContracts(jobs) {
+  for (const name of ['verify', 'windows', 'containers', 'release-images']) {
+    const uploads = jobs[name].steps.filter((step) =>
+      step.uses?.startsWith('actions/upload-artifact@'),
+    );
+    const diagnostics = uploads.filter(
+      (step) => !(name === 'verify' && step.with?.name === coverageArtifact),
+    );
+    expect(diagnostics.length, `${name} must retain failure diagnostics`).toBeGreaterThan(0);
+    for (const step of diagnostics) expect(condition(step)).toBe('always()');
+    for (const step of uploads) expect(step.with['if-no-files-found']).toBe('error');
+  }
+  const steps = jobs.verify.steps;
+  const exports = steps.filter((step) => step.run === 'pnpm release:coverage');
+  const uploads = steps.filter(
+    (step) =>
+      step.uses?.startsWith('actions/upload-artifact@') && step.with?.name === coverageArtifact,
+  );
+  expect(exports).toHaveLength(1);
+  expect(uploads).toHaveLength(1);
+  for (const step of [...exports, ...uploads]) {
+    expect(["github.event_name == 'push'", "success() && github.event_name == 'push'"]).toContain(
+      condition(step),
+    );
+    expect(step['continue-on-error'] ?? false).toBe(false);
+  }
+  expect(uploads[0].with.path).toBe('.artifacts/public-release/coverage.json');
+  expect(uploads[0].with['retention-days']).toBe(30);
+  expect(steps.indexOf(uploads[0])).toBeGreaterThan(steps.indexOf(exports[0]));
+  const verification = steps.findIndex((step) => step.run === 'pnpm validate');
+  expect(verification).toBeGreaterThanOrEqual(0);
+  expect(steps.indexOf(exports[0])).toBeGreaterThan(verification);
+}
 
 describe('checks workflow: untrusted proposals have read-only, complete required checks', () => {
   it('uses safe proposal triggers, full history, and no path filters', () => {
@@ -65,17 +101,21 @@ describe('checks workflow: untrusted proposals have read-only, complete required
     }
   });
 
-  it('runs Linux candidate, Compose, and Windows package checks on every supported event', () => {
+  it('runs Linux candidate, Compose, Windows, and release image checks on every supported event', () => {
     expect(workflow.jobs.verify['runs-on']).toMatch(/^ubuntu-/);
     expect(workflow.jobs.containers['runs-on']).toMatch(/^ubuntu-/);
     expect(workflow.jobs.windows['runs-on']).toMatch(/^windows-/);
+    expect(workflow.jobs['release-images']['runs-on']).toMatch(/^ubuntu-/);
     expect(workflow.jobs.verify.if ?? 'always()').toBe('always()');
     expect(workflow.jobs.containers.if ?? 'always()').toBe('always()');
     expect(workflow.jobs.windows.if ?? 'always()').toBe('always()');
+    expect(workflow.jobs['release-images'].if ?? 'always()').toBe('always()');
     expect(runs('verify')).toContain('pnpm check:pr');
     expect(runs('verify')).toContain('pnpm validate');
     expect(runs('windows')).toContain('pnpm test:coverage');
     expect(runs('windows')).toContain('pnpm build');
+    expect(runs('release-images')).toContain('pnpm release:images');
+    expect(runs('release-images')).toContain('pnpm release:safety');
     expect(runs('containers').match(/pnpm start/g)).toHaveLength(2);
     expect(runs('containers')).toContain('pnpm test:e2e');
     expect(runs('containers')).toContain('pnpm test:a11y');
@@ -92,17 +132,71 @@ describe('checks workflow: untrusted proposals have read-only, complete required
 
   it('always aggregates every required job and retains diagnostics on failure', () => {
     expect(workflow.jobs.required.if).toBe('always()');
-    expect([...workflow.jobs.required.needs].sort()).toEqual(['containers', 'verify', 'windows']);
-    for (const name of ['verify', 'windows', 'containers']) {
-      const uploads = workflow.jobs[name].steps.filter((step) =>
-        step.uses?.startsWith('actions/upload-artifact@'),
-      );
-      expect(uploads.length).toBeGreaterThan(0);
-      for (const step of uploads) {
-        expect(step.if).toBe('always()');
-        expect(step.with['if-no-files-found']).toBe('error');
-      }
-    }
+    expect([...workflow.jobs.required.needs].sort()).toEqual([
+      'containers',
+      'release-images',
+      'verify',
+      'windows',
+    ]);
+    assertUploadContracts(workflow.jobs);
+  });
+
+  it.each([
+    [
+      'conditional diagnostics',
+      (jobs) => {
+        jobs.verify.steps.find((step) => step.with?.name?.startsWith('candidate-')).if =
+          "github.event_name == 'push'";
+      },
+    ],
+    [
+      'missing diagnostics',
+      (jobs) => {
+        jobs.verify.steps = jobs.verify.steps.filter(
+          (step) => !step.with?.name?.startsWith('candidate-'),
+        );
+      },
+    ],
+    [
+      'always coverage upload',
+      (jobs) => {
+        jobs.verify.steps.find((step) => step.with?.name === coverageArtifact).if = 'always()';
+      },
+    ],
+    [
+      'coverage broad path',
+      (jobs) => {
+        jobs.verify.steps.find((step) => step.with?.name === coverageArtifact).with.path =
+          '.artifacts/**';
+      },
+    ],
+    [
+      'missing coverage export',
+      (jobs) => {
+        jobs.verify.steps = jobs.verify.steps.filter(
+          (step) => step.run !== 'pnpm release:coverage',
+        );
+      },
+    ],
+    [
+      'PR coverage export',
+      (jobs) => {
+        jobs.verify.steps.find((step) => step.run === 'pnpm release:coverage').if =
+          "github.event_name == 'pull_request'";
+      },
+    ],
+    [
+      'ignored missing coverage',
+      (jobs) => {
+        jobs.verify.steps.find((step) => step.with?.name === coverageArtifact).with[
+          'if-no-files-found'
+        ] = 'ignore';
+      },
+    ],
+  ])('upload distinction rejects %s', (_name, mutate) => {
+    const jobs = structuredClone(workflow.jobs);
+    mutate(jobs);
+    expect(() => assertUploadContracts(jobs)).toThrow();
   });
 
   it('runs targeted mutation on full non-PR candidates without making it optional', () => {
@@ -123,9 +217,10 @@ describe('required aggregate: execute the real bounded shell truth table', () =>
       VERIFY: '${{ needs.verify.result }}',
       WINDOWS: '${{ needs.windows.result }}',
       CONTAINERS: '${{ needs.containers.result }}',
+      RELEASE_IMAGES: '${{ needs.release-images.result }}',
     });
     const safeLines =
-      /^(?:test "\$(?:VERIFY|WINDOWS|CONTAINERS)" = (?:success|skipped)|if \[ "\$EVENT" = pull_request \]; then|else|fi)$/;
+      /^(?:test "\$(?:VERIFY|WINDOWS|CONTAINERS|RELEASE_IMAGES)" = (?:success|skipped)|if \[ "\$EVENT" = pull_request \]; then|else|fi)$/;
     expect(
       step.run
         .trim()
@@ -162,13 +257,14 @@ describe('required aggregate: execute the real bounded shell truth table', () =>
           VERIFY: 'success',
           CONTAINERS: 'success',
           WINDOWS: 'success',
+          RELEASE_IMAGES: 'success',
         }),
       ).toBe(0);
     },
   );
 
   for (const event of ['pull_request', 'push']) {
-    for (const name of ['VERIFY', 'CONTAINERS', 'WINDOWS']) {
+    for (const name of ['VERIFY', 'CONTAINERS', 'WINDOWS', 'RELEASE_IMAGES']) {
       it.each(['failure', 'cancelled', 'skipped', '', 'unknown'])(
         `rejects ${event} ${name}=%j`,
         async (status) => {
@@ -176,15 +272,26 @@ describe('required aggregate: execute the real bounded shell truth table', () =>
             VERIFY: 'success',
             CONTAINERS: 'success',
             WINDOWS: 'success',
+            RELEASE_IMAGES: 'success',
             [name]: status,
           };
           expect(await aggregate(event, statuses)).not.toBe(0);
         },
       );
+      it(`rejects ${event} with missing ${name}`, async () => {
+        const statuses = {
+          VERIFY: 'success',
+          CONTAINERS: 'success',
+          WINDOWS: 'success',
+          RELEASE_IMAGES: 'success',
+        };
+        delete statuses[name];
+        expect(await aggregate(event, statuses)).not.toBe(0);
+      });
     }
   }
 
-  it.each(['VERIFY', 'CONTAINERS', 'WINDOWS'])(
+  it.each(['VERIFY', 'CONTAINERS', 'WINDOWS', 'RELEASE_IMAGES'])(
     'rejects unexpectedly skipped non-PR %s',
     async (name) => {
       expect(
@@ -192,6 +299,7 @@ describe('required aggregate: execute the real bounded shell truth table', () =>
           VERIFY: 'success',
           WINDOWS: 'success',
           CONTAINERS: 'success',
+          RELEASE_IMAGES: 'success',
           [name]: 'skipped',
         }),
       ).not.toBe(0);

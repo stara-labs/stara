@@ -35,7 +35,13 @@
     "hooks:install": "node tooling/scripts/workspace.mjs hooks-install",
     "check:commit": "node tooling/scripts/workspace.mjs commit",
     "check:push": "node tooling/scripts/workspace.mjs push",
-    "check:pr": "node tooling/scripts/workspace.mjs pr"
+    "check:pr": "node tooling/scripts/workspace.mjs pr",
+    "release:images": "node tooling/release/cli.mjs images",
+    "release:safety": "node tooling/release/cli.mjs safety",
+    "release:await-checks": "node tooling/release/cli.mjs await-checks",
+    "release:publish": "node tooling/release/cli.mjs publish",
+    "release:dispatch": "node tooling/release/cli.mjs dispatch",
+    "release:coverage": "node tooling/release/cli.mjs coverage-export"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

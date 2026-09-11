@@ -10,7 +10,7 @@ export default {
     cache: false,
     coverage: {
       provider: 'v8',
-      include: ['tooling/lib/**/*.mjs', 'tooling/scripts/**/*.mjs'],
+      include: ['tooling/lib/**/*.mjs', 'tooling/scripts/**/*.mjs', 'tooling/release/**/*.mjs'],
       exclude: [],
       thresholds: { lines: 90, branches: 85 },
       reporter: ['text', 'json', 'json-summary'],

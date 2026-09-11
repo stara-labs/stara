@@ -7,6 +7,10 @@ Implement the approved scaffold under issue #1. Keep private Product System
 documents and token inputs outside this repository and ordinary builds.
 Only approved generated token CSS and provenance may be checked in.
 
+The separately approved release milestone is governed by
+`docs/requirements/releases.md` and `docs/release-architecture.md`. It adds
+restricted synthetic-only staging, not production or customer activation.
+
 The initial external Product System authority is immutable revision
 `60f949e21d0fbe82dbdda5801715dbe1172e7b1b`. Maintainers consult that external
 authority; public contributors use this repository's implementation contracts.
@@ -33,6 +37,9 @@ or unilaterally weaken protected tests or acceptance criteria.
 - Record exact revisions, selected scope, results, and verification limitations.
 - No authentication, persistence, agent execution, deployment, or release
   publishing is part of the initial scaffold.
+- Release infrastructure belongs in `infra/gcp/` and release controls in
+  `tooling/release/`. Keep production disabled; never place operational state,
+  credentials, plans, or real diagnostic traces in public artifacts.
 - The application is licensed under Apache-2.0; preserve `LICENSE.md` and
   third-party licenses and notices. This does not relicense the external private
   Product System or authorize package publication.

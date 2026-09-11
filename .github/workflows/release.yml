@@ -1,0 +1,123 @@
+name: Release images
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-images-main
+  cancel-in-progress: false
+
+jobs:
+  prerequisites:
+    name: Verify release images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      scaffold-run: ${{ steps.checks.outputs.scaffold-run }}
+      scaffold-attempt: ${{ steps.checks.outputs.scaffold-attempt }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          version: 11.19.0
+          run_install: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Verify exact-SHA Scaffold checks and CodeQL
+        id: checks
+        run: pnpm release:await-checks
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STARA_SOURCE_SHA: ${{ github.sha }}
+
+  publish:
+    name: Publish verified images
+    needs: prerequisites
+    if: needs.prerequisites.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+    env:
+      STARA_RELEASE_RUN_ID: images-${{ github.run_id }}-${{ github.run_attempt }}
+      STARA_SOURCE_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          version: 11.19.0
+          run_install: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps
+      - run: pnpm release:images
+      - run: pnpm release:safety
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: release-coverage-${{ github.sha }}-${{ needs.prerequisites.outputs.scaffold-attempt }}
+          run-id: ${{ needs.prerequisites.outputs.scaffold-run }}
+          github-token: ${{ github.token }}
+          path: .artifacts/release-inputs/coverage
+      - name: Build and install the pinned patched provenance verifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          directory="$(mktemp -d "$RUNNER_TEMP/stara-gh.XXXXXX")"
+          docker buildx build --platform linux/amd64 --target gh-artifact \
+            --file tooling/release/Dockerfile --output "type=local,dest=$directory" .
+          (cd "$directory" && sha256sum --check --strict SHA256SUMS)
+          sudo install -m 0755 "$directory/bin/gh" /usr/local/bin/gh
+          sudo install -D -m 0644 "$directory/LICENSE" /usr/local/share/licenses/gh/LICENSE
+          sudo install -d /usr/local/share/stara/gh/provenance
+          sudo install -m 0644 "$directory/provenance/"* /usr/local/share/stara/gh/provenance/
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        id: google-auth
+        with:
+          project_id: ${{ secrets.STARA_DELIVERY_PROJECT }}
+          workload_identity_provider: ${{ secrets.STARA_IMAGE_WIF_PROVIDER }}
+          service_account: ${{ secrets.STARA_IMAGE_PUBLISHER }}
+          create_credentials_file: true
+          export_environment_variables: true
+          token_format: access_token
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: us-central1-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.google-auth.outputs.access_token }}
+          logout: true
+      - name: Publish the exact verified images and signed evidence
+        run: pnpm release:publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STARA_ARTIFACT_BUCKET: ${{ secrets.STARA_ARTIFACT_BUCKET }}
+          STARA_IMAGE_REPOSITORY: ${{ secrets.STARA_IMAGE_REPOSITORY }}
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: release-candidate-${{ github.sha }}-${{ github.run_attempt }}
+          path: .artifacts/public-release/manifest.json
+          include-hidden-files: true
+          retention-days: 30
+          if-no-files-found: error
