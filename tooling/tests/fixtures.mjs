@@ -44,7 +44,7 @@ export function git(root, ...args) {
 }
 
 export async function emptyWorkspace() {
-  const root = await mkdtemp(join(tmpdir(), 'stara-control-workspace-'));
+  const root = await mkdtemp(join(await realpath(tmpdir()), 'stara-control-workspace-'));
   owned.push(root);
   return root;
 }

@@ -23,7 +23,7 @@ const evidence = join(
   'evidence',
   `${new Date().toISOString().replaceAll(':', '-')}-${values.label}`,
 );
-const harness = await mkdtemp(join(tmpdir(), 'stara-control-stryker-'));
+const harness = await mkdtemp(join(await realpath(tmpdir()), 'stara-control-stryker-'));
 const hash = async (path) =>
   createHash('sha256')
     .update(await readFile(path))

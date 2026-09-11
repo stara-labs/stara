@@ -1,11 +1,4 @@
-import { realpathSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { defineConfig } from 'vitest/config';
-
-// macOS exposes its temporary directory through the system `/var` symlink.
-// Give control tests the canonical root so symlink-safety checks evaluate test
-// fixtures rather than rejecting the operating system's trusted path alias.
-process.env.TMPDIR = realpathSync(tmpdir());
 
 export default defineConfig({
   test: {

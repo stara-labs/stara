@@ -59,7 +59,6 @@ jobs:
 
   windows:
     name: Windows package verification
-    if: github.event_name != 'pull_request'
     runs-on: windows-2025
     timeout-minutes: 20
     steps:
@@ -156,8 +155,4 @@ jobs:
         run: |
           test "$VERIFY" = success
           test "$CONTAINERS" = success
-          if [ "$EVENT" = pull_request ]; then
-            test "$WINDOWS" = skipped
-          else
-            test "$WINDOWS" = success
-          fi
+          test "$WINDOWS" = success

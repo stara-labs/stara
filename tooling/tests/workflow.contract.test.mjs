@@ -65,15 +65,13 @@ describe('checks workflow: untrusted proposals have read-only, complete required
     }
   });
 
-  it('runs Linux candidate and Compose checks on PRs and Windows on every non-PR event', () => {
+  it('runs Linux candidate, Compose, and Windows package checks on every supported event', () => {
     expect(workflow.jobs.verify['runs-on']).toMatch(/^ubuntu-/);
     expect(workflow.jobs.containers['runs-on']).toMatch(/^ubuntu-/);
     expect(workflow.jobs.windows['runs-on']).toMatch(/^windows-/);
     expect(workflow.jobs.verify.if ?? 'always()').toBe('always()');
     expect(workflow.jobs.containers.if ?? 'always()').toBe('always()');
-    expect(workflow.jobs.windows.if.replaceAll('${{', '').replaceAll('}}', '').trim()).toBe(
-      "github.event_name != 'pull_request'",
-    );
+    expect(workflow.jobs.windows.if ?? 'always()').toBe('always()');
     expect(runs('verify')).toContain('pnpm check:pr');
     expect(runs('verify')).toContain('pnpm validate');
     expect(runs('windows')).toContain('pnpm test:coverage');
@@ -163,7 +161,7 @@ describe('required aggregate: execute the real bounded shell truth table', () =>
         await aggregate(event, {
           VERIFY: 'success',
           CONTAINERS: 'success',
-          WINDOWS: event === 'pull_request' ? 'skipped' : 'success',
+          WINDOWS: 'success',
         }),
       ).toBe(0);
     },
@@ -171,13 +169,13 @@ describe('required aggregate: execute the real bounded shell truth table', () =>
 
   for (const event of ['pull_request', 'push']) {
     for (const name of ['VERIFY', 'CONTAINERS', 'WINDOWS']) {
-      it.each(['failure', 'cancelled', '', 'unknown'])(
+      it.each(['failure', 'cancelled', 'skipped', '', 'unknown'])(
         `rejects ${event} ${name}=%j`,
         async (status) => {
           const statuses = {
             VERIFY: 'success',
             CONTAINERS: 'success',
-            WINDOWS: event === 'pull_request' ? 'skipped' : 'success',
+            WINDOWS: 'success',
             [name]: status,
           };
           expect(await aggregate(event, statuses)).not.toBe(0);
