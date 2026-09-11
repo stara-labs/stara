@@ -50,6 +50,22 @@ dependency advisory merely because the configured high-severity audit passes.
 
 ## Hosted Publishing Inputs
 
+### Default CodeQL Evidence
+
+The first merged release candidate exposed a native-event mismatch: GitHub's
+default CodeQL setup reported `dynamic`, while the release gate queried `push`.
+The [independent regression](evidence/release-codeql-event-test-design.md)
+records the correction. Only the fixed default CodeQL workflow uses `dynamic`;
+scaffold and image publication retain `push`, and dispatch retains `workflow_run`.
+Missing, stale, incomplete or failed CodeQL evidence still denies advancement.
+
+This repair changes the private executor's source as well as the publisher's
+checks. Before activation, rebuild and scan the repaired control image, obtain
+independent review of its exact digest, and apply a reviewed digest-only trigger
+update with dispatch still disabled. An older control image does not inherit a
+source correction. Do not bypass the mainline gate or substitute feature-branch
+application images to complete bootstrap.
+
 ### Provenance Verifier
 
 The executor and publisher use the same `gh-artifact` source-build recipe in

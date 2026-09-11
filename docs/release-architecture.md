@@ -55,6 +55,16 @@ matching runs, are denied. It rechecks
 eligibility before changing traffic. Artifact repositories and service names
 come from private target configuration, never a dispatch payload.
 
+GitHub's default-setup CodeQL evidence uses the `dynamic` event for the fixed
+`dynamic/github-code-scanning/codeql` workflow. Only that pinned workflow may
+use this event; scaffold and image workflows must still be `push` runs on main.
+The CodeQL inventory query omits the event filter so a newer unsupported event
+cannot be hidden. Every returned entry must have the expected event; unsupported
+entries deny the candidate rather than being silently discarded. The distinction
+also applies to current and selected-attempt reads and final evidence validation.
+It does not grant CodeQL cloud authority
+or relax source, repository, job, completion, or latest-run requirements.
+
 Artifact publication is target-neutral and does not require a configuration
 hash. The dispatcher adds the approved target configuration identity only when
 requesting deployment. This lets reviewed mainline artifacts exist before target

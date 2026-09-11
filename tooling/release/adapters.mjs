@@ -515,7 +515,6 @@ export function createCloudAdapters({ configuration, request, verifyAttestation,
           const query = new URLSearchParams({
             head_sha: manifest.sourceSha,
             branch: 'main',
-            event: 'push',
             per_page: '100',
             page: '1',
           });
@@ -547,7 +546,7 @@ export function createCloudAdapters({ configuration, request, verifyAttestation,
                 String(entry.head_repository?.id) === config.policy.repositoryId &&
                 entry.head_sha === manifest.sourceSha &&
                 entry.head_branch === 'main' &&
-                entry.event === 'push',
+                entry.event === 'dynamic',
             );
           }
           // GitHub's workflow ordinal establishes order; run IDs and list order do not.
@@ -568,7 +567,7 @@ export function createCloudAdapters({ configuration, request, verifyAttestation,
               String(run.head_repository?.id) === config.policy.repositoryId &&
               run.head_branch === 'main' &&
               run.head_sha === manifest.sourceSha &&
-              run.event === 'push' &&
+              run.event === (kind === 'codeql' ? 'dynamic' : 'push') &&
               run.status === 'completed' &&
               run.conclusion === 'success',
           );

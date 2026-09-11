@@ -95,7 +95,7 @@ function nativeRun(kind) {
     run_attempt: runs[kind].attempt,
     workflow_id: workflow.id,
     path: workflow.path,
-    event: 'push',
+    event: kind === 'codeql' ? 'dynamic' : 'push',
     head_branch: 'main',
     head_sha: sha,
     status: 'completed',
@@ -544,6 +544,100 @@ async function sanitizedRejection(operation) {
 }
 
 describe('REL-02/03 pipeline waits for exact trusted mainline checks', () => {
+  it('finds successful dynamic CodeQL without narrowing inventory by event', async () => {
+    const f = github({
+      response: (result, route, parameters) => {
+        if (
+          route.endsWith('/workflows/{workflow_id}/runs') &&
+          String(parameters.workflow_id) === String(workflows.codeql.id) &&
+          parameters.event !== undefined &&
+          parameters.event !== 'dynamic'
+        )
+          result.data = { total_count: 0, workflow_runs: [] };
+        return result;
+      },
+    });
+    expect(
+      await pipeline.awaitMainChecks({
+        sourceSha: sha,
+        repositoryId,
+        request: f.request,
+        clock: f.clock,
+      }),
+    ).toEqual(expectedChecks);
+    const query = f.calls.find(
+      ({ route, parameters }) =>
+        route.endsWith('/workflows/{workflow_id}/runs') &&
+        String(parameters.workflow_id) === String(workflows.codeql.id),
+    );
+    expect(query.parameters).not.toHaveProperty('event');
+    expect(f.clock.sleep).not.toHaveBeenCalled();
+  });
+
+  it.each(['inventory', 'current', 'attempt', 'all'])(
+    'rejects a push-labelled CodeQL %s response, not merely a later malformed response',
+    async (phase) => {
+      const f = github({
+        response: (result, route, parameters) => {
+          const inventory =
+            route.endsWith('/workflows/{workflow_id}/runs') &&
+            String(parameters.workflow_id) === String(workflows.codeql.id);
+          const selected = String(parameters.run_id) === runs.codeql.id;
+          const current = selected && route.endsWith('/actions/runs/{run_id}');
+          const attempt = selected && route.endsWith('/attempts/{attempt_number}');
+          if (inventory && ['inventory', 'all'].includes(phase))
+            result.data.workflow_runs[0].event = 'push';
+          if (
+            (current && ['current', 'all'].includes(phase)) ||
+            (attempt && ['attempt', 'all'].includes(phase))
+          )
+            result.data.event = 'push';
+          return result;
+        },
+      });
+      await sanitizedRejection(() =>
+        pipeline.awaitMainChecks({
+          sourceSha: sha,
+          repositoryId,
+          request: f.request,
+          clock: f.clock,
+        }),
+      );
+      const selected = f.calls.filter(
+        ({ parameters }) => String(parameters.run_id) === runs.codeql.id,
+      );
+      if (phase === 'inventory' || phase === 'all') expect(selected).toEqual([]);
+      else
+        expect(
+          selected.some(({ route }) =>
+            route.endsWith(
+              phase === 'current' ? '/actions/runs/{run_id}' : '/attempts/{attempt_number}',
+            ),
+          ),
+        ).toBe(true);
+    },
+  );
+
+  it.each(['inventory', 'attempt'])('still rejects dynamic Scaffold %s evidence', async (phase) => {
+    const mutate = (run, kind) => {
+      if (kind === 'scaffold') run.event = 'dynamic';
+    };
+    const f = github(phase === 'inventory' ? { list: mutate } : { run: mutate });
+    await sanitizedRejection(() =>
+      pipeline.awaitMainChecks({
+        sourceSha: sha,
+        repositoryId,
+        request: f.request,
+        clock: f.clock,
+      }),
+    );
+    expect(
+      f.calls.some(
+        ({ parameters }) => String(parameters.workflow_id) === String(workflows.codeql.id),
+      ),
+    ).toBe(false);
+  });
+
   it('accepts the exact Scaffold and dynamic CodeQL workflows and all seven required jobs', async () => {
     const f = github();
     expect(
@@ -561,8 +655,12 @@ describe('REL-02/03 pipeline waits for exact trusted mainline checks', () => {
       '354641209',
       '355366692',
     ]);
-    for (const { parameters } of queries)
-      expect(parameters).toMatchObject({ head_sha: sha, branch: 'main', event: 'push' });
+    for (const { parameters } of queries) {
+      expect(parameters).toMatchObject({ head_sha: sha, branch: 'main' });
+      if (String(parameters.workflow_id) === String(workflows.codeql.id))
+        expect(parameters).not.toHaveProperty('event');
+      else expect(parameters.event).toBe('push');
+    }
     for (const { parameters } of f.calls) {
       expect(parameters.request.signal).toBeInstanceOf(AbortSignal);
       expect(parameters.request.timeout).toBeGreaterThan(0);
@@ -791,6 +889,32 @@ describe('REL-02/03 latest CodeQL workflow-run selection', () => {
   const selectedCalls = (f) =>
     f.calls.filter(({ parameters }) => String(parameters.run_id) === runs.codeql.id);
 
+  it('denies a newer unsupported push CodeQL run instead of hiding it with an event filter', async () => {
+    const selected = selectedRun();
+    const newer = {
+      ...copy(selected),
+      id: 903,
+      run_number: selected.run_number + 1,
+      event: 'push',
+    };
+    const f = github({
+      response: (result, route, parameters) => {
+        if (inventoryCall({ route, parameters })) {
+          const entries = [selected, newer].filter(
+            (run) => parameters.event === undefined || run.event === parameters.event,
+          );
+          result.data = { total_count: entries.length, workflow_runs: copy(entries) };
+        }
+        return result;
+      },
+    });
+    await sanitizedRejection(() => awaitChecks(f));
+    const inventories = f.calls.filter(inventoryCall);
+    expect(inventories).toHaveLength(1);
+    expect(inventories[0].parameters).not.toHaveProperty('event');
+    expect(f.calls.slice(f.calls.findIndex(inventoryCall) + 1)).toEqual([]);
+  });
+
   it.each([false, true])(
     'selects greatest run_number despite older failed higher ID and response order reversed=%s',
     async (reverse) => {
@@ -803,10 +927,10 @@ describe('REL-02/03 latest CodeQL workflow-run selection', () => {
           workflow_id: String(workflows.codeql.id),
           head_sha: sha,
           branch: 'main',
-          event: 'push',
           per_page: 100,
           page: 1,
         });
+        expect(parameters).not.toHaveProperty('event');
         expect(parameters).not.toHaveProperty('status');
       }
       const calls = selectedCalls(f);
@@ -1649,6 +1773,19 @@ describe('REL-02/03/04/10 completed-workflow candidate dispatch', () => {
     await sanitizedRejection(() => f.run());
     expect(f.publish).not.toHaveBeenCalled();
   });
+
+  it.each(['dynamic', 'pull_request'])(
+    'never dispatches an image publication with a %s native event',
+    async (event) => {
+      const f = dispatchFixture({
+        run: (run) => {
+          run.event = event;
+        },
+      });
+      await sanitizedRejection(() => f.run());
+      expect(f.publish).not.toHaveBeenCalled();
+    },
+  );
 
   it.each(['Verify release images', 'Publish verified images'])(
     'requires exact completed %s job',
