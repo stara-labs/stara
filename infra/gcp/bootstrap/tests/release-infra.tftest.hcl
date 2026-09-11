@@ -76,11 +76,59 @@ run "combined_budget_is_not_an_activation_or_shutdown_control" {
       google_billing_budget.combined.budget_filter[0].calendar_period == "MONTH" &&
       toset(google_billing_budget.combined.budget_filter[0].projects) == toset(["projects/900000000001", "projects/900000000002"]) &&
       toset([for rule in google_billing_budget.combined.threshold_rules : rule.threshold_percent]) == toset([0.5, 0.8, 1.0]) &&
-      length(google_billing_budget.combined.threshold_rules) == 3 &&
-      !google_billing_budget.combined.all_updates_rule[0].disable_default_iam_recipients
+      length(google_billing_budget.combined.threshold_rules) == 3
     )
-    error_message = "Combined monthly USD 100 budget must cover exactly enabled projects and alert at 50/80/100 percent with owner notifications."
+    error_message = "Combined monthly USD 100 budget must cover exactly enabled projects and alert at 50/80/100 percent."
   }
+  assert {
+    condition     = length(google_billing_budget.combined.all_updates_rule) == 0
+    error_message = "Without custom channels, omit the optional notifications block so API-default IAM recipients remain enabled without perpetual drift."
+  }
+}
+
+run "custom_budget_channels_add_to_default_iam_recipients" {
+  command = plan
+  variables {
+    budget_notification_channels = [
+      "projects/stara-test-delivery/notificationChannels/1001",
+      "projects/stara-test-delivery/notificationChannels/1002",
+    ]
+  }
+  assert {
+    condition     = length(google_billing_budget.combined.all_updates_rule) == 1
+    error_message = "Custom budget channels must produce exactly one notifications block."
+  }
+  assert {
+    condition = try(
+      tolist(google_billing_budget.combined.all_updates_rule[0].monitoring_notification_channels) == var.budget_notification_channels &&
+      google_billing_budget.combined.all_updates_rule[0].disable_default_iam_recipients == false,
+      false,
+    )
+    error_message = "Custom channels must match the supplied list exactly and must not disable default IAM recipients."
+  }
+}
+
+run "accept_five_budget_notification_channels" {
+  command = plan
+  variables {
+    budget_notification_channels = [for number in range(5) : "projects/stara-test-delivery/notificationChannels/${1001 + number}"]
+  }
+  assert {
+    condition = length(google_billing_budget.combined.all_updates_rule) == 1 && try(
+      tolist(google_billing_budget.combined.all_updates_rule[0].monitoring_notification_channels) == var.budget_notification_channels &&
+      google_billing_budget.combined.all_updates_rule[0].disable_default_iam_recipients == false,
+      false,
+    )
+    error_message = "All five supported custom channels must remain configured alongside default IAM recipients."
+  }
+}
+
+run "reject_six_budget_notification_channels" {
+  command = plan
+  variables {
+    budget_notification_channels = [for number in range(6) : "projects/stara-test-delivery/notificationChannels/${1001 + number}"]
+  }
+  expect_failures = [var.budget_notification_channels]
 }
 
 run "optional_isolation_is_third_distinct_owned_project_in_budget" {

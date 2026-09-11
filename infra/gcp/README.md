@@ -286,6 +286,12 @@ logs and storage can incur charges even while Run scales to zero. Protected
 state/config buckets require an explicit reviewed preservation/teardown
 procedure; do not remove protection just to make a cleanup command succeed.
 
+With no custom `budget_notification_channels`, bootstrap omits the optional
+notification block to match Google's representation of default settings.
+Default billing IAM notifications remain enabled. Supplied email channels are
+additive and explicitly preserve those default recipients. See Google's
+[notification rules](https://docs.cloud.google.com/billing/docs/reference/budget/rest/v1/billingAccounts.budgets#NotificationsRule).
+
 ## Primary References
 
 - [Google 8.2.0 Cloud Run v2 schema](https://github.com/hashicorp/terraform-provider-google/blob/v8.2.0/website/docs/r/cloud_run_v2_service.html.markdown)

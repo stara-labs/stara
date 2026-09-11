@@ -98,9 +98,13 @@ resource "google_billing_budget" "combined" {
     threshold_percent = 1.0
     spend_basis       = "CURRENT_SPEND"
   }
-  all_updates_rule {
-    disable_default_iam_recipients   = false
-    monitoring_notification_channels = var.budget_notification_channels
+  # Google omits an all-default rule on read; omit it here to keep plans stable.
+  dynamic "all_updates_rule" {
+    for_each = length(var.budget_notification_channels) > 0 ? [1] : []
+    content {
+      disable_default_iam_recipients   = false
+      monitoring_notification_channels = var.budget_notification_channels
+    }
   }
   depends_on = [google_project_service.api]
 }
