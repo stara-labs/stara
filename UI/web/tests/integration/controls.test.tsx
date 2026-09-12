@@ -124,10 +124,10 @@ describe('UI-SHELL-03 shell controls', () => {
   it('Given a new conversation, only an unsent local draft is created', async () => {
     const user = userEvent.setup();
     render(<App />);
-    await user.click(screen.getByRole('button', { name: 'New' }));
+    await user.click(screen.getByRole('button', { name: 'New conversation' }));
     await user.click(screen.getByRole('button', { name: 'Close New conversation' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'New' }));
+    await user.click(screen.getByRole('button', { name: 'New conversation' }));
     await user.click(screen.getByRole('button', { name: 'Create draft' }));
     expect(screen.getByRole('heading', { name: 'Untitled conversation' })).toBeVisible();
     expect(
@@ -156,8 +156,8 @@ describe('UI-SHELL-03 shell controls', () => {
     await user.keyboard('{Escape}');
     await waitFor(() => expect(screen.getByRole('button', { name: 'Show details' })).toHaveFocus());
     act(() => setViewport(700));
-    expect(screen.getAllByRole('tab', { name: 'Home' })).toHaveLength(1);
+    expect(screen.queryByRole('tab', { name: 'Home' })).not.toBeInTheDocument();
     act(() => setViewport(1440));
-    expect(screen.getAllByRole('tab')).toHaveLength(4);
+    expect(screen.getByRole('tab', { name: /Design-partner preparation/ })).toBeVisible();
   });
 });

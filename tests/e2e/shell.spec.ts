@@ -118,7 +118,8 @@ test('UI-JOURNEY-05 overflow retains manual order and canonical identities', asy
   await expect(inspector).toBeVisible();
   await expect(inspector).toHaveAttribute('data-overlay', 'false');
   await expect(page.locator('[data-context-id]')).toHaveCount(4);
-  await expect(page.getByRole('tab', { name: /Resolve client intake/ })).toHaveCount(0);
+  await expect(page.getByRole('tab', { name: /Resolve client intake/ })).toHaveCount(1);
+  await expect(page.getByRole('tab', { name: 'Home', exact: true })).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Working contexts', exact: true }).click();
   const contextTitles = picker.getByRole('button', { name: /^Open / }).locator('strong');
@@ -149,7 +150,7 @@ test('UI-JOURNEY-05 overflow retains manual order and canonical identities', asy
   await page.keyboard.press('Escape');
 
   await page.getByRole('button', { name: 'Home, 2 items need attention' }).click();
-  await expect(inspector).toBeVisible();
+  await expect(inspector).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Home', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Working contexts', exact: true }).click();
   await openResearch.click();

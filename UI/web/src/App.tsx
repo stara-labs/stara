@@ -52,7 +52,9 @@ export function App({
   function close(id: string) {
     dispatch({ type: 'close', id });
     requestAnimationFrame(() =>
-      document.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')?.focus(),
+      document
+        .querySelector<HTMLElement>('[id^="tab-"][role="tab"][aria-selected="true"]')
+        ?.focus(),
     );
   }
   function hideDetails() {
@@ -135,6 +137,11 @@ export function App({
         <header className={styles.brand}>
           <strong>Stara</strong>
           <div className={styles.brandTools}>
+            <IconButton
+              icon="conversation"
+              label="New conversation"
+              onClick={() => setCreating(true)}
+            />
             <IconButton icon="search" label="Search contexts" onClick={() => setPicker('')} />
             <IconButton
               icon="panelLeft"
@@ -181,6 +188,20 @@ export function App({
           />
         </div>
         <div className={styles.frameControls} data-frame-controls>
+          {mobile && (
+            <>
+              <IconButton
+                icon="home"
+                label={`Home, ${homeAttentionLabel}`}
+                onClick={() => open('home')}
+              />
+              <IconButton
+                icon="conversation"
+                label="New conversation"
+                onClick={() => setCreating(true)}
+              />
+            </>
+          )}
           <IconButton
             icon={theme === 'dark' ? 'sun' : 'moon'}
             label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}

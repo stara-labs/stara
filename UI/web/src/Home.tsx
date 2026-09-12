@@ -160,6 +160,7 @@ export function Home({
                       </span>
                       <button
                         className={styles.homeWork}
+                        aria-label={`${item.work} ${item.outcome}`}
                         aria-pressed={selected === item.id}
                         onClick={() => onSelect(item.id)}
                       >
@@ -180,7 +181,7 @@ export function Home({
                     </td>
                     <td data-label="Action">
                       <Button
-                        variant={view === 'attention' ? 'secondary' : 'quiet'}
+                        variant="quiet"
                         aria-label={`${item.action}: ${item.work}`}
                         onClick={() => {
                           onSelect(item.id);

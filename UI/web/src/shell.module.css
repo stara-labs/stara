@@ -112,7 +112,7 @@
 }
 .shell[data-collapsed='true'] .brand strong,
 .shell[data-collapsed='true'] .navRow > span:nth-child(2),
-.shell[data-collapsed='true'] .brandTools > :first-child {
+.shell[data-collapsed='true'] .brandTools > :nth-child(2) {
   display: none;
 }
 .shell[data-collapsed='true'] .navRow {
@@ -809,6 +809,9 @@
 .shell[data-mobile='true'] .tabGroup {
   max-width: none;
   min-width: 0;
+}
+.shell[data-mobile='true'] .tabs {
+  padding-right: calc(4 * var(--stara-control-compact-height) + 4 * var(--stara-tab-gap));
 }
 @media (pointer: coarse) {
   .workspace {
