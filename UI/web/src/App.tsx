@@ -6,6 +6,7 @@ import { createWorkspace, workspaceReducer } from './workspace';
 import type { ContextMemory } from './workspace';
 import { Tabs } from './Tabs';
 import { Home } from './Home';
+import { homeAttentionLabel } from './home-fixtures';
 import { ContextContent } from './ContextContent';
 import { ContextPicker } from './ContextPicker';
 import { Inspector } from './Inspector';
@@ -145,15 +146,15 @@ export function App({
         <nav aria-label="Destinations">
           <button
             className={styles.navRow}
-            title="Home, 2 items need attention"
-            aria-label="Home, 2 items need attention"
+            title={`Home, ${homeAttentionLabel}`}
+            aria-label={`Home, ${homeAttentionLabel}`}
             aria-current={state.active === 'home' ? 'page' : undefined}
             onClick={() => open('home')}
           >
             <Icon name="home" />
             <span>Home</span>
             <Status state="attention" compact>
-              2 items need attention
+              {homeAttentionLabel}
             </Status>
           </button>
         </nav>

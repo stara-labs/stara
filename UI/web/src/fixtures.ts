@@ -1,4 +1,5 @@
 import type { IconName, OperationalState } from '@stara/ui';
+import { homeAttentionLabel } from './home-fixtures';
 
 export interface WorkingContext {
   id: string;
@@ -21,7 +22,7 @@ export const contexts: Record<string, WorkingContext> = {
     kind: 'Home',
     icon: 'home',
     status: 'attention',
-    statusLabel: '2 items need attention',
+    statusLabel: homeAttentionLabel,
     lead: 'Responsible lead',
     summary: 'Attention and coordination',
     verified: false,
