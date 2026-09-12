@@ -6,6 +6,9 @@ assert dependency health, readiness, authentication, data integrity, or any wide
 application state. `GET /api/runtime-config` returns the allowlisted public
 configuration described below. Other routes and methods return 404.
 
+The [local MCP scaffold](MCP.md) exposes these two endpoints through a separate
+stdio process. See its guide for client configuration and extension points.
+
 ## Commands
 
 Run from this package with the workspace's installed dependencies and Node
@@ -86,7 +89,7 @@ behavior; those require a recorded Linux run against the integrated source. A
 deliberately stalled close hook also checks the real five-second watchdog and
 failure exit.
 
-Coverage includes all four production source files, including the entrypoint,
+Coverage includes all production source files, including HTTP and MCP entrypoints,
 with no exclusions. The enforced package floors are 90% lines and 85% branches.
 Subprocess execution supplements behavior evidence; the V8 source report is
 collected in Vitest workers. Generated reports, dependencies, and `dist/` remain

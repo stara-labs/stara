@@ -43,6 +43,9 @@ external token maintenance.
 Only repository-wide files belong at the root. Project-specific source, tests,
 build configuration, and Dockerfiles belong inside their owning projects.
 
+For local agent integrations, see the [MCP scaffold guide](backend/api/MCP.md).
+It exposes service health and public runtime configuration through stdio.
+
 ## Status
 
 The scaffold, execution evidence, and Product acceptance are not complete.
