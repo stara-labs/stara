@@ -4,7 +4,7 @@ import { homeAttentionLabel } from './home-fixtures';
 export interface WorkingContext {
   id: string;
   title: string;
-  kind: 'Home' | 'Work' | 'Conversation' | 'App activity' | 'Knowledge';
+  kind: 'Home' | 'Conversations' | 'Work' | 'Conversation' | 'App activity' | 'Knowledge';
   icon: IconName;
   status: OperationalState;
   statusLabel: string;
@@ -12,6 +12,8 @@ export interface WorkingContext {
   summary: string;
   verified: false;
   draftOnly?: boolean;
+  originalMessage?: string;
+  participantIds?: string[];
 }
 
 // Synthetic coordination records. These values never represent live execution.
@@ -25,6 +27,17 @@ export const contexts: Record<string, WorkingContext> = {
     statusLabel: homeAttentionLabel,
     lead: 'Responsible lead',
     summary: 'Attention and coordination',
+    verified: false,
+  },
+  conversations: {
+    id: 'conversations',
+    title: 'Conversations',
+    kind: 'Conversations',
+    icon: 'conversation',
+    status: 'running',
+    statusLabel: 'Synthetic collection',
+    lead: 'You',
+    summary: 'Synthetic, session-only Conversations',
     verified: false,
   },
   work: {
@@ -128,26 +141,3 @@ export const sources = [
     use: 'Current draft form value. Its governing status has not been decided.',
   },
 ] as const;
-
-export const messages = [
-  {
-    name: 'Responsible lead',
-    role: 'Decision owner',
-    text: 'Keep the onboarding scope bounded. Bring any source conflict back for review before changing the form.',
-  },
-  {
-    name: 'Human contributor',
-    role: 'Contributor',
-    text: 'The partner brief should make the evidence boundary explicit. A prepared recommendation is not an accepted claim.',
-  },
-  {
-    name: 'Intake Agent',
-    role: 'Contributor',
-    text: 'The agreement and account record disagree on the billing address. I have prepared a comparison for the responsible lead.',
-  },
-  {
-    name: 'Product Evidence Researcher',
-    role: 'Contributor',
-    text: 'Comparing three permitted sources for the brief. Human review of the result is expected today.',
-  },
-];

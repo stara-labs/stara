@@ -193,11 +193,11 @@ test('REL-09 staging notice survives contexts, native dialogs, Escape, theme and
   await expect(picker).toHaveCount(0);
   await notice(page);
   await page.getByRole('button', { name: 'New conversation' }).click();
-  const dialog = page.getByRole('dialog', { name: 'New conversation', exact: true });
-  await expect(dialog.getByRole('note', { name: label })).toHaveText(text);
+  const creation = page.getByRole('region', { name: 'New Conversation', exact: true });
+  await expect(creation).toBeVisible();
   await notice(page);
   await page.keyboard.press('Escape');
-  await expect(dialog).toHaveCount(0);
+  await expect(creation).toHaveCount(0);
   await notice(page);
   await page.reload();
   await notice(page);
@@ -274,8 +274,13 @@ for (const width of [1100, 900, 700]) {
         });
         await page.keyboard.press('Escape');
         await page.getByRole('button', { name: 'New conversation' }).click();
+        await page
+          .getByRole('textbox', { name: 'Message', exact: true })
+          .fill('Synthetic temporary message.');
         note = await notice(page);
-        await fitsAndDoesNotCover(page, note, [page.getByRole('button', { name: 'Create draft' })]);
+        await fitsAndDoesNotCover(page, note, [
+          page.getByRole('button', { name: 'Start Conversation' }),
+        ]);
         await accessibility(page, note, accessible);
         await page.screenshot({
           path: testInfo.outputPath(`${width}-${accessible}-${theme}-new.png`),

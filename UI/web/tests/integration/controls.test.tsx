@@ -125,16 +125,15 @@ describe('UI-SHELL-03 shell controls', () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole('button', { name: 'New conversation' }));
-    await user.click(screen.getByRole('button', { name: 'Close New conversation' }));
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('heading', { name: 'New Conversation' })).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'New conversation' }));
-    await user.click(screen.getByRole('button', { name: 'Create draft' }));
-    expect(screen.getByRole('heading', { name: 'Untitled conversation' })).toBeVisible();
+    await user.type(screen.getByRole('textbox', { name: 'Message' }), 'Review local evidence');
+    await user.click(screen.getByRole('button', { name: 'Start Conversation' }));
+    expect(screen.getByRole('heading', { name: 'Review local evidence' })).toBeVisible();
+    expect(screen.getAllByText('No person or Agent was contacted.')[0]).toBeVisible();
     expect(
-      screen.getByText('A local conversation draft. No agent or person has received a message.'),
-    ).toBeVisible();
-    expect(
-      within(screen.getByRole('tabpanel', { name: 'Untitled conversation' })).queryAllByRole(
+      within(screen.getByRole('tabpanel', { name: 'Review local evidence' })).queryAllByRole(
         'button',
         { name: /Select contribution/ },
       ),

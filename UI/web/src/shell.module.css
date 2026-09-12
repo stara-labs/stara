@@ -772,6 +772,249 @@
 .dialogCopy {
   margin-bottom: var(--stara-space-3);
 }
+.conversations,
+.newConversation {
+  min-height: 100%;
+  color: var(--stara-color-text-primary);
+}
+.destinationHeader {
+  min-height: var(--stara-frame-header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--stara-space-3);
+  padding: var(--stara-space-1) var(--stara-space-3);
+  border-bottom: var(--stara-border-hairline) solid var(--stara-color-border-subtle);
+}
+.destinationHeader h1,
+.newConversation h1 {
+  font: var(--stara-type-workspace-title);
+}
+.conversationCollection {
+  display: grid;
+}
+.conversationRow {
+  min-height: var(--stara-row-attention-minimum-height);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--stara-space-3);
+  padding: var(--stara-space-2) var(--stara-space-5);
+  border-bottom: var(--stara-border-hairline) solid var(--stara-color-border-subtle);
+}
+.conversationRow > button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  display: grid;
+  gap: var(--stara-space-related-text);
+}
+.conversationRow strong {
+  font: var(--stara-type-section-title);
+}
+.conversationRow button span {
+  color: var(--stara-color-text-muted);
+  font: var(--stara-type-supporting);
+}
+.newConversation {
+  display: flex;
+  flex-direction: column;
+  padding: var(--stara-space-5);
+  gap: var(--stara-space-5);
+  overflow: auto;
+}
+.newConversation > header {
+  display: grid;
+  gap: var(--stara-space-related-text);
+}
+.newConversation > header p,
+.creationBoundary {
+  color: var(--stara-color-text-muted);
+  font: var(--stara-type-supporting);
+}
+.participantRow {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--stara-control-standard-height) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--stara-space-2);
+  min-height: var(--stara-control-standard-height);
+}
+.participantLabel {
+  padding-top: var(--stara-space-2);
+  color: var(--stara-color-text-muted);
+  font: var(--stara-type-control-label);
+}
+.participantChips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--stara-space-2);
+}
+.participantChip {
+  min-height: var(--stara-control-standard-height);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--stara-control-gap);
+  padding-left: var(--stara-space-1);
+  border: var(--stara-border-hairline) solid var(--stara-color-border-strong);
+  border-radius: var(--stara-radius-control);
+  font: var(--stara-type-control-label);
+}
+.participantChip > span:first-child,
+.participantPicker label > span:first-of-type {
+  width: var(--stara-control-compact-height);
+  height: var(--stara-control-compact-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--stara-color-surface-secondary);
+  font: var(--stara-type-micro);
+}
+.participantChip > span:first-child[data-kind='agent'],
+.participantPicker label > span:first-of-type[data-kind='agent'] {
+  border-radius: var(--stara-radius-small);
+}
+.participantChip small {
+  color: var(--stara-color-text-muted);
+}
+.participantChip button,
+.addParticipant,
+.composerTools button {
+  min-height: var(--stara-control-compact-height);
+  border: 0;
+  border-radius: var(--stara-radius-control);
+  padding-inline: var(--stara-space-2);
+  background: transparent;
+  color: var(--stara-color-text-secondary);
+  font: var(--stara-type-control-label);
+}
+.participantChip button:hover,
+.addParticipant:hover {
+  background: var(--stara-color-surface-hover);
+}
+.participantPicker {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + var(--stara-space-1));
+  left: calc(var(--stara-control-standard-height) + var(--stara-space-2));
+  width: min(var(--stara-dialog-standard-width), calc(100vw - 2 * var(--stara-space-5)));
+  max-height: min(480px, 65vh);
+  overflow: auto;
+  padding: var(--stara-menu-padding);
+  border: var(--stara-border-hairline) solid var(--stara-color-border-subtle);
+  border-radius: var(--stara-radius-floating);
+  background: var(--stara-color-surface-raised);
+  box-shadow: 0 var(--stara-space-2) var(--stara-space-5) var(--stara-color-overlay);
+}
+.participantPicker > label input {
+  width: 100%;
+  min-height: var(--stara-field-height);
+  padding-inline: var(--stara-field-padding-inline);
+  border: var(--stara-border-hairline) solid var(--stara-color-border-strong);
+  border-radius: var(--stara-radius-control);
+  background: var(--stara-color-surface-primary);
+}
+.participantPicker fieldset {
+  border: 0;
+  padding: var(--stara-space-2) 0 0;
+}
+.participantPicker legend {
+  padding: var(--stara-space-1) var(--stara-space-2);
+  color: var(--stara-color-text-muted);
+  font: var(--stara-type-micro);
+}
+.participantPicker fieldset label {
+  min-height: var(--stara-row-attention-minimum-height);
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--stara-space-2);
+  padding: var(--stara-space-1) var(--stara-space-2);
+  border-radius: var(--stara-radius-control);
+}
+.participantPicker fieldset label:hover {
+  background: var(--stara-color-surface-hover);
+}
+.participantPicker label > span:last-child {
+  display: grid;
+  gap: var(--stara-space-related-text);
+}
+.participantPicker label strong {
+  font: var(--stara-type-section-title);
+}
+.participantPicker label small {
+  color: var(--stara-color-text-muted);
+  font: var(--stara-type-supporting);
+}
+.participantPicker footer,
+.creationActions,
+.composerTools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--stara-space-2);
+}
+.participantPicker footer {
+  padding: var(--stara-space-2);
+  border-top: var(--stara-border-hairline) solid var(--stara-color-border-subtle);
+  font: var(--stara-type-supporting);
+}
+.composer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--stara-space-2);
+}
+.composer > label {
+  font: var(--stara-type-control-label);
+}
+.composer textarea {
+  flex: 1;
+  min-height: calc(3 * var(--stara-field-textarea-minimum-height));
+  resize: vertical;
+  padding: var(--stara-field-padding-inline);
+  border: var(--stara-border-hairline) solid var(--stara-color-border-strong);
+  border-radius: var(--stara-radius-control);
+  background: var(--stara-color-surface-primary);
+  color: var(--stara-color-text-primary);
+  font: var(--stara-type-body);
+}
+.composerTools {
+  color: var(--stara-color-text-muted);
+  font: var(--stara-type-supporting);
+}
+.composerTools > span:first-child {
+  display: grid;
+  gap: var(--stara-space-related-text);
+}
+.composerTools button:disabled {
+  color: var(--stara-color-text-disabled);
+}
+.creationActions {
+  justify-content: flex-end;
+}
+@media (max-width: 700px) {
+  .newConversation {
+    padding: var(--stara-space-3);
+  }
+  .participantRow {
+    grid-template-columns: 1fr;
+  }
+  .participantLabel {
+    padding: 0;
+  }
+  .participantPicker {
+    left: 0;
+    width: 100%;
+  }
+  .composer textarea {
+    min-height: var(--stara-field-textarea-minimum-height);
+  }
+}
 .srOnly,
 .skip:not(:focus) {
   position: absolute;

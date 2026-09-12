@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function Tabs({ contexts, open, active, mobile, onOpen, onClose, onMove, onPicker }: Props) {
-  const working = open.filter((id) => id !== 'home');
+  const working = open.filter((id) => id !== 'home' && id !== 'conversations');
   const ref = useRef<HTMLDivElement>(null);
   const [capacity, setCapacity] = useState(open.length);
   useEffect(() => {
@@ -33,8 +33,9 @@ export function Tabs({ contexts, open, active, mobile, onOpen, onClose, onMove, 
   }, []);
 
   let visible = working.slice(0, capacity);
-  if (active !== 'home' && !visible.includes(active)) visible = [...visible.slice(0, -1), active];
-  if (mobile) visible = active === 'home' ? [] : [active];
+  if (!['home', 'conversations'].includes(active) && !visible.includes(active))
+    visible = [...visible.slice(0, -1), active];
+  if (mobile) visible = ['home', 'conversations'].includes(active) ? [] : [active];
 
   function focusTab(id: string) {
     onOpen(id);
@@ -81,7 +82,11 @@ export function Tabs({ contexts, open, active, mobile, onOpen, onClose, onMove, 
                 aria-selected={active === id}
                 aria-label={`${context.title}, ${context.statusLabel}`}
                 title={context.title}
-                tabIndex={active === id || (active === 'home' && id === visible[0]) ? 0 : -1}
+                tabIndex={
+                  active === id || (['home', 'conversations'].includes(active) && id === visible[0])
+                    ? 0
+                    : -1
+                }
                 onClick={() => onOpen(id)}
                 onKeyDown={(event) => {
                   const index = working.indexOf(id);

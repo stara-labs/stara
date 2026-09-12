@@ -24,7 +24,7 @@ export function ContextPicker({
 }) {
   const [query, setQuery] = useState(filter);
   const ordered = [...open, ...Object.keys(contexts).filter((id) => !open.includes(id))].filter(
-    (id) => id !== 'home',
+    (id) => id !== 'home' && id !== 'conversations',
   );
   const matches = ordered.filter((id) =>
     `${contexts[id].title} ${contexts[id].kind}`.toLowerCase().includes(query.toLowerCase()),

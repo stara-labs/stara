@@ -26,6 +26,16 @@ for (const width of [1440, 1100, 900, 700, 390]) {
         await page.screenshot({ path: testInfo.outputPath(`${width}-${theme}-${title}.png`) });
       }
       await page.getByRole('button', { name: 'Home, 2 items need attention' }).click();
+      await page.getByRole('button', { name: 'New conversation', exact: true }).click();
+      await expect(page.getByRole('textbox', { name: 'Message', exact: true })).toBeFocused();
+      expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      );
+      await page.screenshot({
+        path: testInfo.outputPath(`${width}-${theme}-new-conversation.png`),
+      });
+      await page.getByRole('button', { name: 'Cancel', exact: true }).click();
     }
   });
 }
