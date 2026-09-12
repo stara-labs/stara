@@ -145,15 +145,15 @@ export function App({
         <nav aria-label="Destinations">
           <button
             className={styles.navRow}
-            title="Home, 1 decision needed"
-            aria-label="Home, 1 decision needed"
+            title="Home, 2 items need attention"
+            aria-label="Home, 2 items need attention"
             aria-current={state.active === 'home' ? 'page' : undefined}
             onClick={() => open('home')}
           >
             <Icon name="home" />
             <span>Home</span>
             <Status state="attention" compact>
-              1 decision needed
+              2 items need attention
             </Status>
           </button>
         </nav>
@@ -204,14 +204,7 @@ export function App({
               hidden={state.active !== id}
               className={styles.contextPanel}
             >
-              {id === 'home' ? (
-                <div className={styles.workspaceActions}>
-                  <Button onClick={() => setCreating(true)}>
-                    <Icon name="plus" />
-                    New
-                  </Button>
-                </div>
-              ) : (
+              {id === 'home' ? null : (
                 <header className={styles.workspaceHeader}>
                   <h1>{contexts[id].title}</h1>
                   <span>{contexts[id].kind}</span>
@@ -226,7 +219,6 @@ export function App({
                   <Home
                     selected={state.memory.home.selected}
                     onSelect={(selected) => remember({ selected }, 'home')}
-                    onInspect={inspect}
                     onOpen={open}
                   />
                 ) : (

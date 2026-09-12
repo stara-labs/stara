@@ -10,21 +10,26 @@ afterEach(() => {
 });
 
 describe('UI-SHELL-03 shell controls', () => {
-  it('Given a working set, keyboard navigation, reordering and close preserve Home', async () => {
+  it('Given a working set, keyboard navigation, reordering and close preserve Home navigation', async () => {
     const user = userEvent.setup();
     render(<App />);
-    screen.getByRole('tab', { name: 'Home' }).focus();
+    screen.getByRole('tab', { name: /Prepare client/ }).focus();
     await user.keyboard('{ArrowRight}');
-    await waitFor(() => expect(screen.getByRole('tab', { name: /Prepare client/ })).toHaveFocus());
+    await waitFor(() => expect(screen.getByRole('tab', { name: /Design-partner/ })).toHaveFocus());
     await user.keyboard('{Alt>}{ArrowRight}{/Alt}');
-    expect(screen.getByRole('status')).toHaveTextContent('position 3');
+    expect(screen.getByRole('status')).toHaveTextContent('position 4');
     await user.keyboard('{Home}');
-    await waitFor(() => expect(screen.getByRole('tab', { name: 'Home' })).toHaveFocus());
-    await user.keyboard('{Delete}{End}');
-    await waitFor(() => expect(screen.getByRole('tab', { name: /Resolve client/ })).toHaveFocus());
+    await waitFor(() => expect(screen.getByRole('tab', { name: /Prepare client/ })).toHaveFocus());
     await user.keyboard('{Delete}');
-    expect(screen.queryByRole('tab', { name: /Resolve client/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Home' })).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /Prepare client/ })).not.toBeInTheDocument();
+    screen.getByRole('tab', { name: /Resolve client/ }).focus();
+    await user.keyboard('{End}');
+    await waitFor(() => expect(screen.getByRole('tab', { name: /Design-partner/ })).toHaveFocus());
+    await user.keyboard('{Delete}');
+    expect(screen.queryByRole('tab', { name: /Design-partner/ })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Home, 2 items need attention' }),
+    ).toBeInTheDocument();
   });
   it('Given the context picker, searching, reordering, and dismissing are keyboard accessible', async () => {
     const user = userEvent.setup();
@@ -53,20 +58,23 @@ describe('UI-SHELL-03 shell controls', () => {
     await user.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
     expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
     await user.click(screen.getByRole('button', { name: 'Collapse navigation' }));
-    expect(screen.getByRole('button', { name: 'Home, 1 decision needed' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Home, 2 items need attention' }),
+    ).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Expand navigation' }));
-    await user.click(screen.getByRole('button', { name: 'View accepted scope' }));
-    await user.type(screen.getByRole('textbox', { name: 'Work notes' }), 'Review first');
-    await user.click(screen.getByRole('button', { name: 'Home, 1 decision needed' }));
-    await user.click(screen.getByRole('button', { name: 'Open design-partner preparation' }));
+    await user.click(screen.getByRole('tab', { name: 'Recently Completed, 1 item' }));
+    await user.click(
+      screen.getByRole('button', { name: 'View: Record accepted onboarding scope' }),
+    );
+    await user.click(screen.getByRole('button', { name: 'Home, 2 items need attention' }));
+    await user.click(screen.getByRole('tab', { name: 'In Progress, 3 items' }));
+    await user.click(screen.getByRole('button', { name: 'Open: Prepare design-partner brief' }));
     await user.click(
       screen.getByRole('button', { name: 'Select contribution from Human contributor' }),
     );
     expect(
       screen.getByRole('button', { name: 'Select contribution from Human contributor' }),
     ).toHaveAttribute('aria-pressed', 'true');
-    await user.click(screen.getByRole('tab', { name: /Prepare client onboarding plan/ }));
-    expect(screen.getByRole('textbox', { name: 'Work notes' })).toHaveValue('Review first');
   });
   it('Given source comparison, choices and notes never alter operational facts', async () => {
     const user = userEvent.setup();

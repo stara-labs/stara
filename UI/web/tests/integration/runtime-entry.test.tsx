@@ -66,7 +66,7 @@ describe('REL-09 actual browser entry runtime gate', () => {
     await act(async () => {
       resolve(reply({ schemaVersion: 1, environment: 'staging' }));
     });
-    await screen.findByRole('tab', { name: 'Home' });
+    await screen.findByRole('heading', { name: 'Home' });
     expectNotice();
   });
 
@@ -77,13 +77,14 @@ describe('REL-09 actual browser entry runtime gate', () => {
     );
     const user = userEvent.setup();
     await mount();
-    await screen.findByRole('tab', { name: 'Home' });
+    await screen.findByRole('heading', { name: 'Home' });
     expectNotice();
-    await user.click(screen.getByRole('button', { name: 'Review address decision' }));
+    await user.click(
+      screen.getByRole('button', { name: 'Review: Resolve client intake source conflict' }),
+    );
     expectNotice();
     await user.click(screen.getByRole('button', { name: 'Switch to light theme' }));
     expectNotice();
-    await user.click(screen.getByRole('button', { name: 'Hide details' }));
     await user.click(screen.getByRole('tab', { name: /Design-partner preparation/ }));
     expectNotice();
     await user.click(screen.getByRole('button', { name: 'Working contexts' }));
@@ -93,8 +94,7 @@ describe('REL-09 actual browser entry runtime gate', () => {
     // jsdom does not synthesize a native dialog cancel event from Escape.
     fireEvent(screen.getByRole('dialog'), new Event('cancel', { cancelable: true }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    await user.click(screen.getByRole('tab', { name: 'Home' }));
-    await user.click(screen.getByRole('button', { name: 'New' }));
+    await user.click(screen.getByRole('button', { name: 'New conversation' }));
     expect(
       within(screen.getByRole('dialog')).getByRole('note', { name: 'Staging environment' }),
     ).toBe(expectNotice());
@@ -108,7 +108,7 @@ describe('REL-09 actual browser entry runtime gate', () => {
       vi.fn(async () => reply({ schemaVersion: 1, environment: 'development' })),
     );
     await mount();
-    await screen.findByRole('tab', { name: 'Home' });
+    await screen.findByRole('heading', { name: 'Home' });
     expect(screen.queryByRole('note', { name: 'Staging environment' })).not.toBeInTheDocument();
   });
 

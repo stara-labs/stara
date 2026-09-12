@@ -192,8 +192,7 @@ test('REL-09 staging notice survives contexts, native dialogs, Escape, theme and
   await page.keyboard.press('Escape');
   await expect(picker).toHaveCount(0);
   await notice(page);
-  await page.getByRole('tab', { name: 'Home', exact: true }).click();
-  await page.getByRole('button', { name: 'New', exact: true }).click();
+  await page.getByRole('button', { name: 'New conversation' }).click();
   const dialog = page.getByRole('dialog', { name: 'New conversation', exact: true });
   await expect(dialog.getByRole('note', { name: label })).toHaveText(text);
   await notice(page);
@@ -249,19 +248,21 @@ for (const width of [1100, 900, 700]) {
         let note = await notice(page);
         await fitsAndDoesNotCover(page, note, [
           page.getByRole('button', { name: 'Working contexts', exact: true }),
-          page.getByRole('button', { name: 'Review address decision' }),
+          page.getByRole('button', { name: 'Review: Resolve client intake source conflict' }),
         ]);
-        await page.getByRole('button', { name: 'Review address decision' }).focus();
+        await page
+          .getByRole('button', { name: 'Review: Resolve client intake source conflict' })
+          .focus();
         await page.keyboard.press('Enter');
-        await expect(page.getByRole('complementary', { name: 'Context panel' })).toBeVisible();
+        await expect(
+          page.getByRole('tab', { name: /Client intake source decision/ }),
+        ).toHaveAttribute('aria-selected', 'true');
         note = await notice(page);
-        await fitsAndDoesNotCover(page, note, [page.getByRole('button', { name: 'Hide details' })]);
         await accessibility(page, note, accessible);
         await page.screenshot({
-          path: testInfo.outputPath(`${width}-${accessible}-${theme}-inspection.png`),
+          path: testInfo.outputPath(`${width}-${accessible}-${theme}-conversation.png`),
         });
-        await page.keyboard.press('Escape');
-        await expect(page.getByRole('button', { name: 'Review address decision' })).toBeFocused();
+        await page.getByRole('button', { name: 'Home, 2 items need attention' }).click();
         await page.getByRole('button', { name: 'Working contexts', exact: true }).click();
         note = await notice(page);
         await fitsAndDoesNotCover(page, note, [
@@ -272,7 +273,7 @@ for (const width of [1100, 900, 700]) {
           path: testInfo.outputPath(`${width}-${accessible}-${theme}-picker.png`),
         });
         await page.keyboard.press('Escape');
-        await page.getByRole('button', { name: 'New', exact: true }).click();
+        await page.getByRole('button', { name: 'New conversation' }).click();
         note = await notice(page);
         await fitsAndDoesNotCover(page, note, [page.getByRole('button', { name: 'Create draft' })]);
         await accessibility(page, note, accessible);
@@ -289,7 +290,7 @@ for (const width of [1100, 900, 700]) {
 test('REL-09 validated development omits the staging notice', async ({ page }) => {
   await runtime(page, 'development');
   await page.goto('/');
-  await expect(page.getByRole('tab', { name: 'Home', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Home', exact: true })).toBeVisible();
   await expect(page.getByRole('note', { name: label })).toHaveCount(0);
 });
 
@@ -305,7 +306,7 @@ for (const mode of ['missing', 'invalid', 'unavailable']) {
     });
     await page.goto('/');
     await expect(page.getByRole('alert')).toBeVisible();
-    await expect(page.getByRole('tab', { name: 'Home', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Home', exact: true })).toHaveCount(0);
     await expect(page.locator('body')).not.toContainText('synthetic-private-runtime-canary');
   });
 }

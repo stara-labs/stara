@@ -10,14 +10,8 @@ for (const width of [1440, 1100, 900, 700, 390]) {
     for (const theme of ['dark', 'light']) {
       if (theme === 'light')
         await page.getByRole('button', { name: 'Switch to light theme' }).click();
-      await expect(page.getByRole('button', { name: 'Review address decision' })).toBeVisible();
-      await page.getByRole('button', { name: 'Review address decision' }).click();
-      await expect(page.getByRole('complementary', { name: 'Context panel' })).toBeVisible();
+      await expect(page.getByRole('table', { name: 'Home coordination collection' })).toBeVisible();
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-      const control = await page.getByRole('button', { name: 'Hide details' }).boundingBox();
-      expect(control!.x + control!.width).toBeLessThanOrEqual(width);
-      await page.getByRole('button', { name: 'Hide details' }).click();
-      await expect(page.getByRole('button', { name: 'Review address decision' })).toBeFocused();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );
@@ -31,11 +25,7 @@ for (const width of [1440, 1100, 900, 700, 390]) {
         expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
         await page.screenshot({ path: testInfo.outputPath(`${width}-${theme}-${title}.png`) });
       }
-      await page.getByRole('button', { name: 'Working contexts', exact: true }).click();
-      await page
-        .getByRole('dialog')
-        .getByRole('button', { name: 'Open Home', exact: true })
-        .click();
+      await page.getByRole('button', { name: 'Home, 2 items need attention' }).click();
     }
   });
 }
@@ -67,15 +57,17 @@ test('UI-A11Y-02 @accessibility keyboard, 200 percent text, forced colors, reduc
       );
     }
   });
-  await page.getByRole('button', { name: 'Review address decision' }).focus();
+  const review = page.getByRole('button', {
+    name: 'Review: Resolve client intake source conflict',
+  });
+  await review.focus();
   await page.keyboard.press('Enter');
-  await expect(
-    page.getByRole('heading', { name: 'Which address should govern this form?' }),
-  ).toBeFocused();
-  await page.screenshot({ path: testInfo.outputPath('text-zoom-inspection.png') });
-  await page.keyboard.press('Tab');
-  await page.keyboard.press('Escape');
-  await expect(page.getByRole('button', { name: 'Review address decision' })).toBeFocused();
+  await expect(page.getByRole('tab', { name: /Client intake source decision/ })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  await page.screenshot({ path: testInfo.outputPath('text-zoom-conversation.png') });
+  await page.getByRole('button', { name: 'Home, 2 items need attention' }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('text-zoom-forced-colors.png') });
 });
