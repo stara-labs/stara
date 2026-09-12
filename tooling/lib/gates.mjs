@@ -257,6 +257,13 @@ async function executeGates(runtime, selection, stage, results) {
   }
   await rootCheck('tokens:check');
   await rootCheck('lint');
+  if (stage === 'commit')
+    await check('security:codeql', () =>
+      runtime.pnpm(['run', 'security:codeql'], {
+        timeout: 600000,
+        env: { ...runtime.env, STARA_CODEQL_RUN_ID: runtime.runId },
+      }),
+    );
   const inventory = await packageInventory(runtime);
   if (requiredPackages.some((name) => !inventory.some((pkg) => pkg.name === name)))
     throw new Error('Required workspace target is missing');
@@ -590,6 +597,13 @@ async function isolatedGate(runtime, stage, proposal) {
         .join(delimiter);
     }
     Object.assign(env, {
+      STARA_CODEQL_CLI:
+        runtime.env.STARA_CODEQL_CLI ??
+        join(
+          runtime.root,
+          '.artifacts/tools/codeql-2.27.0/codeql',
+          process.platform === 'win32' ? 'codeql.exe' : 'codeql',
+        ),
       STARA_ISOLATED_ROOT: root,
       pnpm_config_store_dir: join(temporary, 'store'),
       pnpm_config_node_linker: 'isolated',

@@ -15,7 +15,11 @@ export function readMcpConfig(env: NodeJS.ProcessEnv): string {
     ) {
       throw new Error();
     }
-    return url.origin;
+    // Construct the destination from literal hosts and a numeric port. Never
+    // propagate the operator's URL string into a request, even after validation.
+    const host = url.hostname === '[::1]' ? '[::1]' : '127.0.0.1';
+    const port = Number(url.port || 80);
+    return `http://${host}${port === 80 ? '' : `:${port}`}`;
   } catch {
     throw new Error(
       'STARA_API_URL must be an HTTP loopback origin with no credentials, path, query, or fragment',
