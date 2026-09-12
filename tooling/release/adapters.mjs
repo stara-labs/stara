@@ -433,7 +433,24 @@ export function createCloudAdapters({ configuration, request, verifyAttestation,
     requireValue(Array.isArray(traffic) && traffic.length > 0 && traffic.length <= 100);
     const result = traffic.map((item) => {
       requireValue(Number.isInteger(item.percent) && item.percent >= 0 && item.percent <= 100);
-      const revision = revisionName(part, item.revision).split('/').at(-1);
+      let observedRevision = item.revision;
+      if (
+        !Object.hasOwn(item, 'revision') &&
+        item.type === 'TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST'
+      ) {
+        // Cloud Run can omit a LATEST status's revision. Resolve it only from a
+        // fully reconciled service; transient metadata cannot pin serving traffic.
+        requireValue(
+          (service.reconciling === undefined || service.reconciling === false) &&
+            matches(service.generation, /^[1-9][0-9]*$/) &&
+            service.observedGeneration === service.generation &&
+            service.terminalCondition?.type === 'Ready' &&
+            service.terminalCondition.state === 'CONDITION_SUCCEEDED',
+        );
+        observedRevision = revisionName(part, service.latestReadyRevision);
+        requireValue(observedRevision === revisionName(part, service.latestCreatedRevision));
+      }
+      const revision = revisionName(part, observedRevision).split('/').at(-1);
       return { type: 'TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION', revision, percent: item.percent };
     });
     requireValue(result.reduce((sum, item) => sum + item.percent, 0) === 100);

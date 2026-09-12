@@ -3030,6 +3030,364 @@ function cloudRunBackend({ afterPatch, getService, getRevision, getOperation } =
   return { handler, model, config };
 }
 
+function stableLatestTraffic(backend, component) {
+  const service = backend.model[component];
+  Object.assign(service, {
+    traffic: [{ type: 'TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST', percent: 100 }],
+    trafficStatuses: [{ type: 'TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST', percent: 100 }],
+    generation: '9007199254740993',
+    observedGeneration: '9007199254740993',
+    terminalCondition: { type: 'Ready', state: 'CONDITION_SUCCEEDED' },
+    reconciling: false,
+  });
+  return service;
+}
+
+describe('Cloud Run adapters: stable omitted LATEST revision regression', () => {
+  it.each([
+    ['web', false],
+    ['web', undefined],
+    ['api', false],
+    ['api', undefined],
+  ])(
+    'pins stable %s LATEST traffic with reconciling=%s before template mutation',
+    async (component, reconciling) => {
+      const backend = cloudRunBackend();
+      const service = stableLatestTraffic(backend, component);
+      if (reconciling === undefined) delete service.reconciling;
+      const before = clone(service);
+      const h = await adapters(backend.handler);
+      await h.value.createRevision(
+        argumentsFor({ component, imageDigest: manifest().images[component].digest }),
+      );
+      const writes = h.request.calls.filter((call) => call.options.method === 'PATCH');
+      expect(writes).toHaveLength(1);
+      const patch = jsonBody(writes[0].body);
+      expect(patch.traffic).toEqual([
+        {
+          type: 'TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION',
+          revision: `${backend.config.services[component]}-old`,
+          percent: 100,
+        },
+      ]);
+      expect(patch.etag).toBe(before.etag);
+      expect(patch.template.revision).not.toBe(patch.traffic[0].revision);
+      expect(service).toEqual(before);
+    },
+  );
+
+  it('resolves both configured services through readTraffic without any mutation', async () => {
+    const backend = cloudRunBackend();
+    stableLatestTraffic(backend, 'web');
+    stableLatestTraffic(backend, 'api');
+    const h = await adapters(backend.handler);
+    const result = await h.value.readTraffic(argumentsFor());
+    expect(result).toEqual(
+      Object.fromEntries(
+        ['web', 'api'].map((component) => [
+          component,
+          [
+            {
+              type: 'TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION',
+              revision: `stara-${component}-old`,
+              percent: 100,
+            },
+          ],
+        ]),
+      ),
+    );
+    expect(h.request.calls).toHaveLength(2);
+    expect(h.request.calls.every((call) => call.options.method === 'GET')).toBe(true);
+  });
+
+  it('rejects the complete traffic read when the second configured service is unstable', async () => {
+    const backend = cloudRunBackend();
+    stableLatestTraffic(backend, 'web');
+    stableLatestTraffic(backend, 'api').observedGeneration = '9007199254740992';
+    const h = await adapters(backend.handler);
+    await denied(() => h.value.readTraffic(argumentsFor()), 'DENIED');
+    expect(h.request.calls).toHaveLength(2);
+    expect(h.request.calls.every((call) => call.options.method === 'GET')).toBe(true);
+  });
+
+  it('recognizes equivalent full and short same-service latest revision names', async () => {
+    const backend = cloudRunBackend();
+    stableLatestTraffic(backend, 'web').latestCreatedRevision = 'stara-web-old';
+    const h = await adapters(backend.handler);
+    await h.value.createRevision(
+      argumentsFor({ component: 'web', imageDigest: manifest().images.web.digest }),
+    );
+    const patch = jsonBody(h.request.calls.find((call) => call.options.method === 'PATCH').body);
+    expect(patch.traffic).toEqual([
+      {
+        type: 'TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION',
+        revision: 'stara-web-old',
+        percent: 100,
+      },
+    ]);
+  });
+
+  it('preserves observed split percentages and explicit revisions while resolving only omitted LATEST', async () => {
+    const backend = cloudRunBackend();
+    const service = stableLatestTraffic(backend, 'web');
+    service.traffic = [
+      { type: 'TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST', percent: 60 },
+      {
+        type: 'TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION',
+        revision: 'stara-web-previous',
+        percent: 40,
+      },
+    ];
+    service.trafficStatuses = [
+      { type: 'TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST', percent: 60 },
+      {
+        type: 'TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION',
+        revision: revisionName(backend.config, 'web', 'previous'),
+        percent: 40,
+      },
+    ];
+    const h = await adapters(backend.handler);
+    await h.value.createRevision(
+      argumentsFor({ component: 'web', imageDigest: manifest().images.web.digest }),
+    );
+    const patch = jsonBody(h.request.calls.find((call) => call.options.method === 'PATCH').body);
+    expect(patch.traffic).toEqual([
+      { type: 'TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION', revision: 'stara-web-old', percent: 60 },
+      {
+        type: 'TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION',
+        revision: 'stara-web-previous',
+        percent: 40,
+      },
+    ]);
+  });
+
+  it('retains explicit serving revisions without requiring fallback readiness metadata', async () => {
+    const backend = cloudRunBackend();
+    backend.model.web.traffic = [{ type: 'TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST', percent: 100 }];
+    backend.model.web.trafficStatuses = [
+      {
+        type: 'TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION',
+        revision: revisionName(backend.config, 'web', 'old'),
+        percent: 100,
+      },
+    ];
+    delete backend.model.web.latestReadyRevision;
+    delete backend.model.web.latestCreatedRevision;
+    const h = await adapters(backend.handler);
+    await h.value.createRevision(
+      argumentsFor({ component: 'web', imageDigest: manifest().images.web.digest }),
+    );
+    const patch = jsonBody(h.request.calls.find((call) => call.options.method === 'PATCH').body);
+    expect(patch.traffic).toEqual([
+      { type: 'TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION', revision: 'stara-web-old', percent: 100 },
+    ]);
+  });
+
+  it.each([
+    [
+      'actively reconciling',
+      (service) => {
+        service.reconciling = true;
+      },
+    ],
+    [
+      'malformed reconciling',
+      (service) => {
+        service.reconciling = 'false';
+      },
+    ],
+    [
+      'null reconciling',
+      (service) => {
+        service.reconciling = null;
+      },
+    ],
+    [
+      'missing generation',
+      (service) => {
+        delete service.generation;
+      },
+    ],
+    [
+      'missing observed generation',
+      (service) => {
+        delete service.observedGeneration;
+      },
+    ],
+    [
+      'stale observed generation beyond safe integer range',
+      (service) => {
+        service.observedGeneration = '9007199254740992';
+      },
+    ],
+    [
+      'numeric generation',
+      (service) => {
+        service.generation = 7;
+        service.observedGeneration = 7;
+      },
+    ],
+    [
+      'numeric observed generation',
+      (service) => {
+        service.generation = '7';
+        service.observedGeneration = 7;
+      },
+    ],
+    [
+      'zero generation',
+      (service) => {
+        service.generation = '0';
+        service.observedGeneration = '0';
+      },
+    ],
+    [
+      'malformed generation',
+      (service) => {
+        service.generation = '7.0';
+        service.observedGeneration = '7.0';
+      },
+    ],
+    [
+      'missing terminal condition',
+      (service) => {
+        delete service.terminalCondition;
+      },
+    ],
+    [
+      'non-ready terminal condition',
+      (service) => {
+        service.terminalCondition.type = 'RoutesReady';
+      },
+    ],
+    [
+      'pending readiness',
+      (service) => {
+        service.terminalCondition.state = 'CONDITION_PENDING';
+      },
+    ],
+    [
+      'failed readiness',
+      (service) => {
+        service.terminalCondition.state = 'CONDITION_FAILED';
+      },
+    ],
+    [
+      'missing latest ready revision',
+      (service) => {
+        delete service.latestReadyRevision;
+      },
+    ],
+    [
+      'missing latest created revision',
+      (service) => {
+        delete service.latestCreatedRevision;
+      },
+    ],
+    [
+      'conflicting ready and created revisions',
+      (service) => {
+        service.latestCreatedRevision = 'stara-web-other';
+      },
+    ],
+    [
+      'foreign latest service',
+      (service) => {
+        service.latestReadyRevision = 'stara-api-old';
+        service.latestCreatedRevision = 'stara-api-old';
+      },
+    ],
+    [
+      'foreign latest project',
+      (service) => {
+        service.latestReadyRevision = service.latestReadyRevision.replace(
+          'stara-test-target',
+          'foreign-target',
+        );
+        service.latestCreatedRevision = service.latestReadyRevision;
+      },
+    ],
+    [
+      'foreign latest region',
+      (service) => {
+        service.latestReadyRevision = service.latestReadyRevision.replace(
+          'us-central1',
+          'europe-west1',
+        );
+        service.latestCreatedRevision = service.latestReadyRevision;
+      },
+    ],
+    [
+      'malformed latest revision',
+      (service) => {
+        service.latestReadyRevision = 'stara-web-../other';
+        service.latestCreatedRevision = service.latestReadyRevision;
+      },
+    ],
+    [
+      'missing non-LATEST revision',
+      (service) => {
+        service.trafficStatuses[0].type = 'TRAFFIC_TARGET_ALLOCATION_TYPE_REVISION';
+      },
+    ],
+    [
+      'unknown allocation type with no revision',
+      (service) => {
+        service.trafficStatuses[0].type = 'TRAFFIC_TARGET_ALLOCATION_TYPE_UNSPECIFIED';
+      },
+    ],
+    [
+      'missing allocation type with no revision',
+      (service) => {
+        delete service.trafficStatuses[0].type;
+      },
+    ],
+    [
+      'null explicit revision',
+      (service) => {
+        service.trafficStatuses[0].revision = null;
+      },
+    ],
+    [
+      'blank explicit revision',
+      (service) => {
+        service.trafficStatuses[0].revision = '';
+      },
+    ],
+    [
+      'foreign explicit revision',
+      (service) => {
+        service.trafficStatuses[0].revision = 'stara-api-old';
+      },
+    ],
+    [
+      'incomplete percentage total',
+      (service) => {
+        service.trafficStatuses[0].percent = 99;
+      },
+    ],
+    [
+      'fractional percentage',
+      (service) => {
+        service.trafficStatuses[0].percent = 99.5;
+      },
+    ],
+  ])('refuses %s before any Cloud Run PATCH', async (_name, mutate) => {
+    const backend = cloudRunBackend();
+    mutate(stableLatestTraffic(backend, 'web'));
+    const h = await adapters(backend.handler);
+    await denied(
+      () =>
+        h.value.createRevision(
+          argumentsFor({ component: 'web', imageDigest: manifest().images.web.digest }),
+        ),
+      'NO_EFFECT',
+    );
+    expect(h.request.calls.filter((call) => call.options.method !== 'GET')).toEqual([]);
+    expect(h.request.calls).toHaveLength(1);
+  });
+});
+
 describe('Cloud Run adapters: fixed target, guarded mutations and bounded operation polling', () => {
   it('preserves writable runtime attributes but omits output-only container buildInfo on PATCH', async () => {
     const backend = cloudRunBackend();
