@@ -6,6 +6,7 @@ import { createWorkspace, workspaceReducer } from './workspace';
 import type { ContextMemory } from './workspace';
 import { Tabs } from './Tabs';
 import { Home } from './Home';
+import { homeAttentionLabel } from './home-fixtures';
 import { ContextContent } from './ContextContent';
 import { ContextPicker } from './ContextPicker';
 import { Inspector } from './Inspector';
@@ -51,7 +52,9 @@ export function App({
   function close(id: string) {
     dispatch({ type: 'close', id });
     requestAnimationFrame(() =>
-      document.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')?.focus(),
+      document
+        .querySelector<HTMLElement>('[id^="tab-"][role="tab"][aria-selected="true"]')
+        ?.focus(),
     );
   }
   function hideDetails() {
@@ -134,6 +137,11 @@ export function App({
         <header className={styles.brand}>
           <strong>Stara</strong>
           <div className={styles.brandTools}>
+            <IconButton
+              icon="conversation"
+              label="New conversation"
+              onClick={() => setCreating(true)}
+            />
             <IconButton icon="search" label="Search contexts" onClick={() => setPicker('')} />
             <IconButton
               icon="panelLeft"
@@ -145,15 +153,15 @@ export function App({
         <nav aria-label="Destinations">
           <button
             className={styles.navRow}
-            title="Home, 1 decision needed"
-            aria-label="Home, 1 decision needed"
+            title={`Home, ${homeAttentionLabel}`}
+            aria-label={`Home, ${homeAttentionLabel}`}
             aria-current={state.active === 'home' ? 'page' : undefined}
             onClick={() => open('home')}
           >
             <Icon name="home" />
             <span>Home</span>
             <Status state="attention" compact>
-              1 decision needed
+              {homeAttentionLabel}
             </Status>
           </button>
         </nav>
@@ -180,6 +188,20 @@ export function App({
           />
         </div>
         <div className={styles.frameControls} data-frame-controls>
+          {mobile && (
+            <>
+              <IconButton
+                icon="home"
+                label={`Home, ${homeAttentionLabel}`}
+                onClick={() => open('home')}
+              />
+              <IconButton
+                icon="conversation"
+                label="New conversation"
+                onClick={() => setCreating(true)}
+              />
+            </>
+          )}
           <IconButton
             icon={theme === 'dark' ? 'sun' : 'moon'}
             label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
@@ -204,14 +226,7 @@ export function App({
               hidden={state.active !== id}
               className={styles.contextPanel}
             >
-              {id === 'home' ? (
-                <div className={styles.workspaceActions}>
-                  <Button onClick={() => setCreating(true)}>
-                    <Icon name="plus" />
-                    New
-                  </Button>
-                </div>
-              ) : (
+              {id === 'home' ? null : (
                 <header className={styles.workspaceHeader}>
                   <h1>{contexts[id].title}</h1>
                   <span>{contexts[id].kind}</span>
@@ -226,7 +241,6 @@ export function App({
                   <Home
                     selected={state.memory.home.selected}
                     onSelect={(selected) => remember({ selected }, 'home')}
-                    onInspect={inspect}
                     onOpen={open}
                   />
                 ) : (

@@ -15,6 +15,7 @@ interface Props {
 }
 
 export function Tabs({ contexts, open, active, mobile, onOpen, onClose, onMove, onPicker }: Props) {
+  const working = open.filter((id) => id !== 'home');
   const ref = useRef<HTMLDivElement>(null);
   const [capacity, setCapacity] = useState(open.length);
   useEffect(() => {
@@ -31,9 +32,9 @@ export function Tabs({ contexts, open, active, mobile, onOpen, onClose, onMove, 
     return () => observer.disconnect();
   }, []);
 
-  let visible = open.slice(0, capacity);
-  if (!visible.includes(active)) visible = [...visible.slice(0, -1), active];
-  if (mobile) visible = [active];
+  let visible = working.slice(0, capacity);
+  if (active !== 'home' && !visible.includes(active)) visible = [...visible.slice(0, -1), active];
+  if (mobile) visible = active === 'home' ? [] : [active];
 
   function focusTab(id: string) {
     onOpen(id);
@@ -58,13 +59,13 @@ export function Tabs({ contexts, open, active, mobile, onOpen, onClose, onMove, 
               key={id}
               data-active={active === id}
               data-context-id={id}
-              draggable={id !== 'home'}
+              draggable
               onDragStart={(event) => {
                 event.dataTransfer.setData('text/plain', id);
                 event.dataTransfer.effectAllowed = 'move';
               }}
               onDragOver={(event) => {
-                if (id !== 'home') event.preventDefault();
+                event.preventDefault();
               }}
               onDrop={(event) => {
                 event.preventDefault();
@@ -78,21 +79,21 @@ export function Tabs({ contexts, open, active, mobile, onOpen, onClose, onMove, 
                 id={`tab-${id}`}
                 aria-controls={`panel-${id}`}
                 aria-selected={active === id}
-                aria-label={id === 'home' ? 'Home' : `${context.title}, ${context.statusLabel}`}
+                aria-label={`${context.title}, ${context.statusLabel}`}
                 title={context.title}
-                tabIndex={active === id ? 0 : -1}
+                tabIndex={active === id || (active === 'home' && id === visible[0]) ? 0 : -1}
                 onClick={() => onOpen(id)}
                 onKeyDown={(event) => {
-                  const index = open.indexOf(id);
+                  const index = working.indexOf(id);
                   const delta = event.key === 'ArrowLeft' ? -1 : 1;
                   if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
                     event.preventDefault();
-                    if (event.altKey) onMove(id, index + delta);
-                    else focusTab(open[(index + delta + open.length) % open.length]);
+                    if (event.altKey) onMove(id, open.indexOf(id) + delta);
+                    else focusTab(working[(index + delta + working.length) % working.length]);
                   } else if (event.key === 'Home' || event.key === 'End') {
                     event.preventDefault();
-                    focusTab(open[event.key === 'Home' ? 0 : open.length - 1]);
-                  } else if (event.key === 'Delete' && id !== 'home') {
+                    focusTab(working[event.key === 'Home' ? 0 : working.length - 1]);
+                  } else if (event.key === 'Delete') {
                     event.preventDefault();
                     onClose(id);
                   } else if (
@@ -106,23 +107,19 @@ export function Tabs({ contexts, open, active, mobile, onOpen, onClose, onMove, 
               >
                 <Icon name={context.icon} />
                 <span>{context.title}</span>
-                {id !== 'home' && (
-                  <Status state={context.status} compact>
-                    {context.statusLabel}
-                  </Status>
-                )}
+                <Status state={context.status} compact>
+                  {context.statusLabel}
+                </Status>
               </button>
-              {id !== 'home' && (
-                <IconButton
-                  className={styles.tabClose}
-                  icon="close"
-                  label={`Close ${context.title}`}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onClose(id);
-                  }}
-                />
-              )}
+              <IconButton
+                className={styles.tabClose}
+                icon="close"
+                label={`Close ${context.title}`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onClose(id);
+                }}
+              />
             </div>
           );
         })}

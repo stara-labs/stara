@@ -8,7 +8,7 @@ afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
 });
-it('UI-TABS-01 dragging moves a canonical working tab and never moves Home', () => {
+it('UI-TABS-01 shows only durable item contexts and never renders Home as a tab', () => {
   const move = vi.fn();
   render(
     <Tabs
@@ -34,8 +34,5 @@ it('UI-TABS-01 dragging moves a canonical working tab and never moves Home', () 
   fireEvent.dragOver(to, { dataTransfer });
   fireEvent.drop(to, { dataTransfer });
   expect(move).toHaveBeenCalledWith('intake', 1);
-  expect(screen.getByRole('tab', { name: 'Home' }).parentElement).toHaveAttribute(
-    'draggable',
-    'false',
-  );
+  expect(screen.queryByRole('tab', { name: 'Home' })).not.toBeInTheDocument();
 });

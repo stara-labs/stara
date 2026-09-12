@@ -1,4 +1,5 @@
 import type { IconName, OperationalState } from '@stara/ui';
+import { homeAttentionLabel } from './home-fixtures';
 
 export interface WorkingContext {
   id: string;
@@ -21,7 +22,7 @@ export const contexts: Record<string, WorkingContext> = {
     kind: 'Home',
     icon: 'home',
     status: 'attention',
-    statusLabel: '1 decision needed',
+    statusLabel: homeAttentionLabel,
     lead: 'Responsible lead',
     summary: 'Attention and coordination',
     verified: false,
@@ -71,6 +72,29 @@ export const contexts: Record<string, WorkingContext> = {
     statusLabel: 'Unread material',
     lead: 'Human contributor',
     summary: 'Separate permitted sources, researcher inference, and claims awaiting human review.',
+    verified: false,
+  },
+  'intake-conversation': {
+    id: 'intake-conversation',
+    title: 'Client intake source decision',
+    kind: 'Conversation',
+    icon: 'conversation',
+    status: 'attention',
+    statusLabel: 'Decision needed',
+    lead: 'Responsible lead',
+    summary:
+      'Review the synthetic source conflict without changing either source or creating an external effect.',
+    verified: false,
+  },
+  'onboarding-conversation': {
+    id: 'onboarding-conversation',
+    title: 'Client onboarding coordination',
+    kind: 'Conversation',
+    icon: 'conversation',
+    status: 'running',
+    statusLabel: 'In progress',
+    lead: 'Responsible lead',
+    summary: 'Coordinate the synthetic onboarding scope and evidence boundary for human review.',
     verified: false,
   },
   knowledge: {
