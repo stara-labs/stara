@@ -1,0 +1,215 @@
+{
+  "version": 1,
+  "sourceCommit": "189a066cacd1559a7640bb200bc2c8ba18330ef9",
+  "cliVersion": "2.27.0",
+  "queryPacks": {
+    "codeql/javascript-queries": "2.4.5",
+    "codeql/actions-queries": "0.6.35"
+  },
+  "findings": [
+    {
+      "ruleId": "actions/artifact-poisoning/medium",
+      "path": ".github/workflows/dispatch.yml",
+      "fingerprint": "3f39397d5f652c3b:1",
+      "count": 1
+    },
+    {
+      "ruleId": "actions/untrusted-checkout/medium",
+      "path": ".github/workflows/dispatch.yml",
+      "fingerprint": "1b6ec012d55a23d2:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/bad-code-sanitization",
+      "path": "tooling/tests/push.contract.test.mjs",
+      "fingerprint": "b8c3da9f2717c21b:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/clear-text-logging",
+      "path": "tooling/scripts/workspace.mjs",
+      "fingerprint": "a77e9a25e9e5ee8:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/command-line-injection",
+      "path": "tooling/tests/workflow.contract.test.mjs",
+      "fingerprint": "6f14b936d1764afd:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/file-system-race",
+      "path": "tooling/lib/build.mjs",
+      "fingerprint": "840a93f381633cdd:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/file-system-race",
+      "path": "tooling/lib/gates.mjs",
+      "fingerprint": "9b17b56f33ac4cc9:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/incomplete-sanitization",
+      "path": "tooling/tests/release-adapters.contract.test.mjs",
+      "fingerprint": "5353ca64ef6f92e3:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/incomplete-sanitization",
+      "path": "tooling/tests/release-adapters.contract.test.mjs",
+      "fingerprint": "5df3b660fe3c93c9:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/incomplete-sanitization",
+      "path": "tooling/tests/release-adapters.contract.test.mjs",
+      "fingerprint": "78d84e158f5c0a06:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/incomplete-sanitization",
+      "path": "tooling/tests/release-adapters.contract.test.mjs",
+      "fingerprint": "fb68ffcaf1c05163:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/incomplete-sanitization",
+      "path": "tooling/tests/release-cli.contract.test.mjs",
+      "fingerprint": "8283b3a029919014:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/incomplete-sanitization",
+      "path": "tooling/tests/release-cli.contract.test.mjs",
+      "fingerprint": "e2fff7d84125576a:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/incomplete-sanitization",
+      "path": "tooling/tests/release-cli.contract.test.mjs",
+      "fingerprint": "f1a9a0561633b6fe:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/incomplete-sanitization",
+      "path": "tooling/tests/release-contract.contract.test.mjs",
+      "fingerprint": "5565ce506f0aae58:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/incomplete-sanitization",
+      "path": "tooling/tests/release-contract.contract.test.mjs",
+      "fingerprint": "86e61aaa9e0fe96e:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/incomplete-sanitization",
+      "path": "tooling/tests/release-transport.contract.test.mjs",
+      "fingerprint": "d57607a9a788db5f:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/incomplete-sanitization",
+      "path": "tooling/tests/release-transport.contract.test.mjs",
+      "fingerprint": "e94f679eb4d0172:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/path-injection",
+      "path": "tests/e2e/artifact-run.ts",
+      "fingerprint": "232f5cf80d61ca9f:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/path-injection",
+      "path": "tests/e2e/artifact-run.ts",
+      "fingerprint": "4050a5204f5df482:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/path-injection",
+      "path": "tests/e2e/artifact-run.ts",
+      "fingerprint": "4d8a40b100fa79e2:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/path-injection",
+      "path": "tooling/lib/evidence.mjs",
+      "fingerprint": "48db52a998fbfe06:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/path-injection",
+      "path": "tooling/lib/evidence.mjs",
+      "fingerprint": "6024831b7ed6aa6a:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/path-injection",
+      "path": "tooling/lib/evidence.mjs",
+      "fingerprint": "bf8f2842dfdd9714:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/path-injection",
+      "path": "tooling/lib/evidence.mjs",
+      "fingerprint": "d87037276f57de87:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/path-injection",
+      "path": "tooling/lib/files.mjs",
+      "fingerprint": "13b02dfe08ec7cce:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/path-injection",
+      "path": "tooling/lib/files.mjs",
+      "fingerprint": "9fa4099455df55a8:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/path-injection",
+      "path": "tooling/lib/files.mjs",
+      "fingerprint": "b935ef65988f8fe8:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/path-injection",
+      "path": "tooling/release/cli.mjs",
+      "fingerprint": "5a773212de109ed9:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/path-injection",
+      "path": "tooling/release/cli.mjs",
+      "fingerprint": "8d77fd687b32b58f:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/path-injection",
+      "path": "tooling/release/cli.mjs",
+      "fingerprint": "9d595ae67f0a2c9f:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/path-injection",
+      "path": "tooling/release/cli.mjs",
+      "fingerprint": "d8530306cd7b32b3:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/user-controlled-bypass",
+      "path": "tooling/release/cli.mjs",
+      "fingerprint": "d5fb97dfd357c22d:1",
+      "count": 1
+    },
+    {
+      "ruleId": "js/user-controlled-bypass",
+      "path": "tooling/release/cli.mjs",
+      "fingerprint": "e8564cf15d8ba72d:1",
+      "count": 1
+    }
+  ]
+}

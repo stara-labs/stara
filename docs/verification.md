@@ -43,6 +43,13 @@ well as the separate container-development journey.
 
 ## Gate Placement
 
+Source/control commits additionally run the pinned local CodeQL
+security-extended suites for JavaScript/TypeScript and Actions against the
+isolated index. New findings block the commit; existing findings use the explicit
+reviewable [regression baseline](../tooling/codeql/README.md). Missing tools or
+incomplete analysis fail closed. Documentation-only commits use the existing
+fast path. GitHub CodeQL remains an independent required check.
+
 | Gate    | Evidence                                                                                                                                                                      |
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Commit  | Exact isolated index: formatting, lint/static checks, secrets, directly affected unit/contract tests                                                                          |

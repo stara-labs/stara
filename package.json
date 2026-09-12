@@ -29,6 +29,7 @@
     "build": "pnpm --filter @stara/web build && pnpm --filter @stara/api build && node tooling/scripts/workspace.mjs artifact",
     "validate": "pnpm tokens:check && pnpm format:check && pnpm lint && pnpm typecheck && pnpm security:secrets && pnpm test:coverage && pnpm build && pnpm test:e2e && pnpm test:a11y",
     "security:secrets": "secretlint \"**/*\"",
+    "security:codeql": "node tooling/scripts/codeql.mjs",
     "security:dependencies": "pnpm audit --audit-level high",
     "tokens:update": "node tooling/scripts/workspace.mjs tokens-update",
     "tokens:check": "node tooling/scripts/workspace.mjs tokens-check",
