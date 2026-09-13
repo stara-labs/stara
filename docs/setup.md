@@ -17,6 +17,11 @@ ports. The API's internal `HOST` and `PORT` contract is described in
 
 ## Commands
 
+Source commits also require the pinned local CodeQL bundle. See the
+[CodeQL setup guide](../tooling/codeql/README.md) for installation, the Windows
+PowerShell prerequisite, and the staged-snapshot security check. Application
+startup itself does not run CodeQL.
+
 | Command                                                   | Purpose                                                      |
 | --------------------------------------------------------- | ------------------------------------------------------------ |
 | `pnpm bootstrap`                                          | Frozen install and safe hook installation                    |
