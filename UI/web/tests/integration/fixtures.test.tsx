@@ -8,8 +8,11 @@ afterEach(cleanup);
 
 const roles = ['You', 'Responsible lead', 'Human contributor'];
 const permittedCompoundLabels = [
+  'Customer lead',
+  'Operations Lead',
   'Intake Agent',
-  'Product Evidence Researcher',
+  'Evidence Researcher',
+  'Product Agent',
   'Company Knowledge',
 ];
 const personalNames = (text: string) =>

@@ -57,7 +57,7 @@ test('UI-JOURNEY-03 tabs reorder by pointer and keyboard, then close and reopen'
   await page
     .getByRole('textbox', { name: 'Conversation draft' })
     .fill('Preserve the evidence boundary.');
-  await page.getByRole('button', { name: 'Select contribution from Human contributor' }).click();
+  await page.getByRole('button', { name: 'Select contribution from Operations Lead' }).click();
   await page.getByRole('button', { name: 'Close Design-partner preparation' }).click();
   await expect(page.getByRole('status')).toContainText('Underlying work is unchanged');
   await page.getByRole('button', { name: 'Working contexts', exact: true }).click();
@@ -69,7 +69,7 @@ test('UI-JOURNEY-03 tabs reorder by pointer and keyboard, then close and reopen'
     'Preserve the evidence boundary.',
   );
   await expect(
-    page.getByRole('button', { name: 'Select contribution from Human contributor' }),
+    page.getByRole('button', { name: 'Select contribution from Operations Lead' }),
   ).toHaveAttribute('aria-pressed', 'true');
 });
 
@@ -187,14 +187,14 @@ test('STR-2-JOURNEY-01 fixture-backed conversation creation is canonical and ses
   const picker = page.getByRole('dialog', { name: 'Add participants', exact: true });
   const search = picker.getByRole('searchbox', { name: 'Search participants', exact: true });
   await expect(search).toBeFocused();
-  await picker.getByRole('checkbox', { name: /Responsible lead/ }).check();
+  await picker.getByRole('checkbox', { name: /Customer lead/ }).check();
   await picker.getByRole('checkbox', { name: /Intake Agent/ }).check();
   await search.fill('does not exist');
   await expect(picker.getByText('No matching participants.', { exact: true })).toBeVisible();
   await search.fill('');
-  await expect(picker.getByRole('checkbox', { name: /Responsible lead/ })).toBeChecked();
+  await expect(picker.getByRole('checkbox', { name: /Customer lead/ })).toBeChecked();
   await picker.getByRole('button', { name: 'Apply', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Remove Responsible lead' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Remove Customer lead' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Remove Intake Agent' })).toBeVisible();
 
   await message.press(process.platform === 'darwin' ? 'Meta+Enter' : 'Control+Enter');

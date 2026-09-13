@@ -70,10 +70,10 @@ describe('UI-SHELL-03 shell controls', () => {
     await user.click(screen.getByRole('tab', { name: 'In Progress, 3 items' }));
     await user.click(screen.getByRole('button', { name: 'Open: Prepare design-partner brief' }));
     await user.click(
-      screen.getByRole('button', { name: 'Select contribution from Human contributor' }),
+      screen.getByRole('button', { name: 'Select contribution from Operations Lead' }),
     );
     expect(
-      screen.getByRole('button', { name: 'Select contribution from Human contributor' }),
+      screen.getByRole('button', { name: 'Select contribution from Operations Lead' }),
     ).toHaveAttribute('aria-pressed', 'true');
   });
   it('Given source comparison, choices and notes never alter operational facts', async () => {

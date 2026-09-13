@@ -34,6 +34,7 @@ export function App({
   const origins = useRef<Record<string, HTMLElement>>({});
   const contentFocus = useRef<Record<string, HTMLElement>>({});
   const creationOrigin = useRef<HTMLElement | null>(null);
+  const pendingCreatedFocus = useRef<string | null>(null);
   const wasCreating = useRef(false);
   const collapsedDefault = useMedia('(max-width: 1100px)');
   const overlay = useMedia('(max-width: 900px)');
@@ -115,6 +116,7 @@ export function App({
       },
     }));
     setCreating(false);
+    pendingCreatedFocus.current = id;
     open(id);
   }
 
@@ -126,6 +128,11 @@ export function App({
       creationOrigin.current.focus();
     wasCreating.current = creating;
   }, [creating]);
+  useEffect(() => {
+    if (pendingCreatedFocus.current !== state.active || creating) return;
+    document.querySelector<HTMLElement>(`#panel-${state.active} h1`)?.focus();
+    pendingCreatedFocus.current = null;
+  }, [contexts, creating, state.active]);
   useEffect(() => {
     if (panelVisible) document.querySelector<HTMLElement>('[data-inspection-heading]')?.focus();
   }, [panelVisible, state.active]);
@@ -292,7 +299,7 @@ export function App({
             >
               {id === 'home' || id === 'conversations' ? null : (
                 <header className={styles.workspaceHeader}>
-                  <h1>{contexts[id].title}</h1>
+                  <h1 tabIndex={-1}>{contexts[id].title}</h1>
                   <span>{contexts[id].kind}</span>
                 </header>
               )}

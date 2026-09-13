@@ -18,11 +18,16 @@ export function NewConversation({
   const composer = useRef<HTMLTextAreaElement>(null);
   const add = useRef<HTMLButtonElement>(null);
   const picker = useRef<HTMLDivElement>(null);
+  const returnPickerFocus = useRef(false);
   const valid = message.trim().length > 0;
 
   useEffect(() => composer.current?.focus(), []);
   useEffect(() => {
     if (pickerOpen) document.getElementById('participant-search')?.focus();
+    else if (returnPickerFocus.current) {
+      add.current?.focus();
+      returnPickerFocus.current = false;
+    }
   }, [pickerOpen]);
   useEffect(() => {
     if (!pickerOpen) return;
@@ -43,8 +48,8 @@ export function NewConversation({
     setPickerOpen(true);
   };
   const closePicker = () => {
+    returnPickerFocus.current = true;
     setPickerOpen(false);
-    requestAnimationFrame(() => add.current?.focus());
   };
   const submit = () => {
     if (valid) onStart(message, selected);
@@ -69,118 +74,127 @@ export function NewConversation({
         <h1 id="new-conversation-title">New Conversation</h1>
         <p>Start a conversation with people and Agents.</p>
       </header>
-      <div className={styles.participantRow}>
-        <span className={styles.participantLabel}>To</span>
-        <div className={styles.participantChips}>
-          {selected.map((id) => {
-            const participant = participantById(id)!;
-            return (
-              <span key={id} className={styles.participantChip}>
-                <span aria-hidden="true" data-kind={participant.kind}>
-                  {participant.initials}
-                </span>
-                <span>{participant.name}</span>
-                <small>{participant.kind === 'agent' ? 'Agent' : 'Person'}</small>
-                <button
-                  aria-label={`Remove ${participant.name}`}
-                  onClick={() => setSelected((current) => current.filter((value) => value !== id))}
+      <div className={styles.conversationComposerCard}>
+        <div className={styles.participantRow}>
+          <span className={styles.participantLabel}>To</span>
+          <div className={styles.participantChips}>
+            {selected.map((id) => {
+              const participant = participantById(id)!;
+              return (
+                <span
+                  key={id}
+                  className={styles.participantChip}
+                  aria-label={`${participant.name}, ${participant.kind === 'agent' ? 'Agent' : 'Person'}`}
                 >
-                  ×
-                </button>
-              </span>
-            );
-          })}
-          <button
-            ref={add}
-            className={styles.addParticipant}
-            aria-label="Add participants"
-            aria-haspopup="dialog"
-            aria-expanded={pickerOpen}
-            onClick={openPicker}
-          >
-            + Add
-          </button>
-        </div>
-        {pickerOpen && (
-          <div
-            ref={picker}
-            className={styles.participantPicker}
-            role="dialog"
-            aria-label="Add participants"
-          >
-            <label>
-              <span className={styles.srOnly}>Search participants</span>
-              <input
-                id="participant-search"
-                type="search"
-                placeholder="Search people and Agents"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            </label>
-            {(['person', 'agent'] as const).map((kind) => {
-              const options = matches.filter((participant) => participant.kind === kind);
-              return options.length > 0 ? (
-                <fieldset key={kind}>
-                  <legend>{kind === 'person' ? 'People' : 'Agents'}</legend>
-                  {options.map((participant) => (
-                    <label key={participant.id}>
-                      <input
-                        type="checkbox"
-                        checked={pending.includes(participant.id)}
-                        onChange={() =>
-                          setPending((current) =>
-                            current.includes(participant.id)
-                              ? current.filter((id) => id !== participant.id)
-                              : [...current, participant.id],
-                          )
-                        }
-                      />
-                      <span aria-hidden="true" data-kind={participant.kind}>
-                        {participant.initials}
-                      </span>
-                      <span>
-                        <strong>{participant.name}</strong>
-                        <small>{participant.description}</small>
-                      </span>
-                    </label>
-                  ))}
-                </fieldset>
-              ) : null;
+                  <span aria-hidden="true" data-kind={participant.kind}>
+                    {participant.initials}
+                  </span>
+                  <span>{participant.name}</span>
+                  <button
+                    aria-label={`Remove ${participant.name}`}
+                    onClick={() =>
+                      setSelected((current) => current.filter((value) => value !== id))
+                    }
+                  >
+                    ×
+                  </button>
+                </span>
+              );
             })}
-            {matches.length === 0 && <p>No matching participants.</p>}
-            <footer>
-              <span aria-live="polite">{pending.length} selected</span>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  setSelected(pending);
-                  closePicker();
-                }}
-              >
-                Apply
-              </Button>
-            </footer>
+            <button
+              ref={add}
+              className={styles.addParticipant}
+              aria-label="Add participants"
+              aria-haspopup="dialog"
+              aria-expanded={pickerOpen}
+              onClick={openPicker}
+            >
+              + Add
+            </button>
           </div>
-        )}
-      </div>
-      <div className={styles.composer}>
-        <label htmlFor="new-conversation-message">Message</label>
-        <textarea
-          ref={composer}
-          id="new-conversation-message"
-          value={message}
-          onChange={(event) => setMessage(event.target.value)}
-          placeholder="Write a message…"
-        />
-        <div className={styles.composerTools}>
-          <span>
+          {pickerOpen && (
+            <div
+              ref={picker}
+              className={styles.participantPicker}
+              role="dialog"
+              aria-label="Add participants"
+            >
+              <label>
+                <span className={styles.srOnly}>Search participants</span>
+                <input
+                  id="participant-search"
+                  type="search"
+                  placeholder="Search people and Agents"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                />
+              </label>
+              {(['person', 'agent'] as const).map((kind) => {
+                const options = matches.filter((participant) => participant.kind === kind);
+                return options.length > 0 ? (
+                  <fieldset key={kind}>
+                    <legend>{kind === 'person' ? 'People' : 'Agents'}</legend>
+                    {options.map((participant) => (
+                      <label key={participant.id}>
+                        <input
+                          type="checkbox"
+                          checked={pending.includes(participant.id)}
+                          onChange={() =>
+                            setPending((current) =>
+                              current.includes(participant.id)
+                                ? current.filter((id) => id !== participant.id)
+                                : [...current, participant.id],
+                            )
+                          }
+                        />
+                        <span aria-hidden="true" data-kind={participant.kind}>
+                          {participant.initials}
+                        </span>
+                        <span>
+                          <strong>{participant.name}</strong>
+                          <small>{participant.description}</small>
+                        </span>
+                      </label>
+                    ))}
+                  </fieldset>
+                ) : null;
+              })}
+              {matches.length === 0 && <p>No matching participants.</p>}
+              <footer>
+                <span aria-live="polite">{pending.length} selected</span>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    setSelected(pending);
+                    closePicker();
+                  }}
+                >
+                  Apply
+                </Button>
+              </footer>
+            </div>
+          )}
+        </div>
+        <div className={styles.composer}>
+          <label className={styles.srOnly} htmlFor="new-conversation-message">
+            Message
+          </label>
+          <textarea
+            ref={composer}
+            id="new-conversation-message"
+            value={message}
+            onChange={(event) => setMessage(event.target.value)}
+            placeholder="Ask a question, request work, or coordinate a review…"
+          />
+          <div className={styles.composerTools}>
             <button disabled aria-describedby="mention-unavailable">
               @ Mention
             </button>
-            <small id="mention-unavailable">Mentions are not implemented.</small>
-          </span>
-          <span>⌘/Ctrl + Enter to start</span>
+            <small id="mention-unavailable" className={styles.srOnly}>
+              Mentions are not implemented.
+            </small>
+            <span>⌘/Ctrl + Enter to start</span>
+          </div>
         </div>
       </div>
       <p className={styles.creationBoundary}>

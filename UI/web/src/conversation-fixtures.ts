@@ -23,17 +23,17 @@ export interface ConversationRecord {
 export const conversationParticipants: ConversationParticipant[] = [
   {
     id: 'responsible-lead',
-    name: 'Responsible lead',
-    initials: 'RL',
+    name: 'Customer lead',
+    initials: 'CL',
     kind: 'person',
-    description: 'Owns the decision and coordinates the next human review.',
+    description: 'Owns the customer decision and coordinates the next review.',
   },
   {
     id: 'human-contributor',
-    name: 'Human contributor',
-    initials: 'HC',
+    name: 'Operations Lead',
+    initials: 'OL',
     kind: 'person',
-    description: 'Contributes context and reviews prepared material.',
+    description: 'Coordinates operational context and reviews prepared material.',
   },
   {
     id: 'intake-agent',
@@ -44,10 +44,17 @@ export const conversationParticipants: ConversationParticipant[] = [
   },
   {
     id: 'evidence-researcher',
-    name: 'Product Evidence Researcher',
+    name: 'Evidence Researcher',
     initials: 'ER',
     kind: 'agent',
     description: 'Organizes permitted evidence for responsible human review.',
+  },
+  {
+    id: 'product-agent',
+    name: 'Product Agent',
+    initials: 'PA',
+    kind: 'agent',
+    description: 'Prepares product context without taking external action.',
   },
 ];
 
