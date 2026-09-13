@@ -8,6 +8,11 @@ participate in the API package's existing tests, coverage, and gates.
 
 ## Run and connect
 
+For Codex, the repository includes a
+[local plugin and setup command](../../tooling/plugins/stara/README.md) that
+package these same two tools and a focused diagnostic skill. Its configured
+copy selects a built checkout explicitly and runs this existing stdio server.
+
 From the repository root, install the workspace and start Stara using the
 [setup guide](../../docs/setup.md), then compile the MCP entrypoint:
 
