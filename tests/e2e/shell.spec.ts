@@ -57,7 +57,7 @@ test('UI-JOURNEY-03 tabs reorder by pointer and keyboard, then close and reopen'
   await page
     .getByRole('textbox', { name: 'Conversation draft' })
     .fill('Preserve the evidence boundary.');
-  await page.getByRole('button', { name: 'Select contribution from Human contributor' }).click();
+  await page.getByRole('button', { name: 'Select contribution from Operations Lead' }).click();
   await page.getByRole('button', { name: 'Close Design-partner preparation' }).click();
   await expect(page.getByRole('status')).toContainText('Underlying work is unchanged');
   await page.getByRole('button', { name: 'Working contexts', exact: true }).click();
@@ -69,7 +69,7 @@ test('UI-JOURNEY-03 tabs reorder by pointer and keyboard, then close and reopen'
     'Preserve the evidence boundary.',
   );
   await expect(
-    page.getByRole('button', { name: 'Select contribution from Human contributor' }),
+    page.getByRole('button', { name: 'Select contribution from Operations Lead' }),
   ).toHaveAttribute('aria-pressed', 'true');
 });
 
@@ -164,4 +164,52 @@ test('UI-JOURNEY-05 overflow retains manual order and canonical identities', asy
   await expect(contextTitles).toHaveText(reorderedTitles);
   await expect(openResearch).toContainText('Conversation | Open | Unread material');
   await page.keyboard.press('Escape');
+});
+
+test('STR-2-JOURNEY-01 fixture-backed conversation creation is canonical and session only', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Conversations', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Conversations', exact: true })).toBeVisible();
+  await expect(page.getByRole('article')).toHaveCount(3);
+
+  await page.getByRole('button', { name: 'New Conversation', exact: true }).click();
+  const message = page.getByRole('textbox', { name: 'Message', exact: true });
+  await expect(message).toBeFocused();
+  const start = page.getByRole('button', { name: 'Start Conversation', exact: true });
+  await message.fill('   ');
+  await expect(start).toBeDisabled();
+  await message.fill('Coordinate the evidence review with the responsible group');
+
+  const add = page.getByRole('button', { name: 'Add participants', exact: true });
+  await add.click();
+  const picker = page.getByRole('dialog', { name: 'Add participants', exact: true });
+  const search = picker.getByRole('searchbox', { name: 'Search participants', exact: true });
+  await expect(search).toBeFocused();
+  await picker.getByRole('checkbox', { name: /Customer lead/ }).check();
+  await picker.getByRole('checkbox', { name: /Intake Agent/ }).check();
+  await search.fill('does not exist');
+  await expect(picker.getByText('No matching participants.', { exact: true })).toBeVisible();
+  await search.fill('');
+  await expect(picker.getByRole('checkbox', { name: /Customer lead/ })).toBeChecked();
+  await picker.getByRole('button', { name: 'Apply', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Remove Customer lead' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Remove Intake Agent' })).toBeVisible();
+
+  await message.press(process.platform === 'darwin' ? 'Meta+Enter' : 'Control+Enter');
+  const createdTitle = 'Coordinate the evidence review with the r…';
+  await expect(page.getByRole('heading', { name: createdTitle, exact: true })).toBeVisible();
+  await expect(page.getByText('No person or Agent was contacted.', { exact: true })).toBeVisible();
+  await expect(page.getByRole('tab', { name: /Coordinate the evidence review/ })).toHaveCount(1);
+
+  await page.getByRole('button', { name: 'Conversations', exact: true }).click();
+  await page.getByRole('button', { name: `Open ${createdTitle}`, exact: true }).click();
+  await expect(page.getByRole('tab', { name: /Coordinate the evidence review/ })).toHaveCount(1);
+  await page.reload();
+  await page.getByRole('button', { name: 'Conversations', exact: true }).click();
+  await expect(page.getByRole('button', { name: `Open ${createdTitle}`, exact: true })).toHaveCount(
+    0,
+  );
+  await expect(page.getByRole('article')).toHaveCount(3);
 });

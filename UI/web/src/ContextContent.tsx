@@ -1,5 +1,6 @@
 import { Button, Status, TextArea } from '@stara/ui';
-import { messages, sources } from './fixtures';
+import { sources } from './fixtures';
+import { participantById, seededContributions } from './conversation-fixtures';
 import type { WorkingContext } from './fixtures';
 import type { ContextMemory } from './workspace';
 import styles from './shell.module.css';
@@ -60,24 +61,47 @@ export function ContextContent({
       {context.kind === 'Conversation' && (
         <>
           <section aria-label="Conversation" className={styles.messages}>
-            {(context.draftOnly ? [] : messages).map((message, index) => (
-              <article
-                key={message.name}
-                className={styles.message}
-                data-selected={memory.selected === String(index)}
-              >
-                <button
-                  className={styles.messageSelect}
-                  aria-pressed={memory.selected === String(index)}
-                  onClick={() => onRemember({ selected: String(index) })}
-                  aria-label={`Select contribution from ${message.name}`}
-                >
-                  <strong>{message.name}</strong>
-                  <span>{message.role}</span>
-                </button>
-                <p>{message.text}</p>
+            {context.originalMessage && (
+              <article className={styles.message}>
+                <div className={styles.messageSelect}>
+                  <strong>You</strong>
+                  <span>Original message</span>
+                </div>
+                <p>{context.originalMessage}</p>
               </article>
-            ))}
+            )}
+            {(context.draftOnly || context.originalMessage ? [] : seededContributions).map(
+              (message, index) => {
+                const participant = participantById(message.participantId)!;
+                return (
+                  <article
+                    key={participant.id}
+                    className={styles.message}
+                    data-selected={memory.selected === String(index)}
+                  >
+                    <button
+                      className={styles.messageSelect}
+                      aria-pressed={memory.selected === String(index)}
+                      onClick={() => onRemember({ selected: String(index) })}
+                      aria-label={`Select contribution from ${participant.name}`}
+                    >
+                      <strong>{participant.name}</strong>
+                      <span>{message.role}</span>
+                    </button>
+                    <p>{message.text}</p>
+                  </article>
+                );
+              },
+            )}
+            {context.participantIds && (
+              <p className={styles.muted}>
+                Participants:{' '}
+                {context.participantIds.map((id) => participantById(id)?.name).join(', ') || 'None'}
+              </p>
+            )}
+            {context.originalMessage && (
+              <p className={styles.muted}>No person or Agent was contacted.</p>
+            )}
           </section>
           <TextArea
             label="Conversation draft"

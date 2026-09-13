@@ -1,12 +1,16 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { Button, Dialog, Icon, IconButton, Status } from '@stara/ui';
+import { Icon, IconButton, Status } from '@stara/ui';
 import { contexts as seededContexts } from './fixtures';
 import { createWorkspace, workspaceReducer } from './workspace';
 import type { ContextMemory } from './workspace';
 import { Tabs } from './Tabs';
 import { Home } from './Home';
 import { homeAttentionLabel } from './home-fixtures';
+import { conversationTitle, seededConversations } from './conversation-fixtures';
+import type { ConversationRecord } from './conversation-fixtures';
+import { Conversations } from './Conversations';
+import { NewConversation } from './NewConversation';
 import { ContextContent } from './ContextContent';
 import { ContextPicker } from './ContextPicker';
 import { Inspector } from './Inspector';
@@ -20,6 +24,7 @@ export function App({
 }: { environment?: PublicRuntimeConfig['environment'] } = {}) {
   const [state, dispatch] = useReducer(workspaceReducer, undefined, createWorkspace);
   const [contexts, setContexts] = useState(seededContexts);
+  const [conversations, setConversations] = useState<ConversationRecord[]>(seededConversations);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [navOverride, setNavOverride] = useState<boolean | null>(null);
   const [picker, setPicker] = useState<string | null>(null);
@@ -28,6 +33,9 @@ export function App({
   const panelScroll = useRef<Record<string, number>>({});
   const origins = useRef<Record<string, HTMLElement>>({});
   const contentFocus = useRef<Record<string, HTMLElement>>({});
+  const creationOrigin = useRef<HTMLElement | null>(null);
+  const pendingCreatedFocus = useRef<string | null>(null);
+  const wasCreating = useRef(false);
   const collapsedDefault = useMedia('(max-width: 1100px)');
   const overlay = useMedia('(max-width: 900px)');
   const mobile = useMedia('(max-width: 700px)');
@@ -38,7 +46,7 @@ export function App({
     (panelVisible && !overlay && collapsedDefault) || (navOverride ?? collapsedDefault);
   const layerOpen = overlay && panelVisible;
   const staging = environment === 'staging';
-  const noticeInFrame = staging && picker === null && !creating;
+  const noticeInFrame = staging && picker === null;
 
   function remember(patch: Partial<ContextMemory>, id = state.active) {
     dispatch({ type: 'remember', id, patch });
@@ -69,10 +77,62 @@ export function App({
     origins.current[state.active] = origin;
     remember({ inspector: true });
   }
+  function create(origin: HTMLElement) {
+    if (creating) return;
+    creationOrigin.current = origin;
+    setCreating(true);
+  }
+  function cancelCreation() {
+    setCreating(false);
+  }
+  function startConversation(message: string, participantIds: string[]) {
+    const id = `session-conversation-${conversations.length + 1}`;
+    const title = conversationTitle(message);
+    const conversation: ConversationRecord = {
+      id,
+      title,
+      message: message.trim(),
+      participantIds,
+      statusLabel: 'Session only',
+      synthetic: true,
+      sessionOnly: true,
+      executing: false,
+    };
+    setConversations((current) => [...current, conversation]);
+    setContexts((current) => ({
+      ...current,
+      [id]: {
+        id,
+        title,
+        kind: 'Conversation',
+        icon: 'conversation',
+        status: 'waiting',
+        statusLabel: 'Session only',
+        lead: 'You',
+        summary: 'A synthetic session Conversation. No participant was contacted.',
+        originalMessage: conversation.message,
+        participantIds,
+        verified: false,
+      },
+    }));
+    setCreating(false);
+    pendingCreatedFocus.current = id;
+    open(id);
+  }
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+  useEffect(() => {
+    if (wasCreating.current && !creating && creationOrigin.current?.isConnected)
+      creationOrigin.current.focus();
+    wasCreating.current = creating;
+  }, [creating]);
+  useEffect(() => {
+    if (pendingCreatedFocus.current !== state.active || creating) return;
+    document.querySelector<HTMLElement>(`#panel-${state.active} h1`)?.focus();
+    pendingCreatedFocus.current = null;
+  }, [contexts, creating, state.active]);
   useEffect(() => {
     if (panelVisible) document.querySelector<HTMLElement>('[data-inspection-heading]')?.focus();
   }, [panelVisible, state.active]);
@@ -140,7 +200,7 @@ export function App({
             <IconButton
               icon="conversation"
               label="New conversation"
-              onClick={() => setCreating(true)}
+              onClick={(event) => create(event.currentTarget)}
             />
             <IconButton icon="search" label="Search contexts" onClick={() => setPicker('')} />
             <IconButton
@@ -163,6 +223,16 @@ export function App({
             <Status state="attention" compact>
               {homeAttentionLabel}
             </Status>
+          </button>
+          <button
+            className={styles.navRow}
+            title="Conversations"
+            aria-label="Conversations"
+            aria-current={state.active === 'conversations' ? 'page' : undefined}
+            onClick={() => open('conversations')}
+          >
+            <Icon name="conversation" />
+            <span>Conversations</span>
           </button>
         </nav>
       </aside>
@@ -198,7 +268,7 @@ export function App({
               <IconButton
                 icon="conversation"
                 label="New conversation"
-                onClick={() => setCreating(true)}
+                onClick={(event) => create(event.currentTarget)}
               />
             </>
           )}
@@ -216,6 +286,7 @@ export function App({
           />
         </div>
         <div className={styles.center} inert={layerOpen}>
+          {creating && <NewConversation onCancel={cancelCreation} onStart={startConversation} />}
           {Object.keys(state.memory).map((id) => (
             <section
               key={id}
@@ -223,12 +294,12 @@ export function App({
               role="tabpanel"
               aria-label={contexts[id].title}
               tabIndex={-1}
-              hidden={state.active !== id}
+              hidden={creating || state.active !== id}
               className={styles.contextPanel}
             >
-              {id === 'home' ? null : (
+              {id === 'home' || id === 'conversations' ? null : (
                 <header className={styles.workspaceHeader}>
-                  <h1>{contexts[id].title}</h1>
+                  <h1 tabIndex={-1}>{contexts[id].title}</h1>
                   <span>{contexts[id].kind}</span>
                 </header>
               )}
@@ -243,6 +314,8 @@ export function App({
                     onSelect={(selected) => remember({ selected }, 'home')}
                     onOpen={open}
                   />
+                ) : id === 'conversations' ? (
+                  <Conversations conversations={conversations} onCreate={create} onOpen={open} />
                 ) : (
                   <ContextContent
                     context={contexts[id]}
@@ -291,34 +364,6 @@ export function App({
           onDismiss={() => setPicker(null)}
           onMove={(id, to) => dispatch({ type: 'move', id, to })}
         />
-      )}
-      {creating && (
-        <Dialog title="New conversation" onDismiss={() => setCreating(false)}>
-          {staging && <StagingNotice />}
-          <p className={styles.dialogCopy}>Local draft. No participants will be contacted.</p>
-          <Button
-            variant="primary"
-            onClick={() => {
-              const id = `draft-${Object.keys(contexts).length}`;
-              setContexts((previous) => ({
-                ...previous,
-                [id]: {
-                  ...seededContexts.conversation,
-                  id,
-                  title: 'Untitled conversation',
-                  status: 'waiting',
-                  statusLabel: 'Unsent draft',
-                  summary: 'A local conversation draft. No agent or person has received a message.',
-                  draftOnly: true,
-                },
-              }));
-              open(id);
-              setCreating(false);
-            }}
-          >
-            Create draft
-          </Button>
-        </Dialog>
       )}
     </div>
   );

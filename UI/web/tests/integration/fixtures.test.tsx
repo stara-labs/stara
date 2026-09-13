@@ -1,14 +1,18 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { App } from '../../src/App';
-import { contexts, messages, sources } from '../../src/fixtures';
+import { contexts, sources } from '../../src/fixtures';
+import { conversationParticipants, seededContributions } from '../../src/conversation-fixtures';
 
 afterEach(cleanup);
 
 const roles = ['You', 'Responsible lead', 'Human contributor'];
 const permittedCompoundLabels = [
+  'Customer lead',
+  'Operations Lead',
   'Intake Agent',
-  'Product Evidence Researcher',
+  'Evidence Researcher',
+  'Product Agent',
   'Company Knowledge',
 ];
 const personalNames = (text: string) =>
@@ -22,15 +26,19 @@ describe('UI-FIXTURES-01 public synthetic fixture boundary', () => {
       expect(roles).toContain(context.lead);
       expect(context.verified).toBe(false);
     }
-    for (const message of messages) {
-      expect([...roles, ...permittedCompoundLabels]).toContain(message.name);
+    for (const participant of conversationParticipants) {
+      expect([...roles, ...permittedCompoundLabels]).toContain(participant.name);
     }
     expect(sources.map((source) => source.address)).toEqual([
       '100 Example Way',
       '200 Sample Avenue',
     ]);
     expect(sources[0].provenance).toBe('Uploaded by Responsible lead');
-    expect(personalNames(JSON.stringify({ contexts, messages, sources }))).toEqual([]);
+    expect(
+      personalNames(
+        JSON.stringify({ contexts, conversationParticipants, seededContributions, sources }),
+      ),
+    ).toEqual([]);
   });
 
   it('keeps every seeded composition role-based and visibly simulated without authority or verification claims', () => {
@@ -40,7 +48,9 @@ describe('UI-FIXTURES-01 public synthetic fixture boundary', () => {
         'Simulated workspace | Synthetic fixtures | Session only',
       ),
     ).toBeVisible();
-    for (const context of Object.values(contexts).filter((entry) => entry.kind !== 'Home')) {
+    for (const context of Object.values(contexts).filter(
+      (entry) => entry.kind !== 'Home' && entry.kind !== 'Conversations',
+    )) {
       fireEvent.click(screen.getByRole('button', { name: 'Working contexts' }));
       fireEvent.click(
         within(screen.getByRole('dialog')).getByRole('button', { name: `Open ${context.title}` }),
