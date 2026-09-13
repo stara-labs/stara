@@ -1,0 +1,20 @@
+{
+  "name": "stara",
+  "version": "0.1.0",
+  "description": "Read local Stara API availability and public runtime configuration.",
+  "author": {
+    "name": "Stara Labs"
+  },
+  "repository": "https://github.com/stara-labs/stara",
+  "license": "Apache-2.0",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Stara",
+    "shortDescription": "Check your local Stara API.",
+    "longDescription": "Read service availability and public runtime configuration from a local Stara API. The workspace uses synthetic fixtures; business records, writes, authentication and agent execution are not exposed by this plugin.",
+    "developerName": "Stara Labs",
+    "category": "Productivity",
+    "capabilities": ["Read"],
+    "defaultPrompt": ["Check my local Stara API and report its environment."]
+  }
+}
