@@ -142,6 +142,9 @@ describe('STR-2 fixture-backed New Conversation', () => {
     expect(screen.getByRole('button', { name: 'Remove Intake Agent' })).toBeVisible();
     expect(suggestions).not.toBeInTheDocument();
     expect(entry).toHaveFocus();
+    expect(entry).toHaveAttribute('placeholder', '');
+    await user.click(screen.getByRole('button', { name: 'Remove Intake Agent' }));
+    expect(entry).toHaveAttribute('placeholder', 'Add People or Agents');
   });
 
   it('creates a no-participant session context, focuses it, and reopens it canonically', async () => {

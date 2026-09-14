@@ -872,7 +872,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--stara-space-2);
+  gap: var(--stara-space-1);
 }
 .participantEntry {
   flex: 1;
@@ -880,6 +880,7 @@
 }
 .participantEntry input {
   width: 100%;
+  min-height: var(--stara-control-compact-height);
   border: 0;
   outline: 0;
   background: transparent;
@@ -932,7 +933,7 @@
   line-height: 1;
 }
 .addParticipant {
-  margin-left: auto;
+  margin-left: var(--stara-space-1);
   min-height: auto;
   padding-block: 0;
   padding-inline: 0;

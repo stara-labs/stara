@@ -111,7 +111,7 @@ export function NewConversation({
                 aria-label="Add People or Agents"
                 aria-controls={pickerMode ? 'participant-picker' : undefined}
                 aria-expanded={Boolean(pickerMode)}
-                placeholder="Add People or Agents"
+                placeholder={selected.length === 0 ? 'Add People or Agents' : ''}
                 value={pickerMode === 'inline' ? query : ''}
                 onChange={(event) => {
                   setQuery(event.target.value);
