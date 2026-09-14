@@ -176,7 +176,9 @@ test('STR-2-JOURNEY-01 fixture-backed conversation creation is canonical and ses
 
   await page.getByRole('button', { name: 'New Conversation', exact: true }).click();
   const message = page.getByRole('textbox', { name: 'Message', exact: true });
-  await expect(message).toBeFocused();
+  await expect(
+    page.getByRole('combobox', { name: 'Add People or Agents', exact: true }),
+  ).toBeFocused();
   const start = page.getByRole('button', { name: 'Start conversation', exact: true });
   await message.fill('   ');
   await expect(start).toBeDisabled();
@@ -184,8 +186,14 @@ test('STR-2-JOURNEY-01 fixture-backed conversation creation is canonical and ses
 
   const add = page.getByRole('button', { name: 'Add People or Agents', exact: true });
   await add.click();
-  const picker = page.getByRole('dialog', { name: 'Add participants', exact: true });
-  const search = picker.getByRole('searchbox', { name: 'Search participants', exact: true });
+  const picker = page.getByRole('region', {
+    name: 'Recent and recommended people and Agents',
+    exact: true,
+  });
+  const search = picker.getByRole('searchbox', {
+    name: 'Search people or Agents',
+    exact: true,
+  });
   await expect(search).toBeFocused();
   await picker.getByRole('checkbox', { name: /Customer lead/ }).check();
   await picker.getByRole('checkbox', { name: /Intake Agent/ }).check();

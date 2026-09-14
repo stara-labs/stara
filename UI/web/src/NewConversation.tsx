@@ -13,31 +13,36 @@ export function NewConversation({
   const [message, setMessage] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
   const [pending, setPending] = useState<string[]>([]);
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerMode, setPickerMode] = useState<'inline' | 'full' | null>(null);
   const [query, setQuery] = useState('');
   const composer = useRef<HTMLTextAreaElement>(null);
+  const participantInput = useRef<HTMLInputElement>(null);
   const add = useRef<HTMLButtonElement>(null);
   const picker = useRef<HTMLDivElement>(null);
   const returnPickerFocus = useRef(false);
   const valid = message.trim().length > 0;
 
-  useEffect(() => composer.current?.focus(), []);
+  useEffect(() => participantInput.current?.focus(), []);
   useEffect(() => {
-    if (pickerOpen) document.getElementById('participant-search')?.focus();
+    if (pickerMode === 'full') document.getElementById('participant-search')?.focus();
     else if (returnPickerFocus.current) {
       add.current?.focus();
       returnPickerFocus.current = false;
     }
-  }, [pickerOpen]);
+  }, [pickerMode]);
   useEffect(() => {
-    if (!pickerOpen) return;
+    if (!pickerMode) return;
     const dismiss = (event: PointerEvent) => {
-      if (!picker.current?.contains(event.target as Node) && event.target !== add.current)
-        setPickerOpen(false);
+      if (
+        !picker.current?.contains(event.target as Node) &&
+        event.target !== add.current &&
+        event.target !== participantInput.current
+      )
+        setPickerMode(null);
     };
     document.addEventListener('pointerdown', dismiss);
     return () => document.removeEventListener('pointerdown', dismiss);
-  }, [pickerOpen]);
+  }, [pickerMode]);
 
   const matches = conversationParticipants.filter((participant) =>
     `${participant.name} ${participant.description}`.toLowerCase().includes(query.toLowerCase()),
@@ -45,11 +50,11 @@ export function NewConversation({
   const openPicker = () => {
     setPending(selected);
     setQuery('');
-    setPickerOpen(true);
+    setPickerMode('full');
   };
   const closePicker = () => {
     returnPickerFocus.current = true;
-    setPickerOpen(false);
+    setPickerMode(null);
   };
   const submit = () => {
     if (valid) onStart(message, selected);
@@ -62,7 +67,7 @@ export function NewConversation({
       onKeyDown={(event) => {
         if (event.key === 'Escape') {
           event.preventDefault();
-          if (pickerOpen) closePicker();
+          if (pickerMode) closePicker();
           else onCancel();
         } else if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
           event.preventDefault();
@@ -78,9 +83,6 @@ export function NewConversation({
         <div className={styles.participantRow}>
           <span className={styles.participantLabel}>To</span>
           <div className={styles.participantChips}>
-            {selected.length === 0 && (
-              <span className={styles.participantPlaceholder}>Add People or Agents</span>
-            )}
             {selected.map((id) => {
               const participant = participantById(id)!;
               return (
@@ -104,34 +106,53 @@ export function NewConversation({
                 </span>
               );
             })}
+            <label className={styles.participantEntry}>
+              <span className={styles.srOnly}>Add People or Agents</span>
+              <input
+                ref={participantInput}
+                role="combobox"
+                aria-label="Add People or Agents"
+                aria-controls={pickerMode ? 'participant-picker' : undefined}
+                aria-expanded={Boolean(pickerMode)}
+                placeholder="Add People or Agents"
+                value={pickerMode === 'inline' ? query : ''}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setPickerMode(event.target.value ? 'inline' : null);
+                }}
+              />
+            </label>
             <button
               ref={add}
               className={styles.addParticipant}
               aria-label="Add People or Agents"
               aria-haspopup="dialog"
-              aria-expanded={pickerOpen}
+              aria-expanded={pickerMode === 'full'}
               onClick={openPicker}
             >
               + Add
             </button>
           </div>
-          {pickerOpen && (
+          {pickerMode && (
             <div
+              id="participant-picker"
               ref={picker}
               className={styles.participantPicker}
-              role="dialog"
-              aria-label="Add participants"
+              role="region"
+              aria-label="Recent and recommended people and Agents"
             >
-              <label>
-                <span className={styles.srOnly}>Search participants</span>
-                <input
-                  id="participant-search"
-                  type="search"
-                  placeholder="Search people and Agents"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                />
-              </label>
+              {pickerMode === 'full' && (
+                <label>
+                  <span className={styles.srOnly}>Search people or Agents</span>
+                  <input
+                    id="participant-search"
+                    type="search"
+                    placeholder="Search people or Agents"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                  />
+                </label>
+              )}
               {(['person', 'agent'] as const).map((kind) => {
                 const options = matches.filter((participant) => participant.kind === kind);
                 return options.length > 0 ? (
@@ -141,14 +162,22 @@ export function NewConversation({
                       <label key={participant.id}>
                         <input
                           type="checkbox"
-                          checked={pending.includes(participant.id)}
-                          onChange={() =>
-                            setPending((current) =>
+                          checked={(pickerMode === 'full' ? pending : selected).includes(
+                            participant.id,
+                          )}
+                          onChange={() => {
+                            const update = (current: string[]) =>
                               current.includes(participant.id)
                                 ? current.filter((id) => id !== participant.id)
-                                : [...current, participant.id],
-                            )
-                          }
+                                : [...current, participant.id];
+                            if (pickerMode === 'full') setPending(update);
+                            else {
+                              setSelected(update);
+                              setQuery('');
+                              setPickerMode(null);
+                              participantInput.current?.focus();
+                            }
+                          }}
                         />
                         <span aria-hidden="true" data-kind={participant.kind}>
                           {participant.initials}
@@ -163,18 +192,20 @@ export function NewConversation({
                 ) : null;
               })}
               {matches.length === 0 && <p>No matching participants.</p>}
-              <footer>
-                <span aria-live="polite">{pending.length} selected</span>
-                <Button
-                  variant="primary"
-                  onClick={() => {
-                    setSelected(pending);
-                    closePicker();
-                  }}
-                >
-                  Apply
-                </Button>
-              </footer>
+              {pickerMode === 'full' && (
+                <footer>
+                  <span aria-live="polite">{pending.length} selected</span>
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      setSelected(pending);
+                      closePicker();
+                    }}
+                  >
+                    Apply
+                  </Button>
+                </footer>
+              )}
             </div>
           )}
         </div>
@@ -208,10 +239,6 @@ export function NewConversation({
           Start conversation
         </Button>
       </footer>
-      <p className={styles.creationBoundary}>
-        Synthetic and session only. Starting does not contact a person, invoke an Agent, or write
-        externally.
-      </p>
     </section>
   );
 }

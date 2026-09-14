@@ -818,19 +818,18 @@
   font: var(--stara-type-supporting);
 }
 .newConversation {
-  width: min(100%, 720px);
+  width: min(100%, calc(30 * var(--stara-space-6)));
   margin-inline: auto;
   display: grid;
   align-content: start;
-  padding: calc(5 * var(--stara-space-5) + var(--stara-space-2) + var(--stara-border-hairline)) 0
-    var(--stara-space-5);
+  padding: 15vh 0 var(--stara-space-5);
   gap: 0;
   overflow: auto;
 }
 .newConversation > header {
   display: grid;
   gap: var(--stara-space-related-text);
-  margin-bottom: var(--stara-space-5);
+  margin-bottom: calc(var(--stara-space-5) + var(--stara-border-hairline));
 }
 .newConversation h1 {
   font:
@@ -839,8 +838,7 @@
     system-ui,
     sans-serif;
 }
-.newConversation > header p,
-.creationBoundary {
+.newConversation > header p {
   color: var(--stara-color-text-muted);
   font:
     13px/20px Inter,
@@ -861,7 +859,7 @@
   grid-template-columns: var(--stara-control-standard-height) minmax(0, 1fr);
   align-items: center;
   gap: var(--stara-space-2);
-  min-height: 38px;
+  min-height: var(--stara-row-standard-height);
   padding: var(--stara-space-2) var(--stara-space-3);
   border-bottom: var(--stara-border-hairline) solid var(--stara-color-border-subtle);
 }
@@ -871,19 +869,25 @@
 }
 .participantChips {
   display: flex;
+  align-self: end;
   align-items: center;
   flex-wrap: wrap;
   gap: var(--stara-space-2);
 }
-.participantPlaceholder {
+.participantEntry {
   flex: 1;
-  color: var(--stara-color-text-muted);
+  min-width: calc(5 * var(--stara-control-standard-height));
+}
+.participantEntry input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--stara-color-text-primary);
   font: var(--stara-type-control-label);
 }
-.addParticipant {
-  margin-left: auto;
-  min-height: auto;
-  padding-inline: 0;
+.participantEntry input::placeholder {
+  color: var(--stara-color-text-muted);
 }
 .participantChip {
   min-height: var(--stara-control-compact-height);
@@ -922,10 +926,10 @@
   font: var(--stara-type-control-label);
 }
 .addParticipant {
+  margin-left: auto;
   min-height: auto;
+  padding-block: 0;
   padding-inline: 0;
-  position: relative;
-  top: var(--stara-space-1);
 }
 .participantChip button:hover,
 .addParticipant:hover {
@@ -1002,7 +1006,9 @@
   display: grid;
 }
 .composer textarea {
-  min-height: 99px;
+  min-height: calc(
+    var(--stara-field-textarea-minimum-height) + var(--stara-space-5) - var(--stara-border-hairline)
+  );
   resize: vertical;
   padding: var(--stara-space-3);
   border: 0;
@@ -1022,8 +1028,9 @@
   justify-content: flex-end;
   margin-top: calc(var(--stara-space-5) + var(--stara-space-1));
 }
-.creationBoundary {
-  margin-top: var(--stara-space-2);
+.creationActions > button {
+  padding-inline: var(--stara-space-2);
+  border-width: 0;
 }
 @media (max-width: 700px) {
   .newConversation {

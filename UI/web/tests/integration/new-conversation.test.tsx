@@ -23,7 +23,7 @@ describe('STR-2 fixture-backed New Conversation', () => {
     render(<App />);
     await user.click(screen.getByRole('button', { name: 'New conversation' }));
     const composer = screen.getByRole('textbox', { name: 'Message' });
-    expect(composer).toHaveFocus();
+    expect(screen.getByRole('combobox', { name: 'Add People or Agents' })).toHaveFocus();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     const start = screen.getByRole('button', { name: 'Start conversation' });
     expect(start).toBeDisabled();
@@ -60,16 +60,20 @@ describe('STR-2 fixture-backed New Conversation', () => {
     await user.click(screen.getByRole('button', { name: 'New conversation' }));
     const add = screen.getByRole('button', { name: 'Add People or Agents' });
     await user.click(add);
-    let picker = screen.getByRole('dialog', { name: 'Add participants' });
+    let picker = screen.getByRole('region', {
+      name: 'Recent and recommended people and Agents',
+    });
     await user.click(within(picker).getByRole('checkbox', { name: /Operations Lead/ }));
     await user.click(within(picker).getByRole('button', { name: 'Apply' }));
     expect(screen.getByRole('button', { name: 'Remove Operations Lead' })).toBeVisible();
     await user.click(add);
     fireEvent.pointerDown(document.body);
-    expect(screen.queryByRole('dialog', { name: 'Add participants' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('region', { name: 'Recent and recommended people and Agents' }),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Remove Operations Lead' })).toBeVisible();
     await user.click(add);
-    picker = screen.getByRole('dialog', { name: 'Add participants' });
+    picker = screen.getByRole('region', { name: 'Recent and recommended people and Agents' });
     await user.keyboard('{Escape}');
     expect(picker).not.toBeInTheDocument();
     expect(add).toHaveFocus();
@@ -81,13 +85,15 @@ describe('STR-2 fixture-backed New Conversation', () => {
     await user.click(screen.getByRole('button', { name: 'New conversation' }));
     const add = screen.getByRole('button', { name: 'Add People or Agents' });
     await user.click(add);
-    let picker = screen.getByRole('dialog', { name: 'Add participants' });
+    let picker = screen.getByRole('region', {
+      name: 'Recent and recommended people and Agents',
+    });
     await user.click(within(picker).getByRole('checkbox', { name: /Customer lead/ }));
     await user.click(within(picker).getByRole('checkbox', { name: /Product Agent/ }));
     await user.click(within(picker).getByRole('button', { name: 'Apply' }));
     await user.click(screen.getByRole('button', { name: 'Remove Customer lead' }));
     await user.click(add);
-    picker = screen.getByRole('dialog', { name: 'Add participants' });
+    picker = screen.getByRole('region', { name: 'Recent and recommended people and Agents' });
     expect(within(picker).getByRole('checkbox', { name: /Customer lead/ })).not.toBeChecked();
     expect(within(picker).getByRole('checkbox', { name: /Product Agent/ })).toBeChecked();
   });
@@ -98,10 +104,12 @@ describe('STR-2 fixture-backed New Conversation', () => {
     await user.click(screen.getByRole('button', { name: 'New conversation' }));
     const add = screen.getByRole('button', { name: 'Add People or Agents' });
     await user.click(add);
-    const picker = screen.getByRole('dialog', { name: 'Add participants' });
+    const picker = screen.getByRole('region', {
+      name: 'Recent and recommended people and Agents',
+    });
     expect(within(picker).getByRole('group', { name: 'People' })).toBeVisible();
     expect(within(picker).getByRole('group', { name: 'Agents' })).toBeVisible();
-    const search = within(picker).getByRole('searchbox', { name: 'Search participants' });
+    const search = within(picker).getByRole('searchbox', { name: 'Search people or Agents' });
     expect(search).toHaveFocus();
     await user.click(within(picker).getByRole('checkbox', { name: /Customer lead/ }));
     await user.click(within(picker).getByRole('checkbox', { name: /Intake Agent/ }));
@@ -116,6 +124,23 @@ describe('STR-2 fixture-backed New Conversation', () => {
     expect(screen.getByRole('button', { name: 'Remove Intake Agent' })).toBeVisible();
     await user.click(screen.getByRole('button', { name: 'Remove Customer lead' }));
     expect(screen.queryByRole('button', { name: 'Remove Customer lead' })).not.toBeInTheDocument();
+  });
+
+  it('filters and selects directly from the inline To combobox', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole('button', { name: 'New conversation' }));
+    const entry = screen.getByRole('combobox', { name: 'Add People or Agents' });
+    await user.type(entry, 'Intake');
+    const suggestions = screen.getByRole('region', {
+      name: 'Recent and recommended people and Agents',
+    });
+    expect(within(suggestions).queryByRole('searchbox')).not.toBeInTheDocument();
+    expect(within(suggestions).queryByRole('button', { name: 'Apply' })).not.toBeInTheDocument();
+    await user.click(within(suggestions).getByRole('checkbox', { name: /Intake Agent/ }));
+    expect(screen.getByRole('button', { name: 'Remove Intake Agent' })).toBeVisible();
+    expect(suggestions).not.toBeInTheDocument();
+    expect(entry).toHaveFocus();
   });
 
   it('creates a no-participant session context, focuses it, and reopens it canonically', async () => {
@@ -147,7 +172,9 @@ describe('STR-2 fixture-backed New Conversation', () => {
     render(<App />);
     await user.click(screen.getByRole('button', { name: 'New conversation' }));
     await user.click(screen.getByRole('button', { name: 'Add People or Agents' }));
-    const picker = screen.getByRole('dialog', { name: 'Add participants' });
+    const picker = screen.getByRole('region', {
+      name: 'Recent and recommended people and Agents',
+    });
     await user.click(within(picker).getByRole('checkbox', { name: /Customer lead/ }));
     await user.click(within(picker).getByRole('checkbox', { name: /Evidence Researcher/ }));
     await user.click(within(picker).getByRole('button', { name: 'Apply' }));
