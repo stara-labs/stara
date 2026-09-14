@@ -66,6 +66,7 @@ describe('STR-2 fixture-backed New Conversation', () => {
     await user.click(within(picker).getByRole('checkbox', { name: /Operations Lead/ }));
     await user.click(within(picker).getByRole('button', { name: 'Apply' }));
     expect(screen.getByRole('button', { name: 'Remove Operations Lead' })).toBeVisible();
+    expect(screen.getByRole('textbox', { name: 'Message' })).toHaveFocus();
     await user.click(add);
     fireEvent.pointerDown(document.body);
     expect(

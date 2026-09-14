@@ -91,9 +91,6 @@ export function NewConversation({
                   className={styles.participantChip}
                   aria-label={`${participant.name}, ${participant.kind === 'agent' ? 'Agent' : 'Person'}`}
                 >
-                  <span aria-hidden="true" data-kind={participant.kind}>
-                    {participant.initials}
-                  </span>
                   <span>{participant.name}</span>
                   <button
                     aria-label={`Remove ${participant.name}`}
@@ -199,7 +196,8 @@ export function NewConversation({
                     variant="primary"
                     onClick={() => {
                       setSelected(pending);
-                      closePicker();
+                      setPickerMode(null);
+                      composer.current?.focus();
                     }}
                   >
                     Apply
