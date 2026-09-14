@@ -35,7 +35,7 @@ for (const width of [1440, 1100, 900, 700, 390]) {
       await page.screenshot({
         path: testInfo.outputPath(`${width}-${theme}-new-conversation.png`),
       });
-      await page.getByRole('button', { name: 'Add participants', exact: true }).click();
+      await page.getByRole('button', { name: 'Add People or Agents', exact: true }).click();
       await expect(
         page.getByRole('dialog', { name: 'Add participants', exact: true }),
       ).toBeVisible();
@@ -43,7 +43,18 @@ for (const width of [1440, 1100, 900, 700, 390]) {
       await page.screenshot({
         path: testInfo.outputPath(`${width}-${theme}-participant-picker.png`),
       });
-      await page.keyboard.press('Escape');
+      await page
+        .getByRole('dialog', { name: 'Add participants', exact: true })
+        .getByRole('checkbox', { name: /Intake Agent/ })
+        .check();
+      await page
+        .getByRole('dialog', { name: 'Add participants', exact: true })
+        .getByRole('button', { name: 'Apply', exact: true })
+        .click();
+      await expect(page.getByRole('button', { name: 'Remove Intake Agent' })).toBeVisible();
+      await page.screenshot({
+        path: testInfo.outputPath(`${width}-${theme}-intake-agent-selected.png`),
+      });
       await page.getByRole('button', { name: 'Cancel', exact: true }).click();
     }
   });

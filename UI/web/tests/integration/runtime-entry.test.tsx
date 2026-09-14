@@ -95,7 +95,7 @@ describe('REL-09 actual browser entry runtime gate', () => {
     fireEvent(screen.getByRole('dialog'), new Event('cancel', { cancelable: true }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'New conversation' }));
-    expect(screen.getByRole('heading', { name: 'New Conversation' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'New conversation' })).toBeVisible();
     expectNotice();
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
     expectNotice();

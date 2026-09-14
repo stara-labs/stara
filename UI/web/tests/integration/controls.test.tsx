@@ -126,10 +126,10 @@ describe('UI-SHELL-03 shell controls', () => {
     render(<App />);
     await user.click(screen.getByRole('button', { name: 'New conversation' }));
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
-    expect(screen.queryByRole('heading', { name: 'New Conversation' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'New conversation' })).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'New conversation' }));
     await user.type(screen.getByRole('textbox', { name: 'Message' }), 'Review local evidence');
-    await user.click(screen.getByRole('button', { name: 'Start Conversation' }));
+    await user.click(screen.getByRole('button', { name: 'Start conversation' }));
     expect(screen.getByRole('heading', { name: 'Review local evidence' })).toBeVisible();
     expect(screen.getAllByText('No person or Agent was contacted.')[0]).toBeVisible();
     expect(

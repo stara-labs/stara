@@ -193,7 +193,7 @@ test('REL-09 staging notice survives contexts, native dialogs, Escape, theme and
   await expect(picker).toHaveCount(0);
   await notice(page);
   await page.getByRole('button', { name: 'New conversation' }).click();
-  const creation = page.getByRole('region', { name: 'New Conversation', exact: true });
+  const creation = page.getByRole('region', { name: 'New conversation', exact: true });
   await expect(creation).toBeVisible();
   await notice(page);
   await page.keyboard.press('Escape');
@@ -279,7 +279,7 @@ for (const width of [1100, 900, 700]) {
           .fill('Synthetic temporary message.');
         note = await notice(page);
         await fitsAndDoesNotCover(page, note, [
-          page.getByRole('button', { name: 'Start Conversation' }),
+          page.getByRole('button', { name: 'Start conversation' }),
         ]);
         await accessibility(page, note, accessible);
         await page.screenshot({

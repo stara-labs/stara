@@ -25,12 +25,12 @@ describe('STR-2 fixture-backed New Conversation', () => {
     const composer = screen.getByRole('textbox', { name: 'Message' });
     expect(composer).toHaveFocus();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    const start = screen.getByRole('button', { name: 'Start Conversation' });
+    const start = screen.getByRole('button', { name: 'Start conversation' });
     expect(start).toBeDisabled();
     await user.type(composer, '   ');
     expect(start).toBeDisabled();
     await user.keyboard('{Meta>}{Enter}{/Meta}');
-    expect(screen.getByRole('heading', { name: 'New Conversation' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'New conversation' })).toBeVisible();
     await user.clear(composer);
     await user.type(composer, 'Coordinate the evidence review');
     expect(start).toBeEnabled();
@@ -42,12 +42,12 @@ describe('STR-2 fixture-backed New Conversation', () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole('button', { name: 'New conversation' }));
-    expect(screen.getByRole('region', { name: 'New Conversation' })).toBeVisible();
+    expect(screen.getByRole('region', { name: 'New conversation' })).toBeVisible();
     expect(screen.queryByRole('dialog', { name: 'New conversation' })).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
     await user.click(screen.getByRole('button', { name: 'Conversations' }));
     await user.click(screen.getByRole('button', { name: 'New Conversation' }));
-    expect(screen.getAllByRole('region', { name: 'New Conversation' })).toHaveLength(1);
+    expect(screen.getAllByRole('region', { name: 'New conversation' })).toHaveLength(1);
     expect(screen.getByRole('textbox', { name: 'Message' })).toHaveAttribute(
       'placeholder',
       'Ask a question, request work, or coordinate a review…',
@@ -58,7 +58,7 @@ describe('STR-2 fixture-backed New Conversation', () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole('button', { name: 'New conversation' }));
-    const add = screen.getByRole('button', { name: 'Add participants' });
+    const add = screen.getByRole('button', { name: 'Add People or Agents' });
     await user.click(add);
     let picker = screen.getByRole('dialog', { name: 'Add participants' });
     await user.click(within(picker).getByRole('checkbox', { name: /Operations Lead/ }));
@@ -79,7 +79,7 @@ describe('STR-2 fixture-backed New Conversation', () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole('button', { name: 'New conversation' }));
-    const add = screen.getByRole('button', { name: 'Add participants' });
+    const add = screen.getByRole('button', { name: 'Add People or Agents' });
     await user.click(add);
     let picker = screen.getByRole('dialog', { name: 'Add participants' });
     await user.click(within(picker).getByRole('checkbox', { name: /Customer lead/ }));
@@ -96,7 +96,7 @@ describe('STR-2 fixture-backed New Conversation', () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole('button', { name: 'New conversation' }));
-    const add = screen.getByRole('button', { name: 'Add participants' });
+    const add = screen.getByRole('button', { name: 'Add People or Agents' });
     await user.click(add);
     const picker = screen.getByRole('dialog', { name: 'Add participants' });
     expect(within(picker).getByRole('group', { name: 'People' })).toBeVisible();
@@ -126,7 +126,7 @@ describe('STR-2 fixture-backed New Conversation', () => {
       screen.getByRole('textbox', { name: 'Message' }),
       'Coordinate the evidence review with the responsible group',
     );
-    await user.click(screen.getByRole('button', { name: 'Start Conversation' }));
+    await user.click(screen.getByRole('button', { name: 'Start conversation' }));
     const heading = screen.getByRole('heading', {
       name: 'Coordinate the evidence review with the r…',
     });
@@ -146,13 +146,13 @@ describe('STR-2 fixture-backed New Conversation', () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole('button', { name: 'New conversation' }));
-    await user.click(screen.getByRole('button', { name: 'Add participants' }));
+    await user.click(screen.getByRole('button', { name: 'Add People or Agents' }));
     const picker = screen.getByRole('dialog', { name: 'Add participants' });
     await user.click(within(picker).getByRole('checkbox', { name: /Customer lead/ }));
     await user.click(within(picker).getByRole('checkbox', { name: /Evidence Researcher/ }));
     await user.click(within(picker).getByRole('button', { name: 'Apply' }));
     await user.type(screen.getByRole('textbox', { name: 'Message' }), 'Review the evidence set');
-    await user.click(screen.getByRole('button', { name: 'Start Conversation' }));
+    await user.click(screen.getByRole('button', { name: 'Start conversation' }));
     expect(screen.getByText('Participants: Customer lead, Evidence Researcher')).toBeVisible();
     expect(screen.getAllByText('No person or Agent was contacted.')).not.toHaveLength(0);
   });

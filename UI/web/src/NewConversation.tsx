@@ -71,13 +71,16 @@ export function NewConversation({
       }}
     >
       <header>
-        <h1 id="new-conversation-title">New Conversation</h1>
+        <h1 id="new-conversation-title">New conversation</h1>
         <p>Start a conversation with people and Agents.</p>
       </header>
       <div className={styles.conversationComposerCard}>
         <div className={styles.participantRow}>
           <span className={styles.participantLabel}>To</span>
           <div className={styles.participantChips}>
+            {selected.length === 0 && (
+              <span className={styles.participantPlaceholder}>Add People or Agents</span>
+            )}
             {selected.map((id) => {
               const participant = participantById(id)!;
               return (
@@ -104,7 +107,7 @@ export function NewConversation({
             <button
               ref={add}
               className={styles.addParticipant}
-              aria-label="Add participants"
+              aria-label="Add People or Agents"
               aria-haspopup="dialog"
               aria-expanded={pickerOpen}
               onClick={openPicker}
@@ -193,22 +196,22 @@ export function NewConversation({
             <small id="mention-unavailable" className={styles.srOnly}>
               Mentions are not implemented.
             </small>
-            <span>⌘/Ctrl + Enter to start</span>
+            <span>⌘↵</span>
           </div>
         </div>
       </div>
-      <p className={styles.creationBoundary}>
-        Synthetic and session only. Starting does not contact a person, invoke an Agent, or write
-        externally.
-      </p>
       <footer className={styles.creationActions}>
         <Button variant="secondary" onClick={onCancel}>
           Cancel
         </Button>
         <Button variant="primary" disabled={!valid} onClick={submit}>
-          Start Conversation
+          Start conversation
         </Button>
       </footer>
+      <p className={styles.creationBoundary}>
+        Synthetic and session only. Starting does not contact a person, invoke an Agent, or write
+        externally.
+      </p>
     </section>
   );
 }

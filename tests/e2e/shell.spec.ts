@@ -177,12 +177,12 @@ test('STR-2-JOURNEY-01 fixture-backed conversation creation is canonical and ses
   await page.getByRole('button', { name: 'New Conversation', exact: true }).click();
   const message = page.getByRole('textbox', { name: 'Message', exact: true });
   await expect(message).toBeFocused();
-  const start = page.getByRole('button', { name: 'Start Conversation', exact: true });
+  const start = page.getByRole('button', { name: 'Start conversation', exact: true });
   await message.fill('   ');
   await expect(start).toBeDisabled();
   await message.fill('Coordinate the evidence review with the responsible group');
 
-  const add = page.getByRole('button', { name: 'Add participants', exact: true });
+  const add = page.getByRole('button', { name: 'Add People or Agents', exact: true });
   await add.click();
   const picker = page.getByRole('dialog', { name: 'Add participants', exact: true });
   const search = picker.getByRole('searchbox', { name: 'Search participants', exact: true });
