@@ -1,0 +1,14 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "stara": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${PLUGIN_ROOT}/scripts/mcp.mjs"],
+      "env": {
+        "STARA_REPO_ROOT": "",
+        "STARA_API_URL": "http://127.0.0.1:3000"
+      }
+    }
+  }
+}
